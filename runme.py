@@ -109,8 +109,8 @@ def main():
                     Interrupt()
                 except:
                     PrintError(reply)
-        try:  
-            stocks.AlwaysRun()
+        try:
+            stocks.AlwaysRun(channel)
         except KeyboardInterrupt:
             Interrupt()
         except:

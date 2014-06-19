@@ -44,19 +44,19 @@ def command(name, minArgs = 0, needsAccount = False, owner = False, updateInfo =
     return real_command
 
 output = False
-def AlwaysRun():
+def AlwaysRun(channel):
     global output
     global watched
     global history
     now = datetime.now()
-    if now.minute % 10 == 0 and now.second ==  7:
+    if now.minute % 10 == 0 and now.second ==  8:
         if now.hour%2 == 0 and now.minute == 10:
         #if now.minute == 0:
             history = {}
         GetStockInfo(True)
         if len(watched) or output:
-            PrintStocks()
-            PrintNews(True)
+            PrintStocks(channel)
+            PrintNews(channel, True)
         watched = []
         sleep(1)
 
