@@ -22,7 +22,6 @@ def SendNotice(target, msg):
 
 commands = []
 def command(name, minArgs = 0, needsAccount = False, owner = False, updateInfo = False):
-    global commands
     def real_command(func):
         def call_func(username, hostmask, channel, text):
             if owner and not CheckOwner(hostmask):
@@ -43,19 +42,19 @@ def command(name, minArgs = 0, needsAccount = False, owner = False, updateInfo =
         return call_func
     return real_command
 
-output = False
+output = 2
 def AlwaysRun(channel):
     global output
     global watched
     global history
     now = datetime.now()
-    if now.minute % 10 == 0 and now.second ==  8:
+    if now.minute % 10 == 0 and now.second ==  9:
         if now.hour%2 == 0 and now.minute == 10:
         #if now.minute == 0:
             history = {}
         GetStockInfo(True)
         if len(watched) or output:
-            PrintStocks(channel)
+            PrintStocks(channel, False, output == 2)
             PrintNews(channel, True)
         watched = []
         sleep(1)
@@ -96,12 +95,15 @@ def Login(channel, hostmask, username, password):
     SendMessage(channel, "Successfully logged in")
     return True
 
-def GetPage(url, account = None, headers = None):
+def GetPage(url, account = None, headers = None, removeTags = False):
     if account:
         req = urllib2.Request(url, urllib.urlencode(headers) if headers else None, {'Cookie':account["cookies"]})
     else:
         req = urllib2.Request(url)
-    return urllib2.urlopen(req).read()
+    page = urllib2.urlopen(req).read()
+    if removeTags:
+        return re.sub("<.*?>", "", page)
+    return page
 
 results = {}
 history = {}
@@ -141,31 +143,40 @@ def GetMoney(account):
     start = page.find("Current Balance:")+21
     return int(re.sub(",", "", page[start:start+page[start:].find("<")]))
 
-def BuySellStocks(channel, account, action, element, amount, stockClass = "1"):
-    page = GetPage("http://tptapi.com/stockProc.php?%s=%s&type=%s" % (action, element, stockClass), account, {"shares":amount,"type":stockClass})
-    SendMessage(channel, re.sub("<.*?>", "", page))
+def BuySellStocks(account, action, element, amount, stockClass = "1"):
+    return GetPage("http://tptapi.com/stockProc.php?%s=%s&type=%s" % (action, element, stockClass), account, {"shares":amount,"type":stockClass}, True)
 
 def GetChange(old, new):
-    output = ""
-    if old < new:
-        output = "09"
-    elif old > new:
-        output = "04"
     #dividing by 0 is bad
     if old == 0:
         return "040%"
-    return output + str(int((float(new)-old)/old*1000)/10.0) + "%"
+    if old < new:
+        color = "09"
+    elif old > new:
+        color = "04"
+    else:
+        color = "08"
+    return color + str(int((float(new)-old)/old*1000)/10.0) + "%"
 
 watched = []
-def PrintStocks(channel, AllPercentages = False):
+def PrintStocks(channel, allPercentages = False, onlyOwned = False):
     output = ""
-    for i in sorted(results):
+    stocks = results.keys()
+    if onlyOwned:
+        stocks = [i for i in watched]
+        for i in logins.values():
+            for j in i["portfolio"]:
+                if i["portfolio"][j]["shares"] > 0 and j not in stocks:
+                    stocks.append(j)
+    if not len(stocks):
+        return
+    for i in sorted(stocks):
         if i in watched:
             output = output + "03"
         else:
             output = output + "07"
         output = output + i + " - $" + results[i]["value"]
-        if (i in watched or AllPercentages) and i in history and len(history[i]) > 1:
+        if (i in watched or allPercentages or onlyOwned) and i in history and len(history[i]) > 1:
             output += " " + GetChange(history[i][-2], history[i][-1])
         output += "  "
         #overflow, separate into multiple messages
@@ -362,13 +373,13 @@ def PingCmd(username, hostmask, channel, text, account):
 
 @command("print", updateInfo = True)
 def PrintCmd(username, hostmask, channel, text, account):
-    """(no args). Print all current stock prices."""
-    PrintStocks(channel)
+    """(print [owned]). Print all current stock prices. Add 'owned' to only print stocks which are owned by someone."""
+    PrintStocks(channel, False, True if len(text) > 0 and text[0] == "owned" else False)
 
 @command("printall", updateInfo = True)
 def PrintAllCmd(username, hostmask, channel, text, account):
-    """(no args). Print all current stock prices and percent changes."""
-    PrintStocks(channel, True)
+    """(printall [owned]). Print all current stock prices and percent changes.  Add 'owned' to only print stocks which are owned by someone."""
+    PrintStocks(channel, True, True if len(text) > 0 and text[0] == "owned" else False)
 
 @command("print2", owner = True)
 def Print2Cmd(username, hostmask, channel, text, account):
@@ -423,17 +434,18 @@ def BuyCmd(username, hostmask, channel, text, account):
         total = int(money/int(results[element]["value"])*float(total[:-1])/100)
         SendMessage(channel, "Buying %s shares of %s" % (str(total), element))
     try:
-        int(total)
+        total = int(total)
     except:
         SendMessage(channel, "%s is not a valid number" % total)
         return
 
-    BuySellStocks(channel, account, "buy", element, total, stockClass)
+    SendMessage(channel, BuySellStocks(account, "buy", element, total, stockClass))
     if element in account["portfolio"]:
         account["portfolio"][element]["shares"] = int(account["portfolio"][element]["shares"]) + int(total)
     else:
         account["portfolio"][element] = {'shares':total}
-    watched.append(element)
+    if element not in watched:
+        watched.append(element)
     #SendMessage("Crackbot", "./stock watch %s" % element)
 
 @command("sell", minArgs = 2, needsAccount = True)
@@ -452,7 +464,7 @@ def SellCmd(username, hostmask, channel, text, account):
     if element not in history:
         SendMessage(channel, "%s is not a valid stock name" % element)
         return
-    BuySellStocks(channel, account, "sell", element, amount, stockClass)
+    SendMessage(channel, BuySellStocks(account, "sell", element, amount, stockClass))
     
     if element in account["portfolio"]:
         account["portfolio"][element]["shares"] -= amount
@@ -473,15 +485,15 @@ def SellAllCmd(username, hostmask, channel, text, account):
     else:
         stocks = int(account["portfolio"][element]["shares"])
     if stocks > 100000000000000:
-        BuySellStocks(channel, account, "sell", element, int(stocks*.9999999999), stockClass)
+        SendMessage(channel, BuySellStocks(account, "sell", element, int(stocks*.9999999999), stockClass))
         leftover = GetPortfolioInfo(account, element)
         if leftover:
             #SendMessage(channel, "Selling leftover %s" % str(leftover))
-            BuySellStocks(channel, account, "sell", element, leftover, stockClass)
+            SendMessage(channel, BuySellStocks(account, "sell", element, leftover, stockClass))
 
     else:
         #print account["portfolio"][element]["shares"]
-        BuySellStocks(channel, account, "sell", element, stocks, stockClass)
+        SendMessage(channel, BuySellStocks(account, "sell", element, stocks, stockClass))
     if element in account["portfolio"]:
         account["portfolio"][element]["shares"] = 0
 
@@ -489,6 +501,11 @@ def SellAllCmd(username, hostmask, channel, text, account):
 def MoneyCmd(username, hostmask, channel, text, account):
     """(no args). Prints the exact amount of money you own with no commas, if logged in"""
     SendMessage(channel, str(GetMoney(account)))
+
+@command("give", minArgs = 2, needsAccount = True)
+def GiveCmd(username, hostmask, channel, text, account):
+    """(give <username> <amount>). Gives money to another user."""
+    SendMessage(channel, GetPage("http://tptapi.com/sendProc.php", account, {"reciever":text[0], "amount":text[1]}, True))
 
 @command("portfolio", needsAccount = True)
 def PortfolioCmd(username, hostmask, channel, text, account):
@@ -521,7 +538,8 @@ def WatchCmd(username, hostmask, channel, text, account):
     """(watch <stockname>). Watches a stock, when the prices change every 10 minutes it will tell you if it went up or down"""
     element = text[0].upper()
     if element in history:
-        watched.append(element)
+        if element not in watched:
+            watched.append(element)
         SendMessage(channel, "Now watching %s" % element)
     else:
         SendMessage(channel, "%s is not a valid stock name" % element)
@@ -535,7 +553,7 @@ def NewsCmd(username, hostmask, channel, text, account):
 def OutputCmd(username, hostmask, channel, text, account):
     """(no args). Toggle printing stock output every 10 minutes."""
     global output
-    output = not output
+    output = (output + 1) % 3
     SendMessage(channel, "Output has been turned %s" % ("on" if output else "off"))
 
 @command("quit", owner = True)
