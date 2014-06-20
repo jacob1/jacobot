@@ -97,10 +97,12 @@ def main():
                             logins = stocks.logins
                             history = stocks.history
                             watched = stocks.watched
+                            news = stocks.news
                             reload(stocks)
                             stocks.logins = logins
                             stocks.history = history
                             stocks.watched = watched
+                            stocks.news = news
                             irc.send("PRIVMSG %s :Reloaded stocks.py\n" % reply)
                     #Parse line in stocks.py
                     if len(text):

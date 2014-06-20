@@ -48,13 +48,13 @@ def AlwaysRun(channel):
     global watched
     global history
     now = datetime.now()
-    if now.minute % 10 == 0 and now.second ==  9:
+    if now.minute % 10 == 0 and now.second ==  10:
         if now.hour%2 == 0 and now.minute == 10:
         #if now.minute == 0:
             history = {}
         GetStockInfo(True)
         if len(watched) or output:
-            PrintStocks(channel, False, output == 2)
+            PrintStocks(channel, False, output != 1)
             PrintNews(channel, True)
         watched = []
         sleep(1)
@@ -244,16 +244,43 @@ def PrintHistory(channel, stock):
         for i in history[stock]:
             output = output + str(i) + ", "
         SendMessage(channel, output[:-2])
-            
+
+goodNews = ["grant", "stealing their newest", "purchases 50 uni", "new employees", "economy is looking great", "expected to be up"]
+badNews = ["employees WILL be cut", "employee cutbacks", "expected to be down", "been downgraded", "recall for their", "class action lawsuit", "bankruptcy", "center of market iussues", "sales may be slowing", "Powder Game"]
+def GoodNews(news):
+    for i in goodNews:
+        if i in news:
+            return True
+    for i in badNews:
+        if i in news:
+            return False
+    return None
+
+def FormatNews(newsitem):
+    newsType = GoodNews(newsitem[2])
+    color = "09" if newsType == True else "04" if newsType == False else "08"
+    return "%s%s %s %s (%s)" % (color, newsitem[1], newsitem[2], newsitem[3], newsitem[0])
+
+def IsInNews(news, newsID):
+    for i in news:
+        if i[0] == newsID:
+            return True
+    return False
+
+news = []
 def PrintNews(channel, first = False):
     page = GetPage("http://tptapi.com/getjson.php?type=news")
-    news = []
-    news.extend(re.findall("\"([^\"]*)\"", page))
+    tempnews = re.findall("\"([^\"]*)\"", page)
+    
+    for i in range(0, len(tempnews), 6):
+        if not IsInNews(news, tempnews[i+1]) and "issued dividends" not in tempnews[i+3]:
+            news.append((tempnews[i+1], tempnews[i+3].split()[0], " ".join(tempnews[i+3].split()[1:]), tempnews[i+5]))
+
     if first:
-        SendMessage(channel, "%s %s (%s)" % (news[3], news[5], news[1]))
+        SendMessage(channel, FormatNews(news[-1]))
     else:
-        for i in range(0, len(news), 6):
-            SendMessage(channel, "%s %s (%s)" % (news[i+3], news[i+5], news[i+1]))
+        for i in news[-1:-6:-1]:
+            SendMessage(channel, FormatNews(i))
 
 
 # GGG   RRR    OO   U  U  PPP   SSSS
@@ -397,7 +424,7 @@ def LoginCmd(username, hostmask, channel, text, account):
             Login(channel, hostmask, text[0], f.readlines()[3].strip())
         return
     if Login(channel, hostmask, text[0], text[1]):
-        SendMessage("TPTAPIStocks", "Logged in: %s!%s" % (username, hostmask))
+        SendMessage("#TPTAPIStocks", "Logged in: %s!%s" % (username, hostmask))
 
 @command("logout", needsAccount = True)
 def LogoutCmd(username, hostmask, channel, text, account):
