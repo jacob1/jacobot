@@ -56,6 +56,10 @@ def AlwaysRun(channel):
         if len(watched) or output:
             PrintStocks(channel, False, output != 1)
             PrintNews(channel, True)
+            #TODO: maybe proper rate limiting, but this works for now
+            for i in messageQueue:
+                irc.send(i)
+            messageQueue[:] = []
         watched = []
         sleep(1)
 
@@ -141,8 +145,10 @@ def GetPortfolioInfo(account, element = None):
 def GetMoney(account):
     page = GetPage("http://tptapi.com/money.php", account)
     start = page.find("Current Balance:")+21
-    return int(re.sub(",", "", page[start:start+page[start:].find("<")]))
+    return int(re.sub(",", "", page[start:start+page[start:].find(".")]))
 
+#You cannot sell more stock than how much you own!
+#INVALID Field!
 def BuySellStocks(account, action, element, amount, stockClass = "1"):
     return GetPage("http://tptapi.com/stockProc.php?%s=%s&type=%s" % (action, element, stockClass), account, {"shares":amount,"type":stockClass}, True)
 
@@ -246,7 +252,7 @@ def PrintHistory(channel, stock):
         SendMessage(channel, output[:-2])
 
 goodNews = ["grant", "stealing their newest", "purchases 50 uni", "new employees", "economy is looking great", "expected to be up"]
-badNews = ["employees WILL be cut", "employee cutbacks", "expected to be down", "been downgraded", "recall for their", "class action lawsuit", "bankruptcy", "center of market iussues", "sales may be slowing", "Powder Game"]
+badNews = ["employees WILL be cut", "employee cutbacks", "expected to be down", "downgraded", "recall for their", "class action lawsuit", "bankruptcy", "center of market iussues", "sales may be slowing", "Powder Game"]
 def GoodNews(news):
     for i in goodNews:
         if i in news:
@@ -268,7 +274,7 @@ def IsInNews(news, newsID):
     return False
 
 news = []
-def PrintNews(channel, first = False):
+def PrintNews(channel, first = False, stock = None):
     page = GetPage("http://tptapi.com/getjson.php?type=news")
     tempnews = re.findall("\"([^\"]*)\"", page)
     
@@ -278,6 +284,10 @@ def PrintNews(channel, first = False):
 
     if first:
         SendMessage(channel, FormatNews(news[-1]))
+    elif stock:
+        for i in news[::-1]:
+            if i[1] == stock:
+                SendMessage(channel, FormatNews(i))
     else:
         for i in news[-1:-6:-1]:
             SendMessage(channel, FormatNews(i))
@@ -574,7 +584,10 @@ def WatchCmd(username, hostmask, channel, text, account):
 @command("news")
 def NewsCmd(username, hostmask, channel, text, account):
     """(news [latest]). Prints the current news. Don't abuse this. Add 'latest' to only return the most recent news item. The effects of news tend to happen in 20-30 minutes"""
-    PrintNews(channel, len(text) > 0 and text[0] == "latest" and True or False)
+    if len(text) > 0:
+        PrintNews(channel, text[0] == "latest" and True or False, text[0].upper())
+    else:
+        PrintNews(channel)
 
 @command("output")
 def OutputCmd(username, hostmask, channel, text, account):

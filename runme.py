@@ -12,6 +12,9 @@ botIdent = "stockbot"
 botRealname = "TPTAPI stock helper bot"
 connected = False
 
+botAccount = "jacobot"
+NickServ = False
+
 def GetIRCpassword():
     with open("passwords.txt") as f:
         return f.readlines()[0].strip()
@@ -23,7 +26,10 @@ def Connect():
     irc.setblocking(0)
     irc.send("USER %s %s %s :%s\n" % (botIdent, botNick, botNick, botRealname))
     irc.send("NICK %s\n" % botNick)
-    irc.send("PRIVMSG NickServ :identify jacobot %s\n" % GetIRCpassword())
+    if NickServ:
+        irc.send("PRIVMSG NickServ :identify %s %s\n" % (botAccount, GetIRCpassword()))
+    else:
+        irc.send("JOIN %s\n" % channel)
     stocks.SetIRC(irc)
     sleep(7)
 
