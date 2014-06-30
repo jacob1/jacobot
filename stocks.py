@@ -150,7 +150,7 @@ def GetMoney(account):
 #You cannot sell more stock than how much you own!
 #INVALID Field!
 def BuySellStocks(account, action, element, amount, stockClass = "1"):
-    return GetPage("http://tptapi.com/stockProc.php?%s=%s&type=%s" % (action, element, stockClass), account, {"shares":amount,"type":stockClass}, True)
+    return GetPage("http://tptapi.com/stockProc.php?%s=%s&type=%s" % (action, element, stockClass), account, {"shares":amount,"type":stockClass}, True).replace("\n", " ")
 
 def GetChange(old, new):
     #dividing by 0 is bad

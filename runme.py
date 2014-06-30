@@ -13,7 +13,7 @@ botRealname = "TPTAPI stock helper bot"
 connected = False
 
 botAccount = "jacobot"
-NickServ = False
+NickServ = True
 
 def GetIRCpassword():
     with open("passwords.txt") as f:
@@ -58,7 +58,6 @@ def Interrupt():
     quit()
 
 def main():
-    global channel
     while True:
         try:
             line = ""
@@ -70,9 +69,10 @@ def main():
                 continue
             else:
                 PrintError()
+                return
         except socket.error, e:
             PrintError()
-            quit()
+            return
         except KeyboardInterrupt:
             Interrupt()
         else:
@@ -127,4 +127,5 @@ def main():
 Connect()
 stocks.GetStockInfo(True)
 ReadPrefs()
-main()
+while True:
+    main()
