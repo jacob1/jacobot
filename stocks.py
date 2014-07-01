@@ -150,7 +150,7 @@ def GetMoney(account):
 #You cannot sell more stock than how much you own!
 #INVALID Field!
 def BuySellStocks(account, action, element, amount, stockClass = "1"):
-    return GetPage("http://tptapi.com/stockProc.php?%s=%s&type=%s" % (action, element, stockClass), account, {"shares":amount,"type":stockClass}, True).replace("\n", " ")
+    return GetPage("http://tptapi.com/stockProc.php?opt=%s&stock=%s" % (action, element), account, {"shares":amount,"class":stockClass}, True).replace("\n", " ")
 
 def GetChange(old, new):
     #dividing by 0 is bad
@@ -459,7 +459,7 @@ def BuyCmd(username, hostmask, channel, text, account):
     element = text[0].upper()
     total = text[1]
     stockClass = "1"
-    if len(text) > 2 and "a" in text[2].lower():
+    if len(text) > 2 and text[2].lower() == "a":
         stockClass = "0"
 
     if element not in history:
@@ -476,7 +476,7 @@ def BuyCmd(username, hostmask, channel, text, account):
         SendMessage(channel, "%s is not a valid number" % total)
         return
 
-    SendMessage(channel, BuySellStocks(account, "buy", element, total, stockClass))
+    SendMessage(channel, BuySellStocks(account, 1, element, total, stockClass))
     if element in account["portfolio"]:
         account["portfolio"][element]["shares"] = int(account["portfolio"][element]["shares"]) + int(total)
     else:
@@ -490,7 +490,7 @@ def SellCmd(username, hostmask, channel, text, account):
     """(sell <stockname> <numberofstocks> [a]). Sells a specific amount of stocks. Buys class B stock by default"""
     element = text[0].upper()
     stockClass = "1"
-    if len(text) > 2 and "a" in text[2].lower():
+    if len(text) > 2 and text[2].lower() == "a":
         stockClass = "0"
 
     try:
@@ -501,7 +501,7 @@ def SellCmd(username, hostmask, channel, text, account):
     if element not in history:
         SendMessage(channel, "%s is not a valid stock name" % element)
         return
-    SendMessage(channel, BuySellStocks(account, "sell", element, amount, stockClass))
+    SendMessage(channel, BuySellStocks(account, 0, element, amount, stockClass))
     
     if element in account["portfolio"]:
         account["portfolio"][element]["shares"] -= amount
@@ -511,7 +511,7 @@ def SellAllCmd(username, hostmask, channel, text, account):
     """(sellall <stockname> [a]). Seels all stocks you bought using the bot. If you didn't buy it with the bot, it won't work. Buys class B stock by default"""
     element = text[0].upper()
     stockClass = "1"
-    if len(text) > 1 and "a" in text[1].lower():
+    if len(text) > 1 and text[1].lower() == "a":
         stockClass = "0"
 
     if element not in account["portfolio"]:
@@ -522,15 +522,15 @@ def SellAllCmd(username, hostmask, channel, text, account):
     else:
         stocks = int(account["portfolio"][element]["shares"])
     if stocks > 100000000000000:
-        SendMessage(channel, BuySellStocks(account, "sell", element, int(stocks*.9999999999), stockClass))
+        SendMessage(channel, BuySellStocks(account, 0, element, int(stocks*.9999999999), stockClass))
         leftover = GetPortfolioInfo(account, element)
         if leftover:
             #SendMessage(channel, "Selling leftover %s" % str(leftover))
-            SendMessage(channel, BuySellStocks(account, "sell", element, leftover, stockClass))
+            SendMessage(channel, BuySellStocks(account, 0, element, leftover, stockClass))
 
     else:
         #print account["portfolio"][element]["shares"]
-        SendMessage(channel, BuySellStocks(account, "sell", element, stocks, stockClass))
+        SendMessage(channel, BuySellStocks(account, 0, element, stocks, stockClass))
     if element in account["portfolio"]:
         account["portfolio"][element]["shares"] = 0
 
