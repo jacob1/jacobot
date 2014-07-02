@@ -172,7 +172,7 @@ def PrintStocks(channel, allPercentages = False, onlyOwned = False):
         stocks = [i for i in watched]
         for i in logins.values():
             for j in i["portfolio"]:
-                if i["portfolio"][j]["shares"] > 0 and j not in stocks:
+                if i["username"] == "jacob2" and i["portfolio"][j]["shares"] > 0 and j not in stocks:
                     stocks.append(j)
     if not len(stocks):
         return
@@ -279,7 +279,7 @@ def PrintNews(channel, first = False, stock = None):
     tempnews = re.findall("\"([^\"]*)\"", page)
     
     for i in range(0, len(tempnews), 6):
-        if not IsInNews(news, tempnews[i+1]) and "issued dividends" not in tempnews[i+3]:
+        if not IsInNews(news, tempnews[i+1]) and "issued dividends" not in tempnews[i+3] and "FEC DISCLOSURE" not in tempnews[i+3]:
             news.append((tempnews[i+1], tempnews[i+3].split()[0], " ".join(tempnews[i+3].split()[1:]), tempnews[i+5]))
 
     if first:
