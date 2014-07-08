@@ -1,3 +1,4 @@
+config.py
 logins.txt
 passwords.txt
 *.pyc

@@ -1,0 +1,12 @@
+server = "irc.freenode.net"
+channel = ""
+botNick = "stockbot"
+botIdent = "stockbot"
+botRealname = "TPTAPI stock helper bot"
+
+botAccount = ""
+botPassword = ""
+NickServ = False
+
+#change to True when done
+configured = False

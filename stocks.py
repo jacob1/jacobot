@@ -371,8 +371,8 @@ def Ban(userID, time, timeunits, reason):
     if userID == "1" or userID == "38642":
         return
     data = urllib.urlencode({"BanUser":userID, "BanReason":reason, "BanTime":time, "BanTimeSpan":timeunits})
-    headers = {'Cookie':GetTPTSessionInfo(1)}
-    req = urllib2.Request("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(2)), data, headers)
+    headers = {'Cookie':GetTPTSessionInfo(0)}
+    req = urllib2.Request("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), data, headers)
      
     response = urllib2.urlopen(req)
     page = response.read()
@@ -380,8 +380,8 @@ def Ban(userID, time, timeunits, reason):
 
 def Unban(userID):
     data = urllib.urlencode({"UnbanUser":userID})
-    headers = {'Cookie':GetTPTSessionInfo(1)}
-    req = urllib2.Request("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(2)), data, headers)
+    headers = {'Cookie':GetTPTSessionInfo(0)}
+    req = urllib2.Request("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), data, headers)
      
     response = urllib2.urlopen(req)
     page = response.read()
@@ -434,7 +434,7 @@ def LoginCmd(username, hostmask, channel, text, account):
         return
     if username == "jacob1" and CheckOwner(hostmask) and text[0] == "jacob2":
         with open("passwords.txt") as f:
-            Login(channel, hostmask, text[0], f.readlines()[3].strip())
+            Login(channel, hostmask, text[0], f.readlines()[2].strip())
         return
     if Login(channel, hostmask, text[0], text[1]):
         SendMessage("#TPTAPIStocks", "Logged in: %s!%s" % (username, hostmask))

@@ -4,20 +4,16 @@ import select
 import traceback
 from time import sleep
 import atexit
+import os.path
 
-server = "irc.freenode.net"
-channel = "#TPTAPIStocks"
-botNick = "stockbot614"
-botIdent = "stockbot"
-botRealname = "TPTAPI stock helper bot"
-connected = False
-
-botAccount = "jacobot"
-NickServ = True
-
-def GetIRCpassword():
-    with open("passwords.txt") as f:
-        return f.readlines()[0].strip()
+if not os.path.isfile("config.py"):
+    import shutil
+    shutil.copyfile("config.py.default", "config.py")
+    print("config.py.default copied to config.py")
+execfile("config.py")
+if not configured:
+    print("you have not configured the bot, open up config.py to edit settings")
+    quit()
 
 def Connect():
     global irc
@@ -27,7 +23,7 @@ def Connect():
     irc.send("USER %s %s %s :%s\n" % (botIdent, botNick, botNick, botRealname))
     irc.send("NICK %s\n" % botNick)
     if NickServ:
-        irc.send("PRIVMSG NickServ :identify %s %s\n" % (botAccount, GetIRCpassword()))
+        irc.send("PRIVMSG NickServ :identify %s %s\n" % (botAccount, botPassword))
     else:
         irc.send("JOIN %s\n" % channel)
     stocks.SetIRC(irc)
