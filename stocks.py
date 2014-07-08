@@ -48,7 +48,7 @@ def AlwaysRun(channel):
     global watched
     global history
     now = datetime.now()
-    if now.minute % 10 == 0 and now.second ==  10:
+    if now.minute % 10 == 0 and now.second ==  11:
         if now.hour%2 == 0 and now.minute == 10:
         #if now.minute == 0:
             history = {}
@@ -263,9 +263,9 @@ def GoodNews(news):
     return None
 
 def FormatNews(newsitem):
-    newsType = GoodNews(newsitem[2])
+    newsType = GoodNews(newsitem[3])
     color = "09" if newsType == True else "04" if newsType == False else "08"
-    return "%s%s %s %s (%s)" % (color, newsitem[1], newsitem[2], newsitem[3], newsitem[0])
+    return "%s%s (%s) %s %s (%s)" % (color, newsitem[2], newsitem[1], newsitem[3], newsitem[4], newsitem[0])
 
 def IsInNews(news, newsID):
     for i in news:
@@ -279,8 +279,11 @@ def PrintNews(channel, first = False, stock = None):
     tempnews = re.findall("\"([^\"]*)\"", page)
     
     for i in range(0, len(tempnews), 6):
-        if not IsInNews(news, tempnews[i+1]) and "issued dividends" not in tempnews[i+3] and "FEC DISCLOSURE" not in tempnews[i+3]:
-            news.append((tempnews[i+1], tempnews[i+3].split()[0], " ".join(tempnews[i+3].split()[1:]), tempnews[i+5]))
+        newsItem = tempnews[i+3]
+        if not IsInNews(news, tempnews[i+1]) and "issued dividends" not in newsItem and "FEC DISCLOSURE" not in newsItem:
+            newsName = newsItem.split("(")[0].strip()
+            newsItem = " ".join(newsItem.split("(")[1:])
+            news.append((tempnews[i+1], newsName, newsItem.split()[0].strip(")"), " ".join(newsItem.split()[1:]), tempnews[i+5]))
 
     if first:
         SendMessage(channel, FormatNews(news[-1]))
