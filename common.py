@@ -1,4 +1,5 @@
 import urllib, urllib2
+import re
 
 def CheckOwner(hostmask):
     host = hostmask.split("!")[-1]

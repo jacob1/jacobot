@@ -195,47 +195,66 @@ def PrintHistory(channel, stock):
         SendMessage(channel, output[:-2])
 
 goodNews = ["grant", "stealing their newest", "purchases 50 uni", "new employees", "economy is looking great", "expected to be up"]
-badNews = ["employees WILL be cut", "employee cutbacks", "expected to be down", "downgraded", "recall for their", "class action lawsuit", "bankruptcy", "center of market iussues", "sales may be slowing", "Powder Game"]
-def GoodNews(news):
+badNews = ["employees WILL be cut", "employee cutbacks", "expected to be down", "downgraded", "recall for their", "class action lawsuit", "center of market iussues", "sales may be slowing", "Powder Game"]
+terribleNews = ["bankruptcy", "liquidation", "shutters"]
+def NewsColor(news):
     for i in goodNews:
         if i in news:
-            return True
+            return "09"
     for i in badNews:
         if i in news:
-            return False
-    return None
+            return "04"
+    for i in terribleNews:
+        if i in news:
+            return "04,01"
+    return "08"
 
 def FormatNews(newsitem):
-    newsType = GoodNews(newsitem[3])
-    color = "09" if newsType == True else "04" if newsType == False else "08"
-    return "%s%s (%s) %s %s (%s)" % (color, newsitem[2], newsitem[1], newsitem[3], newsitem[4], newsitem[0])
+    return "%s%s (%s) %s 07(%s, 07%s)" % (NewsColor(newsitem[3]), newsitem[2], newsitem[1], newsitem[3], newsitem[4], newsitem[0])
 
 def IsInNews(news, newsID):
     for i in news:
         if i[0] == newsID:
             return True
+    for i in specialNews:
+        if i[0] == newsID:
+            return True
     return False
 
 news = []
-def PrintNews(channel, first = False, stock = None):
+specialNews = []
+def PrintNews(channel, first = False, special = False, stock = None):
     page = GetPage("http://tptapi.com/getjson.php?type=news")
     tempnews = re.findall("\"([^\"]*)\"", page)
-    
-    for i in range(0, len(tempnews), 6):
-        newsItem = tempnews[i+3]
-        if not IsInNews(news, tempnews[i+1]) and "issued dividends" not in newsItem and "FEC DISCLOSURE" not in newsItem:
-            newsName = newsItem.split("(")[0].strip()
-            newsItem = " ".join(newsItem.split("(")[1:])
-            news.append((tempnews[i+1], newsName, newsItem.split()[0].strip(")"), " ".join(newsItem.split()[1:]), tempnews[i+5]))
 
+    for i in range(0, len(tempnews), 6):
+        if not IsInNews(news, tempnews[i+1]):
+            newsItem = tempnews[i+3]
+            if "FEC DISCLOSURE" in newsItem:
+                specialNews.append((tempnews[i+1], "<company name>", newsItem.split()[0], " ".join(newsItem.split()[2:]), tempnews[i+5]))
+                SendMessage(channel, FormatNews(specialNews[-1]))
+            elif "issued dividends" in newsItem:
+                specialNews.append((tempnews[i+1], "<compay name>", newsItem.split()[0], " ".join(newsItem.split()[1:]), tempnews[i+5]))
+                SendMessage(channel, FormatNews(specialNews[-1]))
+            elif NewsColor(newsItem) == "04,01":
+                newsName = newsItem.split("(")[0].strip()
+                newsItem = " ".join(newsItem.split("(")[1:])
+                specialNews.append((tempnews[i+1], newsName, newsItem.split()[0].strip(")"), " ".join(newsItem.split()[1:]), tempnews[i+5]))
+                SendMessage(channel, FormatNews(specialNews[-1]))
+            else:
+                newsName = newsItem.split("(")[0].strip()
+                newsItem = " ".join(newsItem.split("(")[1:])
+                news.append((tempnews[i+1], newsName, newsItem.split()[0].strip(")"), " ".join(newsItem.split()[1:]), tempnews[i+5]))
+
+    newslist = specialNews if special else news
     if first:
-        SendMessage(channel, FormatNews(news[-1]))
+        SendMessage(channel, FormatNews(newslist[-1]))
     elif stock:
-        for i in news[::-1]:
-            if i[1] == stock:
+        for i in newslist[::-1]:
+            if i[2] == stock:
                 SendMessage(channel, FormatNews(i))
     else:
-        for i in news[-1:-6:-1]:
+        for i in newslist[-1:-6:-1]:
             SendMessage(channel, FormatNews(i))
 
 
@@ -533,11 +552,14 @@ def WatchCmd(username, hostmask, channel, text, account):
 
 @command("news")
 def NewsCmd(username, hostmask, channel, text, account):
-    """(news [latest]). Prints the current news. Don't abuse this. Add 'latest' to only return the most recent news item. The effects of news tend to happen in 20-30 minutes"""
+    """(news [latest/special]). Prints the current news. Don't abuse this. 'latest' only returns the most recent news item and 'special' uses the special news list."""
+    latest = False
+    special = False
+    stock = text[-1] if len(text) > 0 else None
     if len(text) > 0:
-        PrintNews(channel, text[0] == "latest" and True or False, text[0].upper())
-    else:
-        PrintNews(channel)
+        latest = "latest" in text
+        special = "special" in text
+    PrintNews(channel, latest, special, stock.upper())
 
 @command("output")
 def OutputCmd(username, hostmask, channel, text, account):

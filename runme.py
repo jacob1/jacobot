@@ -97,15 +97,18 @@ def main():
                     if len(text) >= 4 and CheckOwner(text[0]) and text[1] == "PRIVMSG" and text[2][0] == "#":
                         command = text[3].lower().lstrip(":")
                         if command == "!!reload":
+                            commands[:] = []
                             logins = stocks.logins
                             history = stocks.history
                             watched = stocks.watched
                             news = stocks.news
+                            specialNews = stocks.specialNews
                             reload(stocks)
                             stocks.logins = logins
                             stocks.history = history
                             stocks.watched = watched
                             stocks.news = news
+                            stocks.specialNews = specialNews
                             irc.send("PRIVMSG %s :Reloaded stocks.py\n" % reply)
                         elif command == "!!eval":
                             try:
