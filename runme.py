@@ -1,4 +1,3 @@
-import stocks
 import socket
 import select
 import traceback
@@ -15,6 +14,9 @@ if not configured:
     print("you have not configured the bot, open up config.py to edit settings")
     quit()
 
+from common import *
+import stocks
+
 def Connect():
     global irc
     irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,12 +28,11 @@ def Connect():
         irc.send("PRIVMSG NickServ :identify %s %s\n" % (botAccount, botPassword))
     else:
         irc.send("JOIN %s\n" % channel)
-    stocks.SetIRC(irc)
     sleep(7)
 
 def ReadPrefs():
     with open('logins.txt') as f:
-        stocks.logins = {}
+        logins = {}
         for line in f:
             if len(line.strip()):
                 cookies = line.split("|")
@@ -39,8 +40,8 @@ def ReadPrefs():
 
 def WritePrefs():
     with open('logins.txt', 'w') as f:
-        for i in stocks.logins:
-            f.write("%s|%s|%s\r\n" % (i, stocks.logins[i]["username"], stocks.logins[i]["cookies"]))
+        for i in logins:
+            f.write("%s|%s|%s\r\n" % (i, logins[i]["username"], logins[i]["cookies"]))
 atexit.register(WritePrefs)
 
 def PrintError(channel = None):
@@ -93,7 +94,7 @@ def main():
                 
                 try:
                     #Admin commands
-                    if len(text) >= 4 and stocks.CheckOwner(text[0]) and text[1] == "PRIVMSG" and text[2][0] == "#":
+                    if len(text) >= 4 and CheckOwner(text[0]) and text[1] == "PRIVMSG" and text[2][0] == "#":
                         command = text[3].lower().lstrip(":")
                         if command == "!!reload":
                             logins = stocks.logins
@@ -106,19 +107,44 @@ def main():
                             stocks.watched = watched
                             stocks.news = news
                             irc.send("PRIVMSG %s :Reloaded stocks.py\n" % reply)
+                        elif command == "!!eval":
+                            try:
+                                ret = str(eval(" ".join(text[4:])))
+                            except Exception as e:
+                                ret = str(type(e))+":"+str(e)
+                            irc.send("PRIVMSG %s :%s\n" % (channel, ret))
                     #Parse line in stocks.py
                     if len(text):
-                        stocks.Parse(text)
+                        Parse(text)
                 except KeyboardInterrupt:
                     Interrupt()
                 except:
                     PrintError(reply)
         try:
             stocks.AlwaysRun(channel)
+            #TODO: maybe proper rate limiting, but this works for now
+            for i in messageQueue:
+                irc.send(i)
+            messageQueue[:] = []
         except KeyboardInterrupt:
             Interrupt()
         except:
             PrintError(channel)
+
+def Parse(text):
+    if len(text) < 4:
+        return
+    if text[1] == "PRIVMSG":
+        channel = text[2]
+        username = text[0].split("!")[0].lstrip(":")
+        hostmask = text[0].split("!")[1]
+        command = text[3].lower().lstrip(":")
+        if channel == "stockbot614":
+            channel = username
+
+        for i in commands:
+            if command == "!!"+i[0]:
+                i[1](username, hostmask, channel, text[4:])
 
 Connect()
 stocks.GetStockInfo(True)

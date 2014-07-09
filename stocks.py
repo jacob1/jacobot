@@ -5,42 +5,7 @@ import re
 from datetime import datetime
 from time import sleep
 
-def SetIRC(irc_):
-    global irc
-    irc = irc_
-
-messageQueue = []
-def Send(msg):
-    print("> %s" % msg)
-    messageQueue.append(msg)
-
-def SendMessage(target, msg):
-    Send("PRIVMSG %s :%s\n" % (target, msg))
-
-def SendNotice(target, msg):
-    Send("NOTICE %s :%s\n" % (target, msg))
-
-commands = []
-def command(name, minArgs = 0, needsAccount = False, owner = False, updateInfo = False):
-    def real_command(func):
-        def call_func(username, hostmask, channel, text):
-            if owner and not CheckOwner(hostmask):
-                SendNotice(username, "This command is owner only")
-                return
-            if len(text) < minArgs:
-                SendNotice(username, "Usage: %s" % func.__doc__)
-                return
-            account = GetAccount(hostmask)
-            if needsAccount and not account:
-                SendNotice(username, "You are not logged in")
-                return
-            if updateInfo:
-                GetStockInfo()
-            return func(username, hostmask, channel, text, account)
-        call_func.__doc__ = func.__doc__
-        commands.append((name, call_func))
-        return call_func
-    return real_command
+from common import *
 
 output = 2
 def AlwaysRun(channel):
@@ -56,21 +21,9 @@ def AlwaysRun(channel):
         if len(watched) or output:
             PrintStocks(channel, False, output != 1)
             PrintNews(channel, True)
-            #TODO: maybe proper rate limiting, but this works for now
-            for i in messageQueue:
-                irc.send(i)
-            messageQueue[:] = []
         watched = []
         sleep(1)
 
-def CheckOwner(hostmask):
-    host = hostmask.split("!")[-1]
-    return host == "jacob1@Powder/Developer/jacob1"
-
-def GetAccount(hostmask):
-    return logins[hostmask] if hostmask in logins else None
-    
-logins = {}
 def Login(channel, hostmask, username, password):
     for i in logins.values():
         if i["username"] == username:
@@ -98,16 +51,6 @@ def Login(channel, hostmask, username, password):
     logins[hostmask]["cookies"] = "; ".join(tempcookies)
     SendMessage(channel, "Successfully logged in")
     return True
-
-def GetPage(url, account = None, headers = None, removeTags = False):
-    if account:
-        req = urllib2.Request(url, urllib.urlencode(headers) if headers else None, {'Cookie':account["cookies"]})
-    else:
-        req = urllib2.Request(url)
-    page = urllib2.urlopen(req).read()
-    if removeTags:
-        return re.sub("<.*?>", "", page)
-    return page
 
 results = {}
 history = {}
@@ -411,14 +354,16 @@ def PingCmd(username, hostmask, channel, text, account):
     """PONG"""
     SendMessage(channel, "pong")
 
-@command("print", updateInfo = True)
+@command("print")
 def PrintCmd(username, hostmask, channel, text, account):
     """(print [owned]). Print all current stock prices. Add 'owned' to only print stocks which are owned by someone."""
+    GetStockInfo()
     PrintStocks(channel, False, True if len(text) > 0 and text[0] == "owned" else False)
 
-@command("printall", updateInfo = True)
+@command("printall")
 def PrintAllCmd(username, hostmask, channel, text, account):
     """(printall [owned]). Print all current stock prices and percent changes.  Add 'owned' to only print stocks which are owned by someone."""
+    GetStockInfo()
     PrintStocks(channel, True, True if len(text) > 0 and text[0] == "owned" else False)
 
 @command("print2", owner = True)
@@ -446,9 +391,10 @@ def LogoutCmd(username, hostmask, channel, text, account):
         SendMessage(channel, "Logged out: %s" % logins[hostmask]["username"])
         del logins[hostmask]
 
-@command("stock", minArgs = 1, updateInfo = True)
+@command("stock", minArgs = 1)
 def StockCmd(username, hostmask, channel, text, account):
     """(stock <stockname>). Prints current stock price and percent change"""
+    GetStockInfo()
     PrintStockValue(channel, text[0].upper())
 
 @command("history", minArgs = 1)
@@ -556,13 +502,14 @@ def PortfolioCmd(username, hostmask, channel, text, account):
     else:
         SendMessage(channel, info)
 
-@command("rate", updateInfo = True)
+@command("rate")
 def RateCmd(username, hostmask, channel, text, account):
     """(rate [stockname]). If no arguments, only lists the ratings for the best stocks."""
     now = datetime.now()
     if now.hour%2 == 0 and now.minute < 10:
         SendMessage(channel, "Ratings will not be available until the 10 minute mark")
         return
+    GetStockInfo()
     if len(text):
         PrintRatings(channel, text[0].upper())
     else:
@@ -648,25 +595,3 @@ def UnbanCmd(username, hostmask, channel, text, account):
     if username != "jacob1":
         SendMessage("TPTAPIStocks", "Error, only jacob1 should be able to use this command")
     Unban(text[0])
-
-def Parse(text):
-    if len(text) < 4:
-        return
-    if text[1] == "PRIVMSG":
-        channel = text[2]
-        username = text[0].split("!")[0].lstrip(":")
-        hostmask = text[0].split("!")[1]
-        command = text[3].lower().lstrip(":")
-        if channel == "stockbot614":
-            channel = username
-        #if username == "arkiwitect":
-        #    SendMessage(channel, "You are insane")
-
-        for i in commands:
-            if command == "!!"+i[0]:
-                i[1](username, hostmask, channel, text[4:])
-        
-        #TODO: maybe proper rate limiting, but this works for now
-        for i in messageQueue:
-            irc.send(i)
-        messageQueue[:] = []
