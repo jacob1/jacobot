@@ -13,7 +13,7 @@ def AlwaysRun(channel):
     global watched
     global history
     now = datetime.now()
-    if now.minute % 10 == 0 and now.second ==  11:
+    if now.minute % 10 == 0 and now.second ==  15:
         if now.hour%2 == 0 and now.minute == 10:
         #if now.minute == 0:
             history = {}
@@ -59,6 +59,8 @@ def GetStockInfo(new = False):
     stocks = []
     stocks.extend(re.findall("\"([^\"]*)\"", page))
     for i in range(0,len(stocks), 4):
+        if stocks[i] in ignoredStocks:
+            continue
         results[stocks[i]] = {'value':stocks[i+2]}
         if (new):
             if not stocks[i] in history:
@@ -124,7 +126,8 @@ def PrintStocks(channel, allPercentages = False, onlyOwned = False):
             output = output + "03"
         else:
             output = output + "07"
-        output = output + i + " - $" + results[i]["value"]
+        if i in results:
+            output = output + i + " - $" + results[i]["value"]
         if (i in watched or allPercentages or onlyOwned) and i in history and len(history[i]) > 1:
             output += " " + GetChange(history[i][-2], history[i][-1])
         output += "  "
@@ -146,7 +149,7 @@ def PrintMniipRatings(channel):
 def PrintRatings(channel, element = None):
     output = "PowJones Stock Ratings: "
     for i in sorted(results):
-        if ((not element and int(results[i]["value"]) >= 5) or i == element) and i in history and len(history[i]) > 1:
+        if ((not element and int(results[i]["value"]) >= 5) or i == element) and i not in ignoredStocks and i in history and len(history[i]) > 1:
             """minn = history[i][0]
             maxx = history[i][1]
             for j in history[i]:
@@ -223,6 +226,7 @@ def IsInNews(news, newsID):
 
 news = []
 specialNews = []
+ignoredStocks = []
 def PrintNews(channel, first = False, special = False, stock = None):
     page = GetPage("http://tptapi.com/getjson.php?type=news")
     tempnews = re.findall("\"([^\"]*)\"", page)
@@ -241,6 +245,8 @@ def PrintNews(channel, first = False, special = False, stock = None):
                 newsItem = " ".join(newsItem.split("(")[1:])
                 specialNews.append((tempnews[i+1], newsName, newsItem.split()[0].strip(")"), " ".join(newsItem.split()[1:]), tempnews[i+5]))
                 SendMessage(channel, FormatNews(specialNews[-1]))
+                if newsItem.split()[0].strip(")") not in ignoredStocks:
+                    ignoredStocks.append(newsItem.split()[0].strip(")"))
             else:
                 newsName = newsItem.split("(")[0].strip()
                 newsItem = " ".join(newsItem.split("(")[1:])
