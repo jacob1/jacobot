@@ -247,15 +247,17 @@ def PrintNews(channel, first = False, special = False, stock = None):
                 news.append((tempnews[i+1], newsName, newsItem.split()[0].strip(")"), " ".join(newsItem.split()[1:]), tempnews[i+5]))
 
     newslist = specialNews if special else news
-    if first:
-        SendMessage(channel, FormatNews(newslist[-1]))
-    elif stock:
+    if stock:
         for i in newslist[::-1]:
             if i[2] == stock:
                 SendMessage(channel, FormatNews(i))
+                if first:
+                    return
     else:
         for i in newslist[-1:-6:-1]:
             SendMessage(channel, FormatNews(i))
+            if first:
+                return
 
 
 # GGG   RRR    OO   U  U  PPP   SSSS
@@ -555,11 +557,11 @@ def NewsCmd(username, hostmask, channel, text, account):
     """(news [latest/special]). Prints the current news. Don't abuse this. 'latest' only returns the most recent news item and 'special' uses the special news list."""
     latest = False
     special = False
-    stock = text[-1] if len(text) > 0 else None
     if len(text) > 0:
         latest = "latest" in text
         special = "special" in text
-    PrintNews(channel, latest, special, stock.upper())
+    stock = text[-1].upper() if len(text) > 0 and text[-1] not in ["latest", "special"] else None
+    PrintNews(channel, latest, special, stock)
 
 @command("output")
 def OutputCmd(username, hostmask, channel, text, account):
