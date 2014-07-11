@@ -21,7 +21,13 @@ def SendMessage(target, msg):
 def SendNotice(target, msg):
     Send("NOTICE %s :%s\n" % (target, msg))
 
-commands = []
+plugin = ""
+def RegisterMod(name):
+    global plugin
+    commands[name] = []
+    plugin = name
+
+commands = {}
 def command(name, minArgs = 0, needsAccount = False, owner = False):
     def real_command(func):
         def call_func(username, hostmask, channel, text):
@@ -37,7 +43,7 @@ def command(name, minArgs = 0, needsAccount = False, owner = False):
                 return
             return func(username, hostmask, channel, text, account)
         call_func.__doc__ = func.__doc__
-        commands.append((name, call_func))
+        commands[plugin].append((name, call_func))
         return call_func
     return real_command
 

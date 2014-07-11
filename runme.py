@@ -2,8 +2,9 @@ import socket
 import select
 import traceback
 from time import sleep
+import os
 import atexit
-import os.path
+import imp
 
 if not os.path.isfile("config.py"):
     import shutil
@@ -15,7 +16,10 @@ if not configured:
     quit()
 
 from common import *
-import stocks
+mods = {}
+for i in os.listdir("mods"):
+    if os.path.isfile("mods\\"+i) and i[-3:] == ".py":
+        mods[i[:-3]] = imp.load_source(i[:-3], "mods\\"+i)
 
 def Connect():
     global irc
@@ -32,11 +36,10 @@ def Connect():
 
 def ReadPrefs():
     with open('logins.txt') as f:
-        logins = {}
         for line in f:
             if len(line.strip()):
                 cookies = line.split("|")
-                stocks.logins[cookies[0]] = {"username":cookies[1], "portfolio":{}, "cookies":cookies[2].strip()}
+                logins[cookies[0]] = {"username":cookies[1], "portfolio":{}, "cookies":cookies[2].strip()}
 
 def WritePrefs():
     with open('logins.txt', 'w') as f:
@@ -74,57 +77,40 @@ def main():
             Interrupt()
         else:
             if len(line):
-                if ":!!login" in line:
-                    print("<someone logging in>")
-                else:
-                    print(line)
-                text = line.split()
-                #Only join channel once identified
-                if len(text) > 1 and text[1] == "396":
-                    irc.send("JOIN %s\n" % channel)
-                
-                #Get channel to reply to
-                if len(text) > 2 and text[1] == "PRIVMSG":
-                    reply = text[2]
-                    if reply == botNick:
-                        reply = text[0].split("!")[0].lstrip(":")
-                #Reply to pings
-                elif len(text) > 0 and text[0] == "PING":
-                    irc.send("PONG %s\n" % text[1])
-                
                 try:
-                    #Admin commands
-                    if len(text) >= 4 and CheckOwner(text[0]) and text[1] == "PRIVMSG" and text[2][0] == "#":
-                        command = text[3].lower().lstrip(":")
-                        if command == "!!reload":
-                            commands[:] = []
-                            logins = stocks.logins
-                            history = stocks.history
-                            watched = stocks.watched
-                            news = stocks.news
-                            specialNews = stocks.specialNews
-                            reload(stocks)
-                            stocks.logins = logins
-                            stocks.history = history
-                            stocks.watched = watched
-                            stocks.news = news
-                            stocks.specialNews = specialNews
-                            irc.send("PRIVMSG %s :Reloaded stocks.py\n" % reply)
-                        elif command == "!!eval":
-                            try:
-                                ret = str(eval(" ".join(text[4:])))
-                            except Exception as e:
-                                ret = str(type(e))+":"+str(e)
-                            irc.send("PRIVMSG %s :%s\n" % (channel, ret))
-                    #Parse line in stocks.py
-                    if len(text):
-                        Parse(text)
+                    if ":!!login" in line:
+                        print("<someone logging in>")
+                    else:
+                        print(line)
+                    text = line.split()
+
+                    if len(text) > 0:
+                        #Reply to server pings
+                        if text[0] == "PING":
+                            irc.send("PONG %s\n" % text[1])
+
+                    if len(text) > 1:
+                        #Only join channel once identified
+                        if text[1] == "396":
+                            irc.send("JOIN %s\n" % channel)
+
+                    if len(text) > 2:
+                        #Get channel to reply to
+                        if text[1] == "PRIVMSG":
+                            reply = text[2]
+                            if reply == botNick:
+                                reply = text[0].split("!")[0].lstrip(":")
+
+                    if len(text) >= 4:
+                        #Parse line in stocks.py
+                        if len(text):
+                            Parse(text)
                 except KeyboardInterrupt:
                     Interrupt()
                 except:
                     PrintError(reply)
         try:
-            stocks.AlwaysRun(channel)
+            mods["stocks"].AlwaysRun(channel)
             #TODO: maybe proper rate limiting, but this works for now
             for i in messageQueue:
                 irc.send(i)
@@ -135,22 +121,57 @@ def main():
             PrintError(channel)
 
 def Parse(text):
-    if len(text) < 4:
-        return
     if text[1] == "PRIVMSG":
         channel = text[2]
         username = text[0].split("!")[0].lstrip(":")
         hostmask = text[0].split("!")[1]
         command = text[3].lower().lstrip(":")
-        if channel == "stockbot614":
+        if channel == botNick:
             channel = username
 
-        for i in commands:
-            if command == "!!"+i[0]:
-                i[1](username, hostmask, channel, text[4:])
+        #some special owner commands that aren't in modules
+        if CheckOwner(text[0]):
+            if command == "!!reload":
+                mod = text[4]
+                if not os.path.isfile("mods\\%s.py" %moc):
+                    return
+                commands[mod] = []
+                if mod == "stocks":
+                    logins = mods["stocks"].logins
+                    history = mods["stocks"].history
+                    watched = mods["stocks"].watched
+                    news = mods["stocks"].news
+                    specialNews = mods["stocks"].specialNews
+                mods[mod] = imp.load_source(mod, "mods\\%s.py" % mod)
+                if mod == "stocks":
+                    mods["stocks"].logins = logins
+                    mods["stocks"].history = history
+                    mods["stocks"].watched = watched
+                    mods["stocks"].news = news
+                    mods["stocks"].specialNews = specialNews
+                SendMessage(channel, "Reloaded %s.py" % mod)
+                return
+            elif command == "!!eval":
+                try:
+                    ret = str(eval(" ".join(text[4:])))
+                except Exception as e:
+                    ret = str(type(e))+":"+str(e)
+                SendMessage(channel, ret)
+                return
+            elif command == "!!quit":
+                irc.send("QUIT :i'm a potato\n")
+                irc.close()
+                quit()
+
+        #actual commands here
+        for mod in commands:
+            for i in commands[mod]:
+                if command == "!!"+i[0]:
+                    i[1](username, hostmask, channel, text[4:])
+                    return
 
 Connect()
-stocks.GetStockInfo(True)
+mods["stocks"].GetStockInfo(True)
 ReadPrefs()
 while True:
     main()
