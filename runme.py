@@ -64,17 +64,11 @@ def main():
             ready = select.select([irc], [], [], 1.0)
             if ready[0]:
                 line = irc.recv(2040)
-        except socket.timeout, e:
-            if e.args[0] == "timed out":
-                continue
-            else:
-                PrintError()
-                return
-        except socket.error, e:
-            PrintError()
-            return
         except KeyboardInterrupt:
             Interrupt()
+        except: #socket.error, e:   or   socket.timeout, e:
+            PrintError()
+            return
         else:
             if len(line):
                 try:
@@ -107,6 +101,10 @@ def main():
                             Parse(text)
                 except KeyboardInterrupt:
                     Interrupt()
+                except SystemExit:
+                    irc.send("QUIT :i'm a potato\n")
+                    irc.close()
+                    quit()
                 except:
                     PrintError(reply)
         try:
@@ -132,8 +130,11 @@ def Parse(text):
         #some special owner commands that aren't in modules
         if CheckOwner(text[0]):
             if command == "!!reload":
+                if len(text) <= 4:
+                    SendNotice(username, "No module given")
+                    return
                 mod = text[4]
-                if not os.path.isfile("mods\\%s.py" %moc):
+                if not os.path.isfile(os.path.join("mods", mod+".py")):
                     return
                 commands[mod] = []
                 if mod == "stocks":
@@ -142,7 +143,7 @@ def Parse(text):
                     watched = mods["stocks"].watched
                     news = mods["stocks"].news
                     specialNews = mods["stocks"].specialNews
-                mods[mod] = imp.load_source(mod, "mods\\%s.py" % mod)
+                mods[mod] = imp.load_source(mod, os.path.join("mods", mod+".py"))
                 if mod == "stocks":
                     mods["stocks"].logins = logins
                     mods["stocks"].history = history
@@ -159,8 +160,6 @@ def Parse(text):
                 SendMessage(channel, ret)
                 return
             elif command == "!!quit":
-                irc.send("QUIT :i'm a potato\n")
-                irc.close()
                 quit()
 
         #actual commands here
@@ -175,3 +174,4 @@ mods["stocks"].GetStockInfo(True)
 ReadPrefs()
 while True:
     main()
+    Connect()
