@@ -18,8 +18,8 @@ if not configured:
 from common import *
 mods = {}
 for i in os.listdir("mods"):
-    if os.path.isfile("mods\\"+i) and i[-3:] == ".py":
-        mods[i[:-3]] = imp.load_source(i[:-3], "mods\\"+i)
+    if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py":
+        mods[i[:-3]] = imp.load_source(i[:-3], os.path.join("mods", i))
 
 def Connect():
     global irc
