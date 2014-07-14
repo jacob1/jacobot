@@ -4,6 +4,8 @@ botNick = "stockbot"
 botIdent = "stockbot"
 botRealname = "TPTAPI stock helper bot"
 
+ownerHostmask = ""
+
 botAccount = ""
 botPassword = ""
 NickServ = False

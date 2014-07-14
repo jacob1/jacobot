@@ -3,7 +3,7 @@ from common import *
 RegisterMod(__name__)
 
 def GetUsername(who):
-    account = GetAccount("jacob1@Powder/Developer/jacob1")
+    account = GetAccount(ownerHostmask)
     if not account:
         return
     
@@ -17,7 +17,7 @@ def GetUsername(who):
     return name[0]
 	
 def GetFriends(who):
-    account = GetAccount("jacob1@Powder/Developer/jacob1")
+    account = GetAccount(ownerHostmask)
     if not account:
         return
     who = GetUsername(who)

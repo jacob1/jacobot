@@ -1,9 +1,11 @@
 import urllib, urllib2
 import re
 
+execfile("config.py")
+
 def CheckOwner(hostmask):
     host = hostmask.split("!")[-1]
-    return host == "jacob1@Powder/Developer/jacob1"
+    return host == ownerHostmask
 
 #only used for stocks.py, maybe for more later
 logins = {}

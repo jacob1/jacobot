@@ -159,6 +159,12 @@ def Parse(text):
                     ret = str(type(e))+":"+str(e)
                 SendMessage(channel, ret)
                 return
+            elif command == "!!exec":
+                try:
+                    exec(" ".join(text[4:]))
+                except Exception as e:
+                    SendMessage(channel, str(type(e))+":"+str(e))
+                return
             elif command == "!!quit":
                 quit()
 
