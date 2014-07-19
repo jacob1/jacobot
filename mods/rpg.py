@@ -35,16 +35,24 @@ def FindItem(account, itemList, itemID):
     found = None
     for i in itemList:
         if i[2] == itemID or i[0][:len(itemID)].lower() == itemID.lower():
-            if found:
-                return (itemID, itemID) # no match
+            if found and found[1] != i[0]:
+                return None
             found = (i[2], i[0])
     if not found:
-        return (itemID, itemID) # no match
+        return None
     return found
 
 def ItemAction(account, action, itemID):
     return GetPage("http://tptapi.com/item_action.php?opt=%s&item=%s" % (action, itemID), account, removeTags = True)
-    
+
+def PrintLocation(account, channel):
+    page = GetPage("http://tptapi.com/TPTRPG/index.php", account, removeTags = True)
+    location = re.search("Your current location: (.+?)&", page, re.DOTALL).group(1).strip().splitlines()
+    SendMessage(channel, "Current Location: %s" % location[0])
+    print(location)
+    for i in location[1:]:
+        SendMessage(channel, i.strip())
+
 @command("inventory", needsAccount = True)
 def Inventory(username, hostmask, channel, text, account):
     GetInventory(account)
@@ -65,8 +73,8 @@ def ItemList(username, hostmask, channel, text, account):
 @command("itembuy", minArgs = 1, needsAccount = True)
 def ItemBuy(username, hostmask, channel, text, account):
     item = FindItem(account, GetItemList(account), " ".join(text))
-    if item[0] == item[1]:
-        SendMessage(channel, "No such item Name/ID: %s" % item[0])
+    if not item:
+        SendMessage(channel, "No such item Name/ID: %s" % " ".join(text))
         return
     
     ItemAction(account, "0", item[0])
@@ -75,9 +83,8 @@ def ItemBuy(username, hostmask, channel, text, account):
 @command("itemsell", minArgs = 1, needsAccount = True)
 def ItemSell(username, hostmask, channel, text, account):
     item = FindItem(account, GetInventory(account), " ".join(text))
-    if item[0] == item[1]:
-        SendMessage(channel, "No such item Name/ID: %s" % item[0])
-        exec item[0]
+    if not item:
+        SendMessage(channel, "No such item Name/ID: %s" % " ".join(text))
         return
     
     ItemAction(account, "1", item[0])
@@ -85,9 +92,9 @@ def ItemSell(username, hostmask, channel, text, account):
 
 @command("use", minArgs = 1, needsAccount = True)
 def Use(username, hostmask, channel, text, account):
-    item = FindItem(account, " ".join(text))
-    if item[0] == item[1]:
-        SendMessage(channel, "No such item Name/ID: %s" % item[0])
+    item = FindItem(account, GetInventory(account), " ".join(text))
+    if not item:
+        SendMessage(channel, "No such item Name/ID: %s" % " ".join(text))
         return
     
     print(ItemAction(account, "2", item[0]))
@@ -97,3 +104,27 @@ def Use(username, hostmask, channel, text, account):
 def Health(username, hostmask, channel, text, account):
     GetHealth(account)
     SendMessage(channel, "Current: %s Max: %s" % (account["health"][0], account["health"][1]))
+
+@command("location", needsAccount = True)
+def Location(username, hostmask, channel, text, account):
+    PrintLocation(account, channel)
+
+@command("move", minArgs = 1, needsAccount = True)
+def Move(username, hostmask, channel, text, account):
+    direction = text[0]
+    if direction not in ["N", "E", "S", "W"]:
+        SendMessage(channel, "Invalid direction")
+        return
+    page = GetPage("http://tptapi.com/TPTRPG/RPG_Action.php?Act=Walk&Direction=%s" % direction, account, removeTags = True)
+    if len(page):
+        SendMessage(channel, page)
+        return
+    PrintLocation(account, channel)
+
+@command("claim", needsAccount = True)
+def Claim(username, hostmask, channel, text, account):
+    page = GetPage("http://tptapi.com/TPTRPG/RPG_Action.php?Act=Claim", account, removeTags = True)
+    if len(page):
+        SendMessage(channel, page)
+    else:
+        SendMessage(channel, "claimed!")
