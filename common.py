@@ -49,12 +49,12 @@ def command(name, minArgs = 0, needsAccount = False, owner = False):
         return call_func
     return real_command
 
-def GetPage(url, account = None, headers = None, removeTags = False):
-    if account:
-        req = urllib2.Request(url, urllib.urlencode(headers) if headers else None, {'Cookie':account["cookies"]})
+def GetPage(url, cookies = None, headers = None, removeTags = False):
+    if cookies:
+        req = urllib2.Request(url, urllib.urlencode(headers) if headers else None, {'Cookie':cookies})
     else:
         req = urllib2.Request(url)
-    page = urllib2.urlopen(req).read()
+    page = urllib2.urlopen(req, timeout=5).read()
     if removeTags:
         return re.sub("<.*?>", "", page)
     return page

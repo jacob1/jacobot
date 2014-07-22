@@ -7,7 +7,7 @@ def GetUsername(who):
     if not account:
         return
     
-    page = GetPage("http://tptapi.com/profile_search.php?process", account, {"username":who})
+    page = GetPage("http://tptapi.com/profile_search.php?process", account["cookies"], {"username":who})
     name = re.findall(r"/u/([^']*)'/", page)
     if not name:
         try:
@@ -23,7 +23,7 @@ def GetFriends(who):
     who = GetUsername(who)
     if who == -1:
         return "Invalid profile ID"
-    page = GetPage("http://tptapi.com/u/" + who, account)
+    page = GetPage("http://tptapi.com/u/" + who, account["cookies"])
     
     name = re.findall(r"<span>([^<>]*)</span>", page)
     if not name:
@@ -53,7 +53,7 @@ def Message(account, who, message):
     if who == -1:
         return "Invalid profile ID"
     
-    GetPage("http://tptapi.com/chat_send.php?user=%s" % (who), account, {"message":message})
+    GetPage("http://tptapi.com/chat_send.php?user=%s" % (who), account["cookies"], {"message":message})
     return "Message sent"
 
 def ReadChat(account, who):
@@ -61,7 +61,7 @@ def ReadChat(account, who):
     if who == -1:
         return "Invalid profile ID"
     
-    page = GetPage("http://tptapi.com/chat_message.php?id=%s" % (who), account).split("<p>")[1:6]
+    page = GetPage("http://tptapi.com/chat_message.php?id=%s" % (who), account["cookies"]).split("<p>")[1:6]
     if not len(page):
         return "Empty conversation"
     return page

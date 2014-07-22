@@ -176,7 +176,10 @@ def Parse(text):
                     return
 
 Connect()
-mods["stocks"].GetStockInfo(True)
+try:
+    mods["stocks"].GetStockInfo(True)
+except:
+    pass
 ReadPrefs()
 while True:
     main()

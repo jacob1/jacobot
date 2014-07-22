@@ -67,7 +67,7 @@ def GetStockInfo(new = False):
             history[stocks[i]].append(int(stocks[i+2]))
 
 def GetPortfolioInfo(account, element = None):
-    page = GetPage("http://tptapi.com/portfolio.php", account)
+    page = GetPage("http://tptapi.com/portfolio.php", account["cookies"])
     stocks = []
     for i in page.splitlines():
         stocks.extend(re.findall("<td width='\d+%'>([^<>]*)</td>", i))
@@ -87,14 +87,14 @@ def GetPortfolioInfo(account, element = None):
     return output
 
 def GetMoney(account):
-    page = GetPage("http://tptapi.com/money.php", account)
+    page = GetPage("http://tptapi.com/money.php", account["cookies"])
     start = page.find("Current Balance:")+21
     return int(re.sub(",", "", page[start:start+page[start:].find(".")]))
 
 #You cannot sell more stock than how much you own!
 #INVALID Field!
 def BuySellStocks(account, action, element, amount, stockClass = "1"):
-    return GetPage("http://tptapi.com/stockProc.php?opt=%s&stock=%s" % (action, element), account, {"shares":amount,"class":stockClass}, True).replace("\n", " ")
+    return GetPage("http://tptapi.com/stockProc.php?opt=%s&stock=%s" % (action, element), account["cookies"], {"shares":amount,"class":stockClass}, True).replace("\n", " ")
 
 def GetChange(old, new):
     #dividing by 0 is bad
