@@ -3,12 +3,12 @@ from common import *
 RegisterMod(__name__)
 
 def GetHealth(account):
-    page = GetPage("http://tptapi.com/money.php", account) #temporary until stats.php is done
+    page = GetPage("http://tptapi.com/money.php", account["cookies"]) #temporary until stats.php is done
     hp = re.search("glyphicon-heart'></i> (.+?)</font>", page).group(1)
     account["health"] = (hp.split("/")[0], hp.split("/")[1])
     
 def GetInventory(account):
-    page = GetPage("http://tptapi.com/inventory.php", account)
+    page = GetPage("http://tptapi.com/inventory.php", account["cookies"])
     items = []
     items.extend(re.findall("<td width='\d+%'>(.+?)</td>", page))
     items[0:4] = []
@@ -20,7 +20,7 @@ def GetInventory(account):
     return account["inventory"]
 
 def GetItemList(account):
-    page = GetPage("http://tptapi.com/store.php", account)
+    page = GetPage("http://tptapi.com/store.php", account["cookies"])
     items = []
     items.extend(re.findall("<td width='\d+%'>(.+?)</td>", page))
     items[0:4] = []
@@ -43,10 +43,10 @@ def FindItem(account, itemList, itemID):
     return found
 
 def ItemAction(account, action, itemID):
-    return GetPage("http://tptapi.com/item_action.php?opt=%s&item=%s" % (action, itemID), account, removeTags = True)
+    return GetPage("http://tptapi.com/item_action.php?opt=%s&item=%s" % (action, itemID), account["cookies"], removeTags = True)
 
 def PrintLocation(account, channel):
-    page = GetPage("http://tptapi.com/TPTRPG/index.php", account, removeTags = True)
+    page = GetPage("http://tptapi.com/TPTRPG/index.php", account["cookies"], removeTags = True)
     location = re.search("Your current location: (.+?)&", page, re.DOTALL).group(1).strip().splitlines()
     SendMessage(channel, "Current Location: %s" % location[0])
     print(location)
@@ -123,7 +123,7 @@ def Move(username, hostmask, channel, text, account):
     if direction not in ["N", "E", "S", "W"]:
         SendMessage(channel, "Invalid direction")
         return
-    page = GetPage("http://tptapi.com/TPTRPG/RPG_Action.php?Act=Walk&Direction=%s" % direction, account, removeTags = True)
+    page = GetPage("http://tptapi.com/TPTRPG/RPG_Action.php?Act=Walk&Direction=%s" % direction, account["cookies"], removeTags = True)
     if len(page):
         SendMessage(channel, page)
         return
@@ -132,7 +132,7 @@ def Move(username, hostmask, channel, text, account):
 @command("claim", needsAccount = True)
 def Claim(username, hostmask, channel, text, account):
     """claim (no args). Claims the spot you are standing on in the rpg game"""
-    page = GetPage("http://tptapi.com/TPTRPG/RPG_Action.php?Act=Claim", account, removeTags = True)
+    page = GetPage("http://tptapi.com/TPTRPG/RPG_Action.php?Act=Claim", account["cookies"], removeTags = True)
     if len(page):
         SendMessage(channel, page)
     else:
