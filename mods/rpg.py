@@ -55,6 +55,7 @@ def PrintLocation(account, channel):
 
 @command("inventory", needsAccount = True)
 def Inventory(username, hostmask, channel, text, account):
+    """inventory (no args). Prints which items you own in the store"""
     GetInventory(account)
     if len(account["inventory"]) == 0:
         SendMessage(channel, "Inventory empty")
@@ -63,6 +64,7 @@ def Inventory(username, hostmask, channel, text, account):
 
 @command("itemlist")
 def ItemList(username, hostmask, channel, text, account):
+    """itemlist (no args). Prints the list of items you can buy in the store"""
     account = GetAccount(ownerHostmask)
     if not account:
         return
@@ -72,6 +74,7 @@ def ItemList(username, hostmask, channel, text, account):
 
 @command("itembuy", minArgs = 1, needsAccount = True)
 def ItemBuy(username, hostmask, channel, text, account):
+    """itembuy <item>. Buys item in the store. It will match and buy partial item names"""
     item = FindItem(account, GetItemList(account), " ".join(text))
     if not item:
         SendMessage(channel, "No such item Name/ID: %s" % " ".join(text))
@@ -82,6 +85,7 @@ def ItemBuy(username, hostmask, channel, text, account):
 
 @command("itemsell", minArgs = 1, needsAccount = True)
 def ItemSell(username, hostmask, channel, text, account):
+    """itemsell <item>. Sells the first matching item from your inventory. It will match partial item names"""
     item = FindItem(account, GetInventory(account), " ".join(text))
     if not item:
         SendMessage(channel, "No such item Name/ID: %s" % " ".join(text))
@@ -92,6 +96,7 @@ def ItemSell(username, hostmask, channel, text, account):
 
 @command("use", minArgs = 1, needsAccount = True)
 def Use(username, hostmask, channel, text, account):
+    """use <item>. Uses the first matching item from your inventory to recover hp. It will match partial item names"""
     item = FindItem(account, GetInventory(account), " ".join(text))
     if not item:
         SendMessage(channel, "No such item Name/ID: %s" % " ".join(text))
@@ -102,15 +107,18 @@ def Use(username, hostmask, channel, text, account):
     
 @command("health", needsAccount = True)
 def Health(username, hostmask, channel, text, account):
+    """health (no args). Prints your current health"""
     GetHealth(account)
     SendMessage(channel, "Current: %s Max: %s" % (account["health"][0], account["health"][1]))
 
 @command("location", needsAccount = True)
 def Location(username, hostmask, channel, text, account):
+    """location (no args). Prints your current location"""
     PrintLocation(account, channel)
 
 @command("move", minArgs = 1, needsAccount = True)
 def Move(username, hostmask, channel, text, account):
+    """move N/E/S/W. Moves your character in the RPG game"""
     direction = text[0]
     if direction not in ["N", "E", "S", "W"]:
         SendMessage(channel, "Invalid direction")
@@ -123,6 +131,7 @@ def Move(username, hostmask, channel, text, account):
 
 @command("claim", needsAccount = True)
 def Claim(username, hostmask, channel, text, account):
+    """claim (no args). Claims the spot you are standing on in the rpg game"""
     page = GetPage("http://tptapi.com/TPTRPG/RPG_Action.php?Act=Claim", account, removeTags = True)
     if len(page):
         SendMessage(channel, page)
