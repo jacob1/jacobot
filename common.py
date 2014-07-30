@@ -54,7 +54,7 @@ def GetPage(url, cookies = None, headers = None, removeTags = False):
         req = urllib2.Request(url, urllib.urlencode(headers) if headers else None, {'Cookie':cookies})
     else:
         req = urllib2.Request(url)
-    page = urllib2.urlopen(req, timeout=5).read()
+    page = urllib2.urlopen(req, timeout=10).read()
     if removeTags:
         return re.sub("<.*?>", "", page)
     return page
