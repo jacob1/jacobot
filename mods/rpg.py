@@ -10,7 +10,7 @@ def GetHealth(account):
 def GetInventory(account):
     page = GetPage("http://tptapi.com/inventory.php", account["cookies"])
     items = []
-    items.extend(re.findall("<td width='\d+%'>(.+?)</td>", page))
+    items.extend(re.findall("<td width='\d+%'>(.*?)</td>", page))
     items[0:4] = []
 
     account["inventory"] = []
@@ -22,11 +22,11 @@ def GetInventory(account):
 def GetItemList(account):
     page = GetPage("http://tptapi.com/store.php", account["cookies"])
     items = []
-    items.extend(re.findall("<td width='\d+%'>(.+?)</td>", page))
-    items[0:4] = []
+    items.extend(re.findall("<td width='\d+%'>(.*?)</td>", page))
+    items[0:6] = []
 
     itemList = []
-    for i in range(0, len(items), 4):
+    for i in range(0, len(items), 6):
         itemID = re.search("item=(.+)'", items[i+3]).group(1)
         itemList.append((items[i], items[i+2], itemID, items[i+1]))
     return itemList
