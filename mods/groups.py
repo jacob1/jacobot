@@ -17,13 +17,10 @@ def GetUsername(who):
     return name[0]
 	
 def GetFriends(who):
-    account = GetAccount(ownerHostmask)
-    if not account:
-        return
     who = GetUsername(who)
     if who == -1:
         return "Invalid profile ID"
-    page = GetPage("http://tptapi.com/u/" + who, account["cookies"])
+    page = GetPage("http://tptapi.com/u/" + who)
     
     name = re.findall(r"<span>([^<>]*)</span>", page)
     if not name:

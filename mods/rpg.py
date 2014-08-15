@@ -4,7 +4,7 @@ RegisterMod(__name__)
 
 def GetHealth(account):
     page = GetPage("http://tptapi.com/money.php", account["cookies"]) #temporary until stats.php is done
-    hp = re.search("glyphicon-heart'></i> (.+?)</font>", page).group(1)
+    hp = re.search("glyphicon-heart'></span> (.+?)</font>", page).group(1)
     account["health"] = (hp.split("/")[0], hp.split("/")[1])
     
 def GetInventory(account):
@@ -19,15 +19,15 @@ def GetInventory(account):
         account["inventory"].append((items[i], items[i+1], itemID))
     return account["inventory"]
 
-def GetItemList(account):
-    page = GetPage("http://tptapi.com/store.php", account["cookies"])
+def GetItemList():
+    page = GetPage("http://tptapi.com/store.php")
     items = []
     items.extend(re.findall("<td width='\d+%'>(.*?)</td>", page))
     items[0:6] = []
 
     itemList = []
     for i in range(0, len(items), 6):
-        itemID = re.search("item=(.+)'", items[i+3]).group(1)
+        itemID = re.search("item=(.+)'", items[i+5]).group(1).split("&")[0]
         itemList.append((items[i], items[i+2], itemID, items[i+1]))
     return itemList
 
@@ -65,11 +65,7 @@ def Inventory(username, hostmask, channel, text, account):
 @command("itemlist")
 def ItemList(username, hostmask, channel, text, account):
     """itemlist (no args). Prints the list of items you can buy in the store"""
-    account = GetAccount(ownerHostmask)
-    if not account:
-        return
-
-    itemList = GetItemList(account)
+    itemList = GetItemList()
     SendMessage(channel, ", ".join("07%s: $%s (%s, %s in existence)" % (i[0], i[1], i[2], i[3]) for i in itemList))
 
 @command("itembuy", minArgs = 1, needsAccount = True)

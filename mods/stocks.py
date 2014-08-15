@@ -328,6 +328,9 @@ def BuyCmd(username, hostmask, channel, text, account):
         return
     if total[-1] == "%":
         GetStockInfo()
+        if element in results and int(results[element]["value"]) == 0:
+            SendMessage(channel, "Error: %s is bankrupt!" % element)
+            return
         money = GetMoney(account)
         total = int(money/int(results[element]["value"])*float(total[:-1])/100)
         SendMessage(channel, "Buying %s shares of %s" % (str(total), element))
