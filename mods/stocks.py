@@ -8,13 +8,14 @@ from time import sleep
 from common import *
 RegisterMod(__name__)
 
-output = 2
+output = 0
 def AlwaysRun(channel):
     global output
     global watched
     global history
     now = datetime.now()
     if now.minute % 10 == 0 and now.second ==  15:
+        #return
         if now.hour%2 == 0 and now.minute == 10:
         #if now.minute == 0:
             history = {}
@@ -345,7 +346,7 @@ def BuyCmd(username, hostmask, channel, text, account):
         account["portfolio"][element]["shares"] = int(account["portfolio"][element]["shares"]) + int(total)
     else:
         account["portfolio"][element] = {'shares':total}
-    if element not in watched:
+    if element not in watched and account["username"] == "jacob2":
         watched.append(element)
     #SendMessage("Crackbot", "./stock watch %s" % element)
 
