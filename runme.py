@@ -175,12 +175,19 @@ def Parse(text):
                     i[1](username, hostmask, channel, text[4:])
                     return
 
-Connect()
 try:
     mods["stocks"].GetStockInfo(True)
 except:
     pass
 ReadPrefs()
 while True:
-    main()
-    Connect()
+    try:
+        Connect()
+        main()
+        sleep(20)
+    except KeyboardInterrupt:
+        break
+    except SystemExit:
+        break
+    except:
+        pass
