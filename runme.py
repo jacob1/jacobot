@@ -29,7 +29,7 @@ def Connect():
     irc.send("USER %s %s %s :%s\n" % (botIdent, botNick, botNick, botRealname))
     irc.send("NICK %s\n" % botNick)
     if NickServ:
-        irc.send("PRIVMSG NickServ :identify %s %s\n" % (botAccount, botPassword))
+        irc.send("ns identify %s %s\n" % (botAccount, botPassword))
     else:
         irc.send("JOIN %s\n" % channel)
     sleep(7)
@@ -82,6 +82,9 @@ def main():
                         #Reply to server pings
                         if text[0] == "PING":
                             irc.send("PONG %s\n" % text[1])
+                        elif text[0] == "ERROR":
+                            irc.close()
+                            return #try to reconnect
 
                     if len(text) > 1:
                         #Only join channel once identified
@@ -126,6 +129,8 @@ def Parse(text):
         command = text[3].lower().lstrip(":")
         if channel == botNick:
             channel = username
+        #if username == "FeynmanStockBot":
+        #    return
 
         #some special owner commands that aren't in modules
         if CheckOwner(text[0]):
