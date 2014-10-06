@@ -89,7 +89,6 @@ def main():
                     if len(text) > 1:
                         #Only join channel once identified
                         if text[1] == "396":
-                            print("test")
                             irc.send("JOIN %s\n" % channel)
                         #Nickname already in use
                         elif text[1] == "433":
