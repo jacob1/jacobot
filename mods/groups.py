@@ -56,11 +56,11 @@ def Message(account, who, message):
 def ReadChat(account, who):
     who = GetUsername(who)
     if who == -1:
-        return "Invalid profile ID"
+        return {"Invalid profile ID"}
     
     page = GetPage("http://tptapi.com/chat_message.php?id=%s" % (who), account["cookies"]).split("<p>")[1:6]
     if not len(page):
-        return "Empty conversation"
+        return {"Empty conversation"}
     return page
 
 #groups

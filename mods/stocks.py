@@ -48,7 +48,7 @@ def Login(channel, hostmask, username, password):
 
     tempcookies = []
     for i in list(cj):
-        if i.name == "PHPSESSID":
+        if i.name in ["T_UID", "T_UIK", "T_UIS"]:
             tempcookies.append("%s=%s" % (i.name, i.value))
     logins[hostmask]["cookies"] = "; ".join(tempcookies)
     SendMessage(channel, "Successfully logged in")

@@ -18,9 +18,13 @@ def Send(msg):
     messageQueue.append(msg)
 
 def SendMessage(target, msg):
+    msg = msg[:450]
+    if re.match(".*moo+$", msg):
+        msg = msg + "."
     Send("PRIVMSG %s :%s\n" % (target, msg))
 
 def SendNotice(target, msg):
+    msg = msg[:450]
     Send("NOTICE %s :%s\n" % (target, msg))
 
 plugin = ""

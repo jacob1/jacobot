@@ -60,22 +60,22 @@ def Interrupt():
 def main():
     while True:
         try:
-            line = ""
+            lines = ""
             ready = select.select([irc], [], [], 1.0)
             if ready[0]:
-                line = irc.recv(2040)
+                lines = irc.recv(2040)
         except KeyboardInterrupt:
             Interrupt()
         except: #socket.error, e:   or   socket.timeout, e:
             PrintError()
             return
         else:
-            if len(line):
+            for line in lines.splitlines():
                 try:
                     if ":!!login" in line:
-                        print("<someone logging in>")
+                        print("<someone logging in>\n")
                     else:
-                        print(line)
+                        print(line+"\n")
                     text = line.split()
 
                     if len(text) > 0:
@@ -89,7 +89,15 @@ def main():
                     if len(text) > 1:
                         #Only join channel once identified
                         if text[1] == "396":
+                            print("test")
                             irc.send("JOIN %s\n" % channel)
+                        #Nickname already in use
+                        elif text[1] == "433":
+                            irc.send("NICK %s-\n" % text[3])
+                            if NickServ:
+                                irc.send("ns identify %s %s\n" % (botAccount, botPassword))
+                                irc.send("ns ghost %s\n" % (botNick))
+                                irc.send("NICK %s\n" % (botNick))
 
                     if len(text) > 2:
                         #Get channel to reply to
