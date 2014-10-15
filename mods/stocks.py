@@ -407,7 +407,7 @@ def MoneyCmd(username, hostmask, channel, text, account):
 @command("give", minArgs = 2, needsAccount = True)
 def GiveCmd(username, hostmask, channel, text, account):
     """(give <username> <amount>). Gives money to another user."""
-    SendMessage(channel, GetPage("http://tptapi.com/sendProc.php", account, {"reciever":text[0], "amount":text[1]}, True))
+    SendMessage(channel, GetPage("http://tptapi.com/sendProc.php", account["cookies"], {"reciever":text[0], "amount":text[1]}, True))
 
 @command("portfolio", needsAccount = True)
 def PortfolioCmd(username, hostmask, channel, text, account):

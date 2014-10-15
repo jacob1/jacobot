@@ -50,6 +50,8 @@ atexit.register(WritePrefs)
 def PrintError(channel = None):
     print "=======ERROR=======\n%s========END========\n" % (traceback.format_exc())
     if channel:
+        if channel[0] != "#":
+            channel = "#TPTAPIStocks"
         irc.send("PRIVMSG %s :Error printed to console\n" % (channel))
     
 def Interrupt():
