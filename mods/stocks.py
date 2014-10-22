@@ -13,6 +13,8 @@ def AlwaysRun(channel):
     global output
     global watched
     global history
+    if output == 0:
+        return
     now = datetime.now()
     if now.minute % 10 == 0 and now.second ==  15:
         #return
@@ -21,7 +23,7 @@ def AlwaysRun(channel):
             history = {}
         GetStockInfo(True)
         if len(watched) or output:
-            PrintStocks(channel, False, output != 1)
+            PrintStocks(channel, False, output != 2)
             PrintNews(channel, True)
         watched = []
         sleep(1)
@@ -462,6 +464,7 @@ def NewsCmd(username, hostmask, channel, text, account):
 def OutputCmd(username, hostmask, channel, text, account):
     """(no args). Toggle printing stock output every 10 minutes."""
     global output
-    output = (output + 1) % 3
-    SendMessage(channel, "Output has been turned %s" % ("on" if output else "off"))
+    output = (output + 1) % 4
+    outputmessages = ("completely off", "off", "on low", "on")
+    SendMessage(channel, "Output has been turned %s" % (outputmessages[output]))
 

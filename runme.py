@@ -31,7 +31,8 @@ def Connect():
     if NickServ:
         irc.send("ns identify %s %s\n" % (botAccount, botPassword))
     else:
-        irc.send("JOIN %s\n" % channel)
+        for i in channels:
+            irc.send("JOIN %s\n" % i)
     sleep(7)
 
 def ReadPrefs():
@@ -91,7 +92,8 @@ def main():
                     if len(text) > 1:
                         #Only join channel once identified
                         if text[1] == "396":
-                            irc.send("JOIN %s\n" % channel)
+                            for i in channels:
+                                irc.send("JOIN %s\n" % i)
                         #Nickname already in use
                         elif text[1] == "433":
                             irc.send("NICK %s-\n" % text[3])
@@ -111,6 +113,10 @@ def main():
                         #Parse line in stocks.py
                         if len(text):
                             Parse(text)
+
+                    if len(text) >= 5:
+                        if text[1] == "MODE" and text[2] == "##powder-bots" and text[3] == "+o" and text[4] == botNick:
+                            irc.send("MODE ##powder-bots -o %s\n" % (botNick))
                 except KeyboardInterrupt:
                     Interrupt()
                 except SystemExit:
@@ -120,7 +126,7 @@ def main():
                 except:
                     PrintError(reply)
         try:
-            mods["stocks"].AlwaysRun(channel)
+            mods["stocks"].AlwaysRun(channels[0])
             #TODO: maybe proper rate limiting, but this works for now
             for i in messageQueue:
                 irc.send(i)
@@ -128,7 +134,7 @@ def main():
         except KeyboardInterrupt:
             Interrupt()
         except:
-            PrintError(channel)
+            PrintError(channels[0])
 
 def Parse(text):
     if text[1] == "PRIVMSG":
