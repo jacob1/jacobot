@@ -52,7 +52,7 @@ def PrintError(channel = None):
     print "=======ERROR=======\n%s========END========\n" % (traceback.format_exc())
     if channel:
         if channel[0] != "#":
-            channel = "#TPTAPIStocks"
+            channel = channels[0]
         irc.send("PRIVMSG %s :Error printed to console\n" % (channel))
     
 def Interrupt():
@@ -117,6 +117,11 @@ def main():
                     if len(text) >= 5:
                         if text[1] == "MODE" and text[2] == "##powder-bots" and text[3] == "+o" and text[4] == botNick:
                             irc.send("MODE ##powder-bots -o %s\n" % (botNick))
+
+                    #allow modules to do their own text parsing if needed, outside of raw commands
+                    for mod in mods:
+                         if hasattr(mods[mod], "Parse"):
+                            mods[mod].Parse(line, text)
                 except KeyboardInterrupt:
                     Interrupt()
                 except SystemExit:
@@ -126,7 +131,10 @@ def main():
                 except:
                     PrintError(reply)
         try:
-            mods["stocks"].AlwaysRun(channels[0])
+            #allow modules to have a "tick" function constantly run, for any updates they need
+            for mod in mods:
+                if hasattr(mods[mod], "AlwaysRun"):
+                    mods[mod].AlwaysRun(channels[0])
             #TODO: maybe proper rate limiting, but this works for now
             for i in messageQueue:
                 irc.send(i)

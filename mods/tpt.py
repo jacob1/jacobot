@@ -2,18 +2,38 @@ import urllib, urllib2
 from common import *
 RegisterMod(__name__)
 
+def Parse(raw, text):
+    if len(text) >= 8 and text[0] == ":StewieGriffin!~Stewie@Powder/Bot/StewieGriffin" and text[1] == "PRIVMSG" and text[2] == "#powder-info" and text[3] == ":New" and text[4] == "registration:":
+        if text[7] == "[82.171.135.245]":
+            BanUser(text[5][:-1], "1", "p", "Automatic ip ban (if placed in error, please contact jacob1)")
+
 def GetTPTSessionInfo(line):
     with open("passwords.txt") as f:
         return f.readlines()[line].strip()
 
-def BanUser(userID, time, timeunits, reason):
-    if userID == "1" or userID == "38642":
+def GetUserID(username):
+	page = GetPage("http://powdertoy.co.uk/User.json?Name={}".format(username))
+	thing = page.find("\"ID\":")
+	return page[thing+5:page.find(",", thing)]
+
+def BanUser(username, time, timeunits, reason):
+    try:
+        userID = int(username)
+    except:
+        userID = GetUserID(username)
+    if userID < 0 or userID == 1 or userID == 38642:
         return
-    data = {"BanUser":userID, "BanReason":reason, "BanTime":time, "BanTimeSpan":timeunits}
+    data = {"BanUser":str(userID).strip("="), "BanReason":reason, "BanTime":time, "BanTimeSpan":timeunits}
     GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data)
 
 def UnbanUser(userID):
-    data = {"UnbanUser":userID}
+    try:
+        userID = int(username)
+    except:
+        userID = GetUserID(username)
+    if userID < 0:
+	    return
+    data = {"UnbanUser":str(userID).strip("=")}
     GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data)
 
 def GetPostInfo(postID):
@@ -35,7 +55,7 @@ def UnhidePost(postID):
 
 @command("ban", minArgs = 4, owner = True)
 def Ban(username, hostmask, channel, text, account):
-    """(ban <user ID> <ban time> <ban time units> <reason>). bans someone in TPT. Owner only."""
+    """(ban <user ID> <ban time> <ban time units> <reason>). bans someone in TPT. Owner only. Add = to ban usernames that look like IDs"""
     if username != "jacob1":
         SendNotice(username, "Error, only jacob1 should be able to use this command")
     BanUser(text[0], text[1], text[2], " ".join(text[3:]))
