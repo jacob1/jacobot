@@ -1,4 +1,5 @@
 import urllib, urllib2
+import json
 from common import *
 RegisterMod(__name__)
 
@@ -52,6 +53,49 @@ def HidePost(postID, remove, reason):
 def UnhidePost(postID):
     GetPage("http://powdertoy.co.uk/Discussions/Thread/UnhidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0))
 
+def GetLinkedAccounts(account):
+    try:
+        if account.find(".") >= 0:
+            page = GetPage("http://powdertoy.co.uk/IPTools/GetInfo.json?IP=%s" % account, GetTPTSessionInfo(0))
+        else:
+            page = GetPage("http://powdertoy.co.uk/IPTools/GetInfo.json?Username=%s" % account, GetTPTSessionInfo(0))
+    except:
+        return "There was an error fetching the page (probably a timeout)"
+
+    data = json.loads(page)
+    if data == False:
+        return "Invalid data"
+
+    output = []
+    if "Username" in data:
+        if "Banned" in data and data["Banned"] == "1":
+            output.append("\x0204%s\x02:" % data["Username"])
+        else:
+            output.append("\x02%s\x02:" % data["Username"])
+    elif "Address" in data:
+        if "Network" in data and "NetworkTop" in data:
+            output.append("\x02%s\x02 (%s - %s):" % (data["Address"], data["Network"], data["NetworkTop"]))
+        else:
+            output.append("\x02%s\x02:" % data["Address"])
+    if "Country" in data:
+        if "CountryCode" in data:
+            output.append("%s (%s)," % (data["Country"], data["CountryCode"]))
+        else:
+            output.append("%s," % (data["Country"]))
+    if "ISP" in data:
+        output.append("%s," % data["ISP"])
+
+    if "Users" in data and len(data["Users"]):
+        output.append("Linked Accounts:")
+        for userID in data["Users"]:
+            if data["Users"][userID]["Banned"] == "1":
+                output.append("\x0204%s\x02 (%s)" % (data["Users"][userID]["Username"], userID))
+            else:
+                output.append("\x02%s\x02 (%s)" % (data["Users"][userID]["Username"], userID,))
+    elif "Addresses" in data and len(data["Addresses"]):
+        output.append("Linked IPs:")
+        output.append(", ".join("%s (%s)" % (ip[0], ip[1]) for ip in data["Addresses"]))
+    return " ".join(output)
 
 @command("ban", minArgs = 4, owner = True)
 def Ban(username, hostmask, channel, text, account):
@@ -87,10 +131,7 @@ def Unhide(username, hostmask, channel, text, account):
     """(unhide <post ID>). Unhides a post in TPT. Owner only."""
     UnhidePost(text[0])
 
-#Not TPT, temporary
-@command("iam", owner = True)
-def Remove(username, hostmask, channel, text, account):
-    """(iam <text>). Submits text to iam's game thing. Owner only."""
-    GetPage("http://173.206.82.2/game/sendtext.php", {"message":" ".join(text)}, {"message":" ".join(text)})
-
-
+@command("ipmap", minArgs = 1, owner = True)
+def IpMap(username, hostmask, channel, text, account):
+    """(ipmap <username/ip>). Prints out linked accounts or IP addresses. Owner only."""
+    SendMessage(channel, GetLinkedAccounts(text[0]))
