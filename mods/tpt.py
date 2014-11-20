@@ -53,6 +53,12 @@ def HidePost(postID, remove, reason):
 def UnhidePost(postID):
     GetPage("http://powdertoy.co.uk/Discussions/Thread/UnhidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0))
 
+def LockThread(threadID, reason):
+    GetPage("http://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Lock":"Lock Thread", "Moderation_LockReason":reason})
+
+def UnlockThread(threadID):
+    GetPage("http://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Unlock":"Unlock"})
+
 def GetLinkedAccounts(account):
     try:
         if account.find(".") >= 0:
@@ -130,6 +136,16 @@ def Remove(username, hostmask, channel, text, account):
 def Unhide(username, hostmask, channel, text, account):
     """(unhide <post ID>). Unhides a post in TPT. Owner only."""
     UnhidePost(text[0])
+
+@command("lock", minArgs = 2, owner = True)
+def Lock(username, hostmask, channel, text, account):
+    """(lock <thread ID> <reason>). Locks a thread in TPT. Owner only."""
+    LockThread(text[0], " ".join(text[1:]))
+
+@command("unlock", minArgs = 1, owner = True)
+def Unlock(username, hostmask, channel, text, account):
+    """(unlock <thread ID>). Unlocks a thread in TPT. Owner only."""
+    UnlockThread(text[0])
 
 @command("ipmap", minArgs = 1, owner = True)
 def IpMap(username, hostmask, channel, text, account):
