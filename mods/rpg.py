@@ -60,13 +60,13 @@ def Inventory(username, hostmask, channel, text, account):
     if len(account["inventory"]) == 0:
         SendMessage(channel, "Inventory empty")
         return
-    SendMessage(channel, ", ".join("07%s: $%s (%s)" % (i[0], i[1], i[2]) for i in account["inventory"]))
+    SendMessage(channel, ", ".join("\x0307%s\x03: $%s (%s)" % (i[0], i[1], i[2]) for i in account["inventory"]))
 
 @command("itemlist")
 def ItemList(username, hostmask, channel, text, account):
     """itemlist (no args). Prints the list of items you can buy in the store"""
     itemList = GetItemList()
-    SendMessage(channel, ", ".join("07%s: $%s (%s, %s in existence)" % (i[0], i[1], i[2], i[3]) for i in itemList))
+    SendMessage(channel, ", ".join("\x0307%s\x03: $%s (%s, %s in existence)" % (i[0], i[1], i[2], i[3]) for i in itemList))
 
 @command("itembuy", minArgs = 1, needsAccount = True)
 def ItemBuy(username, hostmask, channel, text, account):

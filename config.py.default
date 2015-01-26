@@ -1,10 +1,10 @@
 server = "irc.freenode.net"
-channel = ""
+channels = ("",)
 botNick = "stockbot"
 botIdent = "stockbot"
 botRealname = "TPTAPI stock helper bot"
 
-ownerHostmask = ""
+ownerHostmasks = ("",)
 
 botAccount = ""
 botPassword = ""

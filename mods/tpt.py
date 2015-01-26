@@ -75,7 +75,7 @@ def GetLinkedAccounts(account):
     output = []
     if "Username" in data:
         if "Banned" in data and data["Banned"] == "1":
-            output.append("\x0204%s\x02:" % data["Username"])
+            output.append("\x02\x0304%s\x02\x03:" % data["Username"])
         else:
             output.append("\x02%s\x02:" % data["Username"])
     elif "Address" in data:
@@ -95,7 +95,7 @@ def GetLinkedAccounts(account):
         output.append("Linked Accounts:")
         for userID in data["Users"]:
             if data["Users"][userID]["Banned"] == "1":
-                output.append("\x0204%s\x02 (%s)" % (data["Users"][userID]["Username"], userID))
+                output.append("\x02\x0304%s\x02\x03 (%s)" % (data["Users"][userID]["Username"], userID))
             else:
                 output.append("\x02%s\x02 (%s)" % (data["Users"][userID]["Username"], userID,))
     elif "Addresses" in data and len(data["Addresses"]):

@@ -5,7 +5,7 @@ execfile("config.py")
 
 def CheckOwner(hostmask):
     host = hostmask.split("!")[-1]
-    return host == ownerHostmask
+    return host in ownerHostmasks
 
 #only used for stocks.py, maybe for more later
 logins = {}

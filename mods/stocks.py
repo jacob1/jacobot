@@ -80,7 +80,7 @@ def GetPortfolioInfo(account, element = None):
         try:
             if stocks[i] == "":
                 continue
-            output = output + "07%s (%s): %s  " % (stocks[i], stocks[i+2], stocks[i+1])
+            output = output + "\x0307%s\x03 (%s): %s  " % (stocks[i], stocks[i+2], stocks[i+1])
             if element == stocks[i]:
                 return int(stocks[i+1])
         except:
@@ -102,14 +102,14 @@ def BuySellStocks(account, action, element, amount, stockClass = "1"):
 def GetChange(old, new):
     #dividing by 0 is bad
     if old == 0:
-        return "040%"
+        return "\x03040%"
     if old < new:
-        color = "09"
+        color = "\x0309"
     elif old > new:
-        color = "04"
+        color = "\x0304"
     else:
-        color = "08"
-    return color + str(int((float(new)-old)/old*1000)/10.0) + "%"
+        color = "\x0308"
+    return color + str(int((float(new)-old)/old*1000)/10.0) + "%\x0F"
 
 watched = []
 def PrintStocks(channel, allPercentages = False, onlyOwned = False):
@@ -125,11 +125,11 @@ def PrintStocks(channel, allPercentages = False, onlyOwned = False):
         return
     for i in sorted(stocks):
         if i in watched:
-            output = output + "03"
+            output = output + "\x0303"
         else:
-            output = output + "07"
+            output = output + "\x0307"
         if i in results:
-            output = output + i + " - $" + results[i]["value"]
+            output = output + i + "\x0F - $" + results[i]["value"]
         if (i in watched or allPercentages or onlyOwned) and i in history and len(history[i]) > 1:
             output += " " + GetChange(history[i][-2], history[i][-1])
         output += "  "
@@ -145,7 +145,7 @@ def PrintMniipRatings(channel):
     ratings[0] = ratings[0][5:]
     output = "PowJones Stock Ratings: "
     for i in range(0, len(ratings)-1, 2):
-        output = output + "07" + ratings[i].strip("{,:\n") + ": " + ratings[i+1] + " "
+        output = output + "\x0307" + ratings[i].strip("{,:\n") + "\x03: " + ratings[i+1] + " "
     SendMessage(channel, output)
 
 def PrintRatings(channel, element = None, all = False):
@@ -166,18 +166,18 @@ def PrintRatings(channel, element = None, all = False):
             average = sum(history[i])/len(history[i])
             rating = GetChange(int(results[i]["value"]), average)
             if average/asdf > int(results[i]["value"]) or element or all:
-                output = output + "07" + i + ": " + rating + " "
+                output = output + "\x0307" + i + ": " + rating + " "
             """else:
                 average = sum(history[i])/len(history[i])
                 rating = GetChange(int(results[i]["value"]), average)
                 if average > int(results[i]["value"]) or element:
-                    output = output + "07" + i + ": " + rating + " """
+                    output = output + "\x0307" + i + ": " + rating + " """
             
             """rating = (float(results[i]["value"])-minn)/(maxx-minn)
             #rating = GetChange(1, rating)
-            #output = output + "07" + i + ": " + rating + " "
+            #output = output + "\x0307" + i + ": " + rating + " "
             if rating < .4:
-                output = output + "07" + i + ": 09" + str(int((1-rating)*100)) + "% " """
+                output = output + "\x0307" + i + ": \x0309" + str(int((1-rating)*100)) + "%\x0F " """
 
             if len(output) > 400:
                 SendMessage(channel, output)
@@ -193,7 +193,7 @@ def PrintStockValue(channel, stock):
         SendMessage(channel, "%s %s" % (results[stock]["value"], change))
 
 def PrintHistory(channel, stock):
-    output = "07" + stock + ": "
+    output = "\x0307" + stock + "\x03: "
     if stock in history:
         for i in history[stock]:
             output = output + str(i) + ", "
@@ -205,17 +205,17 @@ terribleNews = ["bankruptcy", "liquidation", "shutters"]
 def NewsColor(news):
     for i in goodNews:
         if i in news:
-            return "09"
+            return "\x0309"
     for i in badNews:
         if i in news:
-            return "04"
+            return "\x0304"
     for i in terribleNews:
         if i in news:
-            return "04,01"
-    return "08"
+            return "\x0304,01"
+    return "\x0308"
 
 def FormatNews(newsitem):
-    return "%s%s (%s) %s 07(%s, 07%s)" % (NewsColor(newsitem[3]), newsitem[2], newsitem[1], newsitem[3], newsitem[4], newsitem[0])
+    return "%s%s\x03 (%s) %s \x0307(%s\x03, \x0307%s)" % (NewsColor(newsitem[3]), newsitem[2], newsitem[1], newsitem[3], newsitem[4], newsitem[0])
 
 def IsInNews(news, newsID):
     for i in news:
@@ -242,7 +242,7 @@ def PrintNews(channel, first = False, special = False, stock = None):
             elif "issued dividends" in newsItem:
                 specialNews.append((tempnews[i+1], "<compay name>", newsItem.split()[0], " ".join(newsItem.split()[1:]), tempnews[i+5]))
                 SendMessage(channel, FormatNews(specialNews[-1]))
-            elif NewsColor(newsItem) == "04,01":
+            elif NewsColor(newsItem) == "\x0304,01":
                 newsName = newsItem.split("(")[0].strip()
                 newsItem = " ".join(newsItem.split("(")[1:])
                 specialNews.append((tempnews[i+1], newsName, newsItem.split()[0].strip(")"), " ".join(newsItem.split()[1:]), tempnews[i+5]))
