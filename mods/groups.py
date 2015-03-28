@@ -3,7 +3,7 @@ from common import *
 RegisterMod(__name__)
 
 def GetUsername(who):
-    account = GetAccount(ownerHostmask)
+    account = GetAccount(ownerHostmasks[0])
     if not account:
         return
     

@@ -71,7 +71,7 @@ def ItemList(username, hostmask, channel, text, account):
 @command("itembuy", minArgs = 1, needsAccount = True)
 def ItemBuy(username, hostmask, channel, text, account):
     """itembuy <item>. Buys item in the store. It will match and buy partial item names"""
-    item = FindItem(account, GetItemList(account), " ".join(text))
+    item = FindItem(account, GetItemList(), " ".join(text))
     if not item:
         SendMessage(channel, "No such item Name/ID: %s" % " ".join(text))
         return

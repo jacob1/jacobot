@@ -3,10 +3,11 @@ import json
 from common import *
 RegisterMod(__name__)
 
+ipbans = ("[213.149.187.164]",)
 def Parse(raw, text):
     if len(text) >= 8 and text[0] == ":StewieGriffin!~Stewie@Powder/Bot/StewieGriffin" and text[1] == "PRIVMSG" and text[2] == "#powder-info" and text[3] == ":New" and text[4] == "registration:":
-        if text[7] == "[82.171.135.245]":
-            BanUser(text[5][:-1], "1", "p", "Automatic ip ban (if placed in error, please contact jacob1)")
+        if text[7] in ipbans:
+            BanUser(text[5][:-1], "1", "p", "Automatic ip ban")
 
 def GetTPTSessionInfo(line):
     with open("passwords.txt") as f:
