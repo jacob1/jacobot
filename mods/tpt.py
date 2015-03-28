@@ -1,5 +1,6 @@
 import urllib, urllib2
 import json
+import time
 from common import *
 RegisterMod(__name__)
 
@@ -9,6 +10,7 @@ def Parse(raw, text):
         if text[7] in ipbans:
             BanUser(text[5][:-1], "1", "p", "Automatic ip ban")
 
+#Generic useful functions
 def GetTPTSessionInfo(line):
     with open("passwords.txt") as f:
         return f.readlines()[line].strip()
@@ -18,6 +20,7 @@ def GetUserID(username):
 	thing = page.find("\"ID\":")
 	return page[thing+5:page.find(",", thing)]
 
+#Ban / Unban Functions
 def BanUser(username, time, timeunits, reason):
     try:
         userID = int(username)
@@ -38,6 +41,7 @@ def UnbanUser(userID):
     data = {"UnbanUser":str(userID).strip("=")}
     GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data)
 
+#Functions to get info from TPT
 def GetPostInfo(postID):
     page = GetPage("http://tpt.io/.%s" % postID)
     match = re.search("<div class=\"Comment\">(.+?<div id=\"MessageContainer-%s\" class=\"Message\">.+?)</li>" % postID, page, re.DOTALL)
@@ -45,6 +49,29 @@ def GetPostInfo(postID):
     #"[ \n\t]*</?div.+?>[ \n\t+]*"
     print(matchinfo)
 
+def GetSaveInfo(saveID):
+    page = GetPage("http://powdertoythings.co.uk/Powder/Saves/ViewDetailed.json?ID=%s" % saveID)
+    info = json.loads(page)
+    return info
+
+def FormatDate(unixtime):
+    timestruct = time.localtime(unixtime)
+    strftime = time.strftime("%a %b %d %Y %I:%M:%S%p", timestruct)
+    return strftime
+
+def FormatSaveInfo(info):
+    elementCount = {}
+    for element in info["ElementCount"]:
+        elementCount[element["Name"]] = element["Count"]
+    elementCountSorted = sorted(elementCount.items(), key=lambda x: x[1], reverse=True)
+
+    mainline = "Save is \x0302%s\x03 (ID:%s) by \x0305%s\x03. Has %s upvotes, %s downvotes, %s views, and %s comments. Created in TPT version %s." % (info["Name"], info["ID"], info["Username"], info["ScoreUp"], info["ScoreDown"], info["Views"], info["Comments"], info["PowderVersion"])
+    dateline = "Uploaded on \x0303%s\x03. Updated %s time%s: [%s]" % (FormatDate(info["FirstPublishTime"]), len(info["BumpTimes"]), "" if len(info["BumpTimes"]) == 1 else "s", ", ".join([FormatDate(i) for i in info["BumpTimes"]]))
+    descriptionline = "Description: \x0303%s\x03. Tags: [%s]" % (info["Description"], ", ".join(info["Tags"]))
+    elementline = "Element Counts: %s" % (", ".join(["\x02%s\x02: %s" % (element[0], element[1]) for element in elementCountSorted]))
+    return "%s\n%s\n%s\n%s" % (mainline, dateline, descriptionline, elementline)
+
+#Moderation functions
 def HidePost(postID, remove, reason):
     data = {"Hide_Reason":reason}
     if remove:
@@ -152,3 +179,11 @@ def Unlock(username, hostmask, channel, text, account):
 def IpMap(username, hostmask, channel, text, account):
     """(ipmap <username/ip>). Prints out linked accounts or IP addresses. Owner only."""
     SendMessage(channel, GetLinkedAccounts(text[0]))
+
+@command("saveinfo", minArgs = 1, owner = True)
+def SaveInfo(username, hostmask, channel, text, account):
+    """(saveinfo <saveid>). Prints out lots of useful information about TPT saves. Owner only."""
+    info = GetSaveInfo(text[0])
+    formatted = FormatSaveInfo(info)
+    for line in formatted.split("\n"):
+        SendMessage(channel, line)
