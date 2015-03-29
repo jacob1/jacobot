@@ -53,12 +53,14 @@ def command(name, minArgs = 0, needsAccount = False, owner = False):
         return call_func
     return real_command
 
-def GetPage(url, cookies = None, headers = None, removeTags = False):
+def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect=False):
     if cookies:
         req = urllib2.Request(url, urllib.urlencode(headers) if headers else None, {'Cookie':cookies})
     else:
-        req = urllib2.Request(url)
-    page = urllib2.urlopen(req, timeout=10).read()
+        req = urllib2.Request(url, urllib.urlencode(headers) if headers else None)
+    data = urllib2.urlopen(req, timeout=10)
+    page = data.read()
+    url = data.geturl()
     if removeTags:
         return re.sub("<.*?>", "", page)
-    return page
+    return url if getredirect else page

@@ -54,6 +54,11 @@ def PrintError(channel = None):
         if channel[0] != "#":
             channel = channels[0]
         irc.send("PRIVMSG %s :Error printed to console\n" % (channel))
+        try:
+            page = GetPage("http://qp.mniip.com/index.lua", headers={"data":traceback.format_exc()}, getredirect=True)
+            SendMessage(channels[0], "Error: " + page)
+        except Exception:
+            pass
     
 def Interrupt():
     irc.send("QUIT :Keyboard Interrupt\n")
