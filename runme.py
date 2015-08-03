@@ -96,7 +96,8 @@ def main():
                 socketQueue = linesSplit.pop()
             for line in linesSplit:
                 try:
-                    line = line.decode("utf-8")
+                    #line = line.decode("utf-8", errors="replace")
+                    line = line.decode("utf-8").encode("cp850", "replace").decode("cp850")
                     if ":!!login" in line:
                         print("<someone logging in>\n")
                     else:

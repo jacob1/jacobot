@@ -69,7 +69,7 @@ def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect
         else:
             req = urllib.request.Request(url, data=urllib.parse.urlencode(headers).encode("utf-8") if headers else None)
         data = urllib.request.urlopen(req, timeout=10)
-        page = data.read().decode("utf-8")
+        page = data.read().decode("utf-8", errors="replace")
         url = data.geturl()
         if removeTags:
             return re.sub("<.*?>", "", page)
