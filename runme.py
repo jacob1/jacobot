@@ -5,6 +5,8 @@ from time import sleep
 import os
 import atexit
 import imp
+import hashlib
+import random
 
 if not os.path.isfile("config.py"):
     import shutil
@@ -18,7 +20,7 @@ if not configured:
 from common import *
 mods = {}
 for i in os.listdir("mods"):
-    if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py":
+    if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py" and i[:-3] not in config.disabledPlugins:
         mods[i[:-3]] = imp.load_source(i[:-3], os.path.join("mods", i))
 
 def Connect():
@@ -54,11 +56,6 @@ def PrintError(channel = None):
         if channel[0] != "#":
             channel = channels[0]
         irc.send("PRIVMSG %s :Error printed to console\n" % (channel))
-        try:
-            page = GetPage("http://qp.mniip.com/index.lua", headers={"data":traceback.format_exc()}, getredirect=True)
-            SendMessage(channels[0], "Error: " + page)
-        except Exception:
-            pass
     
 def Interrupt():
     irc.send("QUIT :Keyboard Interrupt\n")

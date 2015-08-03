@@ -1,14 +1,18 @@
 server = "irc.freenode.net"
 channels = ("",)
+errorchannel = ""
 botNick = "stockbot"
 botIdent = "stockbot"
 botRealname = "TPTAPI stock helper bot"
 
 ownerHostmasks = ("",)
+adminHostmasks = ("",)
 
 botAccount = ""
 botPassword = ""
 NickServ = False
+
+disabledPlugins = ["stocks", "rpg", "groups", "tpt"]
 
 #change to True when done
 configured = False

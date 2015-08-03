@@ -7,6 +7,10 @@ def CheckOwner(hostmask):
     host = hostmask.split("!")[-1]
     return host in ownerHostmasks
 
+def CheckAdmin(hostmask):
+    host = hostmask.split("!")[-1]
+    return host in adminHostmasks or CheckOwner(hostmask)
+
 #only used for stocks.py, maybe for more later
 logins = {}
 def GetAccount(hostmask):
@@ -34,11 +38,14 @@ def RegisterMod(name):
     plugin = name
 
 commands = {}
-def command(name, minArgs = 0, needsAccount = False, owner = False):
+def command(name, minArgs = 0, needsAccount = False, owner = False, admin = False):
     def real_command(func):
         def call_func(username, hostmask, channel, text):
             if owner and not CheckOwner(hostmask):
                 SendNotice(username, "This command is owner only")
+                return
+            if admin and not CheckAdmin(hostmask):
+                SendNotice(username, "This command is admin only")
                 return
             if len(text) < minArgs:
                 SendNotice(username, "Usage: %s" % func.__doc__)
@@ -54,13 +61,17 @@ def command(name, minArgs = 0, needsAccount = False, owner = False):
     return real_command
 
 def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect=False):
-    if cookies:
-        req = urllib2.Request(url, urllib.urlencode(headers) if headers else None, {'Cookie':cookies})
-    else:
-        req = urllib2.Request(url, urllib.urlencode(headers) if headers else None)
-    data = urllib2.urlopen(req, timeout=10)
-    page = data.read()
-    url = data.geturl()
-    if removeTags:
-        return re.sub("<.*?>", "", page)
-    return url if getredirect else page
+    try:
+        if cookies:
+            req = urllib2.Request(url, urllib.urlencode(headers) if headers else None, {'Cookie':cookies})
+        else:
+            req = urllib2.Request(url, urllib.urlencode(headers) if headers else None)
+        data = urllib2.urlopen(req, timeout=10)
+        page = data.read()
+        url = data.geturl()
+        if removeTags:
+            return re.sub("<.*?>", "", page)
+        return url if getredirect else page
+    #except urllib.error.URLerror:
+    except IOError:
+        return None
