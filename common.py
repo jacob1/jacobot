@@ -1,7 +1,9 @@
-import urllib, urllib2
+import urllib.request
+import urllib.parse
+import urllib.error
 import re
 
-execfile("config.py")
+from config import *
 
 def CheckOwner(hostmask):
     host = hostmask.split("!")[-1]
@@ -63,15 +65,15 @@ def command(name, minArgs = 0, needsAccount = False, owner = False, admin = Fals
 def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect=False):
     try:
         if cookies:
-            req = urllib2.Request(url, urllib.urlencode(headers) if headers else None, {'Cookie':cookies})
+            req = urllib.request.Request(url, data=urllib.parse.urlencode(headers).encode("utf-8") if headers else None, headers={'Cookie':cookies.encode("utf-8")})
         else:
-            req = urllib2.Request(url, urllib.urlencode(headers) if headers else None)
-        data = urllib2.urlopen(req, timeout=10)
-        page = data.read()
+            req = urllib.request.Request(url, data=urllib.parse.urlencode(headers).encode("utf-8") if headers else None)
+        data = urllib.request.urlopen(req, timeout=10)
+        page = data.read().decode("utf-8")
         url = data.geturl()
         if removeTags:
             return re.sub("<.*?>", "", page)
         return url if getredirect else page
-    #except urllib.error.URLerror:
-    except IOError:
+    except urllib.error.URLError:
+    #except IOError:
         return None

@@ -1,5 +1,4 @@
-import urllib, urllib2
-import HTMLParser
+import html.parser
 import json
 import time
 import re
@@ -165,7 +164,7 @@ def ReportsList():
 
 #Prints reports on a save (reporter and report text)
 def PrintReports(channel, reportlist):
-    h = HTMLParser.HTMLParser()
+    h = html.parser.HTMLParser()
     for report in reportlist:
         reporter = report[0]
         text = h.unescape(report[1])
@@ -178,7 +177,7 @@ def PrintReports(channel, reportlist):
 
 #prints the report list (save title, save author, save ID link, report count)
 def PrintReportList(channel, reportlist):
-    h = HTMLParser.HTMLParser()
+    h = html.parser.HTMLParser()
     for report in reportlist:
         ID = report[1]
         count = int(report[0])

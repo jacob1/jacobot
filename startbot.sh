@@ -1,1 +1,1 @@
-python runme.py
+python3 runme.py

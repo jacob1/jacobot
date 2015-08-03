@@ -3,16 +3,21 @@ import select
 import traceback
 from time import sleep
 import os
+import sys
 import atexit
 import imp
 import hashlib
 import random
 
+if sys.version_info < (3, 0):
+    print('Python 3 is required to run the bot.')
+    quit()
+
 if not os.path.isfile("config.py"):
     import shutil
     shutil.copyfile("config.py.default", "config.py")
     print("config.py.default copied to config.py")
-execfile("config.py")
+from config import *
 if not configured:
     print("you have not configured the bot, open up config.py to edit settings")
     quit()
@@ -20,63 +25,78 @@ if not configured:
 from common import *
 mods = {}
 for i in os.listdir("mods"):
-    if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py" and i[:-3] not in config.disabledPlugins:
+    if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py" and i[:-3] not in disabledPlugins:
         mods[i[:-3]] = imp.load_source(i[:-3], os.path.join("mods", i))
+
+def RawSend(socket, message):
+    socket.send(message.encode('utf-8'))
 
 def Connect():
     global irc
+    print("Connecting to %s..." % (server))
     irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     irc.connect((server,6667))
     irc.setblocking(0)
-    irc.send("USER %s %s %s :%s\n" % (botIdent, botNick, botNick, botRealname))
-    irc.send("NICK %s\n" % botNick)
+    RawSend(irc, "USER %s %s %s :%s\n" % (botIdent, botNick, botNick, botRealname))
+    RawSend(irc, "NICK %s\n" % (botNick))
     if NickServ:
-        irc.send("ns identify %s %s\n" % (botAccount, botPassword))
+        RawSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
     else:
         for i in channels:
-            irc.send("JOIN %s\n" % i)
+            RawSend(irc, "JOIN %s\n" % (i))
     sleep(7)
 
 def ReadPrefs():
-    with open('logins.txt') as f:
-        for line in f:
-            if len(line.strip()):
-                cookies = line.split("|")
-                logins[cookies[0]] = {"username":cookies[1], "portfolio":{}, "cookies":cookies[2].strip()}
+    try:
+        with open('logins.txt') as f:
+            for line in f:
+                if len(line.strip()):
+                    cookies = line.split("|")
+                    logins[cookies[0]] = {"username":cookies[1], "portfolio":{}, "cookies":cookies[2].strip()}
+    except OSError:
+        pass
 
 def WritePrefs():
-    with open('logins.txt', 'w') as f:
-        for i in logins:
-            f.write("%s|%s|%s\r\n" % (i, logins[i]["username"], logins[i]["cookies"]))
+    try:
+        with open('logins.txt', 'w') as f:
+            for i in logins:
+                f.write("%s|%s|%s\r\n" % (i, logins[i]["username"], logins[i]["cookies"]))
+    except OSError:
+        pass
 atexit.register(WritePrefs)
 
 def PrintError(channel = None):
-    print "=======ERROR=======\n%s========END========\n" % (traceback.format_exc())
+    print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()))
     if channel:
         if channel[0] != "#":
             channel = channels[0]
-        irc.send("PRIVMSG %s :Error printed to console\n" % (channel))
+        RawSend(irc, "PRIVMSG %s :Error printed to console\n" % (channel))
     
 def Interrupt():
-    irc.send("QUIT :Keyboard Interrupt\n")
+    RawSend(irc, "QUIT :Keyboard Interrupt\n")
     irc.close()
     quit()
 
 def main():
+    socketQueue = b""
     while True:
         try:
-            lines = ""
+            lines = b""
             ready = select.select([irc], [], [], 1.0)
             if ready[0]:
                 lines = irc.recv(2040)
-        except KeyboardInterrupt:
-            Interrupt()
-        except: #socket.error, e:   or   socket.timeout, e:
+        except Exception: #socket.error, e:   or   socket.timeout, e:
             PrintError()
             return
         else:
-            for line in lines.splitlines():
+            lines = socketQueue + lines # add on any queue from the last recv
+            linesSplit = lines.splitlines()
+            socketQueue = b""
+            if lines and lines[-1] != ord("\n"):
+                socketQueue = linesSplit.pop()
+            for line in linesSplit:
                 try:
+                    line = line.decode("utf-8")
                     if ":!!login" in line:
                         print("<someone logging in>\n")
                     else:
@@ -86,7 +106,7 @@ def main():
                     if len(text) > 0:
                         #Reply to server pings
                         if text[0] == "PING":
-                            irc.send("PONG %s\n" % text[1])
+                            RawSend(irc, "PONG %s\n" % (text[1]))
                         elif text[0] == "ERROR":
                             irc.close()
                             return #try to reconnect
@@ -95,14 +115,20 @@ def main():
                         #Only join channel once identified
                         if text[1] == "396":
                             for i in channels:
-                                irc.send("JOIN %s\n" % i)
+                                RawSend(irc, "JOIN %s\n" % (i))
                         #Nickname already in use
                         elif text[1] == "433":
-                            irc.send("NICK %s-\n" % text[3])
+                            RawSend(irc, "NICK %s-\n" % (text[3]))
                             if NickServ:
-                                irc.send("ns identify %s %s\n" % (botAccount, botPassword))
-                                irc.send("ns ghost %s\n" % (botNick))
-                                irc.send("NICK %s\n" % (botNick))
+                                RawSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
+                                RawSend(irc, "ns ghost %s\n" % (botNick))
+                                RawSend(irc, "NICK %s\n" % (botNick))
+                        elif text[1] == "437":
+                            RawSend(irc, "NICK %s-\n" % text[3])
+                            if NickServ:
+                                RawSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
+                                RawSend(irc, "ns release %s\n" % (botNick))
+                                RawSend(irc, "NICK %s\n" % (botNick))
 
                     if len(text) > 2:
                         #Get channel to reply to
@@ -110,6 +136,8 @@ def main():
                             reply = text[2]
                             if reply == botNick:
                                 reply = text[0].split("!")[0].lstrip(":")
+                        elif text[1] == "NICK" and text[0].split("!")[0][1:] == botNick:
+                            RawSend(irc, "NICK %s\n" % (botNick))
 
                     if len(text) >= 4:
                         #Parse line in stocks.py
@@ -118,20 +146,18 @@ def main():
 
                     if len(text) >= 5:
                         if text[1] == "MODE" and text[2] == "##powder-bots" and text[3] == "+o" and text[4] == botNick:
-                            irc.send("MODE ##powder-bots -o %s\n" % (botNick))
+                            RawSend(irc, "MODE ##powder-bots -o %s\n" % (botNick))
 
                     #allow modules to do their own text parsing if needed, outside of raw commands
                     for mod in mods:
                          if hasattr(mods[mod], "Parse"):
                             mods[mod].Parse(line, text)
-                except KeyboardInterrupt:
-                    Interrupt()
                 except SystemExit:
-                    irc.send("QUIT :i'm a potato\n")
+                    RawSend(irc, "QUIT :i'm a potato\n")
                     irc.close()
                     quit()
-                except:
-                    PrintError(reply)
+                except Exception:
+                    PrintError(channels[0])
         try:
             #allow modules to have a "tick" function constantly run, for any updates they need
             for mod in mods:
@@ -139,11 +165,9 @@ def main():
                     mods[mod].AlwaysRun(channels[0])
             #TODO: maybe proper rate limiting, but this works for now
             for i in messageQueue:
-                irc.send(i)
+                RawSend(irc, i)
             messageQueue[:] = []
-        except KeyboardInterrupt:
-            Interrupt()
-        except:
+        except Exception:
             PrintError(channels[0])
 
 def Parse(text):
@@ -216,8 +240,10 @@ while True:
         main()
         sleep(20)
     except KeyboardInterrupt:
+        print("Keyboard inturrupt, bot shut down")
         break
-    except SystemExit:
-        break
-    except:
+    except Exception:
+        PrintError()
+        print("A strange error occured, reconnecting in 10 seconds")
+        sleep(10)
         pass
