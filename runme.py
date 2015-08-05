@@ -26,9 +26,12 @@ from common import *
 mods = {}
 for i in os.listdir("mods"):
     if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py" and i[:-3] not in disabledPlugins:
-        mods[i[:-3]] = imp.load_source(i[:-3], os.path.join("mods", i))
+        try:
+            mods[i[:-3]] = imp.load_source(i[:-3], os.path.join("mods", i))
+        except Exception:
+            pass
 
-def RawSend(socket, message):
+def SocketSend(socket, message):
     socket.send(message.encode('utf-8'))
 
 def Connect():
@@ -37,13 +40,13 @@ def Connect():
     irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     irc.connect((server,6667))
     irc.setblocking(0)
-    RawSend(irc, "USER %s %s %s :%s\n" % (botIdent, botNick, botNick, botRealname))
-    RawSend(irc, "NICK %s\n" % (botNick))
+    SocketSend(irc, "USER %s %s %s :%s\n" % (botIdent, botNick, botNick, botRealname))
+    SocketSend(irc, "NICK %s\n" % (botNick))
     if NickServ:
-        RawSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
+        SocketSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
     else:
         for i in channels:
-            RawSend(irc, "JOIN %s\n" % (i))
+            SocketSend(irc, "JOIN %s\n" % (i))
     sleep(7)
 
 def ReadPrefs():
@@ -70,10 +73,12 @@ def PrintError(channel = None):
     if channel:
         if channel[0] != "#":
             channel = channels[0]
-        RawSend(irc, "PRIVMSG %s :Error printed to console\n" % (channel))
+        SocketSend(irc, "PRIVMSG %s :Error printed to console\n" % (channel))
+        if errorCode:
+            exec(errorCode)
     
 def Interrupt():
-    RawSend(irc, "QUIT :Keyboard Interrupt\n")
+    SocketSend(irc, "QUIT :Keyboard Interrupt\n")
     irc.close()
     quit()
 
@@ -96,18 +101,14 @@ def main():
                 socketQueue = linesSplit.pop()
             for line in linesSplit:
                 try:
-                    #line = line.decode("utf-8", errors="replace")
-                    line = line.decode("utf-8").encode("cp850", "replace").decode("cp850")
-                    if ":!!login" in line:
-                        print("<someone logging in>\n")
-                    else:
-                        print(line+"\n")
+                    line = line.decode(encoding, errors="replace")
+                    print("<-- "+line)
                     text = line.split()
 
                     if len(text) > 0:
                         #Reply to server pings
                         if text[0] == "PING":
-                            RawSend(irc, "PONG %s\n" % (text[1]))
+                            SocketSend(irc, "PONG %s\n" % (text[1]))
                         elif text[0] == "ERROR":
                             irc.close()
                             return #try to reconnect
@@ -116,20 +117,20 @@ def main():
                         #Only join channel once identified
                         if text[1] == "396":
                             for i in channels:
-                                RawSend(irc, "JOIN %s\n" % (i))
+                                SocketSend(irc, "JOIN %s\n" % (i))
                         #Nickname already in use
                         elif text[1] == "433":
-                            RawSend(irc, "NICK %s-\n" % (text[3]))
+                            SocketSend(irc, "NICK %s-\n" % (text[3]))
                             if NickServ:
-                                RawSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
-                                RawSend(irc, "ns ghost %s\n" % (botNick))
-                                RawSend(irc, "NICK %s\n" % (botNick))
+                                SocketSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
+                                SocketSend(irc, "ns ghost %s\n" % (botNick))
+                                SocketSend(irc, "NICK %s\n" % (botNick))
                         elif text[1] == "437":
-                            RawSend(irc, "NICK %s-\n" % text[3])
+                            SocketSend(irc, "NICK %s-\n" % text[3])
                             if NickServ:
-                                RawSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
-                                RawSend(irc, "ns release %s\n" % (botNick))
-                                RawSend(irc, "NICK %s\n" % (botNick))
+                                SocketSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
+                                SocketSend(irc, "ns release %s\n" % (botNick))
+                                SocketSend(irc, "NICK %s\n" % (botNick))
 
                     if len(text) > 2:
                         #Get channel to reply to
@@ -138,7 +139,7 @@ def main():
                             if reply == botNick:
                                 reply = text[0].split("!")[0].lstrip(":")
                         elif text[1] == "NICK" and text[0].split("!")[0][1:] == botNick:
-                            RawSend(irc, "NICK %s\n" % (botNick))
+                            SocketSend(irc, "NICK %s\n" % (botNick))
 
                     if len(text) >= 4:
                         #Parse line in stocks.py
@@ -147,14 +148,14 @@ def main():
 
                     if len(text) >= 5:
                         if text[1] == "MODE" and text[2] == "##powder-bots" and text[3] == "+o" and text[4] == botNick:
-                            RawSend(irc, "MODE ##powder-bots -o %s\n" % (botNick))
+                            SocketSend(irc, "MODE ##powder-bots -o %s\n" % (botNick))
 
                     #allow modules to do their own text parsing if needed, outside of raw commands
                     for mod in mods:
                          if hasattr(mods[mod], "Parse"):
                             mods[mod].Parse(line, text)
                 except SystemExit:
-                    RawSend(irc, "QUIT :i'm a potato\n")
+                    SocketSend(irc, "QUIT :i'm a potato\n")
                     irc.close()
                     quit()
                 except Exception:
@@ -166,7 +167,7 @@ def main():
                     mods[mod].AlwaysRun(channels[0])
             #TODO: maybe proper rate limiting, but this works for now
             for i in messageQueue:
-                RawSend(irc, i)
+                SocketSend(irc, i)
             messageQueue[:] = []
         except Exception:
             PrintError(channels[0])

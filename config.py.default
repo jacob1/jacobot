@@ -1,9 +1,9 @@
 server = "irc.freenode.net"
 channels = ("",)
 errorchannel = ""
-botNick = "stockbot"
-botIdent = "stockbot"
-botRealname = "TPTAPI stock helper bot"
+botNick = "potatobot"
+botIdent = "potatobot"
+botRealname = "unnoficial jacobot clone"
 
 ownerHostmasks = ("",)
 adminHostmasks = ("",)
@@ -12,7 +12,17 @@ botAccount = ""
 botPassword = ""
 NickServ = False
 
+# Don't load certain plugins from the mods/ folder
 disabledPlugins = ["stocks", "rpg", "groups", "tpt"]
+
+# encoding used to decode lines recieved from IRC. Use the 'charmap' encoding if running from the windows console to prevent errors
+encoding = "utf-8"
+
+# A string containing python code that is run whenever an error happens
+errorCode = """with socket.socket() as sock:
+    sock.connect(("termbin.com", 9999))
+    sock.send(traceback.format_exc().encode("utf-8", "replace"))
+    SendMessage(errorchannel, "Error: " + sock.recv(1024).decode("utf-8"))"""
 
 #change to True when done
 configured = False
