@@ -47,7 +47,6 @@ def Connect():
     else:
         for i in channels:
             SocketSend(irc, "JOIN %s\n" % (i))
-    sleep(7)
 
 def ReadPrefs():
     try:
@@ -102,7 +101,7 @@ def main():
             for line in linesSplit:
                 try:
                     line = line.decode(encoding, errors="replace")
-                    print("<-- "+line)
+                    print("<-- "+line+"\n")
                     text = line.split()
 
                     if len(text) > 0:
@@ -194,11 +193,12 @@ def Parse(text):
                     return
                 commands[mod] = []
                 if mod == "stocks":
-                    logins = mods["stocks"].logins
-                    history = mods["stocks"].history
-                    watched = mods["stocks"].watched
-                    news = mods["stocks"].news
-                    specialNews = mods["stocks"].specialNews
+                    if "stocks" in mods:
+                        logins = mods["stocks"].logins
+                        history = mods["stocks"].history
+                        watched = mods["stocks"].watched
+                        news = mods["stocks"].news
+                        specialNews = mods["stocks"].specialNews
                 mods[mod] = imp.load_source(mod, os.path.join("mods", mod+".py"))
                 if mod == "stocks":
                     mods["stocks"].logins = logins

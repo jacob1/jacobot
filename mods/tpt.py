@@ -85,7 +85,7 @@ def UnbanUser(username):
     try:
         userID = int(username)
     except:
-        userID = GetUserID(username)
+        userID = int(GetUserID(username))
     if userID < 0:
 	    return
     data = {"UnbanUser":str(userID).strip("=")}
@@ -275,7 +275,7 @@ def Hide(username, hostmask, channel, text, account):
 
 @command("remove", minArgs = 1, admin = True)
 def Remove(username, hostmask, channel, text, account):
-    """(remove <post ID> [<reason>]). Removes a post in TPT. Owner only."""
+    """(remove <post ID> [<reason>]). Removes a post in TPT. Admin only."""
     HidePost(text[0], True, " ".join(text[1:]))
 
 @command("unhide", minArgs = 1, admin = True)
