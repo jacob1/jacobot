@@ -20,7 +20,6 @@ def GetAccount(hostmask):
 
 messageQueue = []
 def Send(msg):
-    print("--> %s" % msg)
     messageQueue.append(msg)
 
 def SendMessage(target, msg):

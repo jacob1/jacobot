@@ -34,9 +34,14 @@ for i in os.listdir("mods"):
 def SocketSend(socket, message):
     socket.send(message.encode('utf-8'))
 
+def Print(message):
+    if encoding != "utf-8":
+        message = message.encode("utf-8").decode(encoding)
+    print(message)
+
 def Connect():
     global irc
-    print("Connecting to %s..." % (server))
+    Print("Connecting to %s..." % (server))
     irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     irc.connect((server,6667))
     irc.setblocking(0)
@@ -68,7 +73,7 @@ def WritePrefs():
 atexit.register(WritePrefs)
 
 def PrintError(channel = None):
-    print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()))
+    Print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()))
     if channel:
         if channel[0] != "#":
             channel = channels[0]
@@ -100,8 +105,8 @@ def main():
                 socketQueue = linesSplit.pop()
             for line in linesSplit:
                 try:
-                    line = line.decode(encoding, errors="replace")
-                    print("<-- "+line+"\n")
+                    line = line.decode("utf-8", errors="replace")
+                    Print("<-- "+line+"\n")
                     text = line.split()
 
                     if len(text) > 0:
@@ -166,6 +171,7 @@ def main():
                     mods[mod].AlwaysRun(channels[0])
             #TODO: maybe proper rate limiting, but this works for now
             for i in messageQueue:
+                Print("--> %s" % i)
                 SocketSend(irc, i)
             messageQueue[:] = []
         except Exception:
@@ -242,10 +248,10 @@ while True:
         main()
         sleep(20)
     except KeyboardInterrupt:
-        print("Keyboard inturrupt, bot shut down")
+        Print("Keyboard inturrupt, bot shut down")
         break
     except Exception:
         PrintError()
-        print("A strange error occured, reconnecting in 10 seconds")
+        Print("A strange error occured, reconnecting in 10 seconds")
         sleep(10)
         pass
