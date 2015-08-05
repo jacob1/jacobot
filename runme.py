@@ -185,7 +185,7 @@ def Parse(text):
 
         #some special owner commands that aren't in modules
         if CheckOwner(text[0]):
-            if command == "!!reload":
+            if command == "%sreload" % (commandChar):
                 if len(text) <= 4:
                     SendNotice(username, "No module given")
                     return
@@ -208,26 +208,26 @@ def Parse(text):
                     mods["stocks"].specialNews = specialNews
                 SendMessage(channel, "Reloaded %s.py" % mod)
                 return
-            elif command == "!!eval":
+            elif command == "%seval" % (commandChar):
                 try:
                     ret = str(eval(" ".join(text[4:])))
                 except Exception as e:
                     ret = str(type(e))+":"+str(e)
                 SendMessage(channel, ret)
                 return
-            elif command == "!!exec":
+            elif command == "%sexec" % (commandChar):
                 try:
                     exec(" ".join(text[4:]))
                 except Exception as e:
                     SendMessage(channel, str(type(e))+":"+str(e))
                 return
-            elif command == "!!quit":
+            elif command == "%squit" % (commandChar):
                 quit()
 
         #actual commands here
         for mod in commands:
             for i in commands[mod]:
-                if command == "!!"+i[0]:
+                if command == "%s%s" % (commandChar, i[0]):
                     i[1](username, hostmask, channel, text[4:])
                     return
 

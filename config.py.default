@@ -5,12 +5,14 @@ botNick = "potatobot"
 botIdent = "potatobot"
 botRealname = "unnoficial jacobot clone"
 
-ownerHostmasks = ("",)
-adminHostmasks = ("",)
-
 botAccount = ""
 botPassword = ""
 NickServ = False
+
+ownerHostmasks = ("",)
+adminHostmasks = ("",)
+
+commandChar = "!!"
 
 # Don't load certain plugins from the mods/ folder
 disabledPlugins = ["stocks", "rpg", "groups", "tpt"]
