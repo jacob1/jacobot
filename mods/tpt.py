@@ -395,14 +395,24 @@ def Stolen(username, hostmask, channel, text, account):
 
 @command("stolen", minArgs=2, admin = True)
 def Stolen(username, hostmask, channel, text, account):
-    """(stolen <stolenID> <originalID>). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Admin only."""
+    """(stolen <stolenID> <originalID> [long/<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
     stolenID = text[0]
     saveID = text[1]
+    if int(stolenID) <= int(saveID):
+        SendMessage(channel, "Error: stolenID can't be less than originalID, use !!readreport instead")
+        return
     #DoUnpublish(stolenID)
     PromotionLevel(stolenID, -2)
     info = GetSaveInfo(saveID)
     if info:
-        DoComment(stolenID, "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"]))
+        message = "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
+        if len(text) > 2:
+            if text[2] == "long":
+                message += " Do not publish copies of other player's saves, instead you should \"Favorite\" the save or save it locally to your computer."
+            else:
+                message += " " + " ".join(text[2:])
+
+        DoComment(stolenID, message)
         SendMessage(channel, "Done.")
     else:
         SendMessage(channel, "Error getting original save info.")
