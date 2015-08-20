@@ -36,12 +36,14 @@ def AlwaysRun(channel):
     if now.minute == 30 and now.second ==  0:
         reportlist = ReportsList()
         if reportlist == None:
-            SendMessage("#powder-info", "Error fetching reports")
-            sleep(1)
-            return
+            sleep(5)
+            reportlist = ReportsList()
+            if reportlist == None:
+                SendMessage("#powder-info", "Error fetching reports")
+                return
         reportlistunseen = [report for report in reportlist if seenReports.get(report[1]) != int(report[0])]
         for report in reportlistunseen:
-            if seenReports.get(report[1]) and report[0] > seenReports.get(report[1]):
+            if seenReports.get(report[1]) and int(report[0]) > seenReports.get(report[1]):
                 report = (int(report[0]) - seenReports.get(report[1]), report[1], report[2])
         if len(reportlist):
             SendMessage("#powder-info", u"There are \u0002%s unread reports\u0002: " % (len(reportlist)) + ", ".join(["http://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
@@ -75,7 +77,7 @@ def BanUser(username, time, timeunits, reason):
     try:
         userID = int(username)
     except:
-        userID = GetUserID(username)
+        userID = int(GetUserID(username))
     if userID < 0 or userID == 1 or userID == 38642:
         return
     data = {"BanUser":str(userID).strip("="), "BanReason":reason, "BanTime":time, "BanTimeSpan":timeunits}

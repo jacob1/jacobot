@@ -170,9 +170,14 @@ def main():
                 if hasattr(mods[mod], "AlwaysRun"):
                     mods[mod].AlwaysRun(channels[0])
             #TODO: maybe proper rate limiting, but this works for now
+            temp = False
+            if len(messageQueue) > 7:
+                temp = True
             for i in messageQueue:
                 Print("--> %s" % i)
                 SocketSend(irc, i)
+                if temp:
+                    sleep(1)
             messageQueue[:] = []
         except Exception:
             PrintError(channels[0])
