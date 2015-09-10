@@ -36,7 +36,7 @@ def SocketSend(socket, message):
 
 def Print(message):
     if encoding != "utf-8":
-        message = message.encode("utf-8").decode(encoding)
+        message = message.encode(encoding, errors="replace").decode(encoding)
     print(message)
 
 def Connect():
