@@ -7,7 +7,7 @@ from datetime import datetime
 from time import sleep
 RegisterMod(__name__)
 
-ipbans = ("31.48.60.79", "109.146.200.33", "5.80.87.176")
+ipbans = ("31.48.60.79", "109.146.200.33", "5.80.87.176", "75.167.145.14")
 def Parse(raw, text):
     if len(text) >= 8 and text[0] == ":StewieGriffin!~Stewie@Powder/Bot/StewieGriffin" and text[1] == "PRIVMSG" and text[2] == "#powder-info" and text[3] == ":New" and text[4] == "registration:":
         if text[7].strip("[]") in ipbans:
@@ -43,8 +43,8 @@ def AlwaysRun(channel):
                 return
         reportlistunseen = [report for report in reportlist if seenReports.get(report[1]) != int(report[0])]
         for report in reportlistunseen:
-            if seenReports.get(report[1]) and int(report[0]) > seenReports.get(report[1]):
-                report = (int(report[0]) - seenReports.get(report[1]), report[1], report[2])
+            if seenReports.get(report[1]) and int(report[0]) > int(seenReports.get(report[1])):
+                report = (int(report[0]) - int(seenReports.get(report[1])), report[1], report[2])
         if len(reportlist):
             SendMessage("#powder-info", u"There are \u0002%s unread reports\u0002: " % (len(reportlist)) + ", ".join(["http://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
             PrintReportList("#powder-info", reportlistunseen)
@@ -115,6 +115,8 @@ def FormatDate(unixtime):
     return strftime
 
 def FormatSaveInfo(info):
+    if info["Status"] == 0:
+        return info["Error"]
     elementCount = {}
     for element in info["ElementCount"]:
         elementCount[element["Name"]] = element["Count"]
@@ -312,9 +314,12 @@ def IpMap(username, hostmask, channel, text, account):
 def SaveInfo(username, hostmask, channel, text, account):
     """(saveinfo <saveid>). Prints out lots of useful information about TPT saves. Admin only."""
     info = GetSaveInfo(text[0])
-    formatted = FormatSaveInfo(info)
-    for line in formatted.split("\n"):
-        SendMessage(channel, line)
+    if info:
+        formatted = FormatSaveInfo(info)
+        for line in formatted.split("\n"):
+            SendMessage(channel, line)
+    else:
+        SendMessage(channel, "Save info not found")
 
 @command("getreports", minArgs=1, admin = True)
 def GetReports(username, hostmask, channel, text, account):
@@ -397,22 +402,28 @@ def Stolen(username, hostmask, channel, text, account):
 
 @command("stolen", minArgs=2, admin = True)
 def Stolen(username, hostmask, channel, text, account):
-    """(stolen <stolenID> <originalID> [long/<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
+    """(stolen <stolenID> <originalID> [copied/long/<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
     stolenID = text[0]
     saveID = text[1]
+    arg = text[2] if len(text) > 2 else ""
     if int(stolenID) <= int(saveID):
         SendMessage(channel, "Error: stolenID can't be less than originalID, use !!readreport instead")
         return
-    #DoUnpublish(stolenID)
-    PromotionLevel(stolenID, -2)
+    if arg == "copied":
+        DoUnpublish(stolenID)
+    else:
+        PromotionLevel(stolenID, -2)
     info = GetSaveInfo(saveID)
     if info:
-        message = "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
-        if len(text) > 2:
-            if text[2] == "long":
-                message += " Do not publish copies of other player's saves, instead you should \"Favorite\" the save or save it locally to your computer."
-            else:
-                message += " " + " ".join(text[2:])
+        if arg == "copied":
+            message = "Save unpublished: copied without credit from id:%s (save \"%s\" by %s). Please give credit to the original owner when modifying saves." % (saveID, info["Name"], info["Username"])
+        else:
+            message = "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
+            if len(text) > 2:
+                if text[2] == "long":
+                    message += " Do not publish copies of other player's saves, instead you should \"Favorite\" the save or save it locally to your computer."
+                else:
+                    message += " " + " ".join(text[2:])
 
         DoComment(stolenID, message)
         SendMessage(channel, "Done.")
