@@ -7,16 +7,17 @@ from datetime import datetime
 from time import sleep
 RegisterMod(__name__)
 
-ipbans = ("31.48.60.79", "109.146.200.33", "5.80.87.176", "75.167.145.14")
+ipbans = ("109.155.17.85",)
 def Parse(raw, text):
     if len(text) >= 8 and text[0] == ":StewieGriffin!~Stewie@Powder/Bot/StewieGriffin" and text[1] == "PRIVMSG" and text[2] == "#powder-info" and text[3] == ":New" and text[4] == "registration:":
         if text[7].strip("[]") in ipbans:
-            BanUser(text[5][:-1], "1", "p", "Automatic ip ban")
+            BanUser(text[5][:-1], "1", "p", "Ban evasion")
     match = re.match("^:StewieGriffinSub!(Stewie|jacksonmj3)@2a01:7e00::f03c:91ff:fedf:890f PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), http://tpt.io/~([0-9]+)$", raw)
     if match:
         saveID = match.group(3)
         info = GetSaveInfo(saveID)
         if info:
+            sleep(1)
             elementCount = {}
             for element in info["ElementCount"]:
                 elementCount[element["Name"]] = int(element["Count"])
@@ -68,9 +69,11 @@ def GetTPTSessionInfo(line):
         return f.readlines()[line].strip()
 
 def GetUserID(username):
-	page = GetPage("http://powdertoy.co.uk/User.json?Name={}".format(username))
-	thing = page.find("\"ID\":")
-	return page[thing+5:page.find(",", thing)]
+    page = GetPage("http://powdertoy.co.uk/User.json?Name={}".format(username))
+    if not page:
+        return -1
+    thing = page.find("\"ID\":")
+    return page[thing+5:page.find(",", thing)]
 
 #Ban / Unban Functions
 def BanUser(username, time, timeunits, reason):
@@ -79,9 +82,11 @@ def BanUser(username, time, timeunits, reason):
     except:
         userID = int(GetUserID(username))
     if userID < 0 or userID == 1 or userID == 38642:
-        return
+        return False
     data = {"BanUser":str(userID).strip("="), "BanReason":reason, "BanTime":time, "BanTimeSpan":timeunits}
-    GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data)
+    if not GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data):
+        return False
+    return True
 
 def UnbanUser(username):
     try:
@@ -89,9 +94,11 @@ def UnbanUser(username):
     except:
         userID = int(GetUserID(username))
     if userID < 0:
-	    return
+	    return False
     data = {"UnbanUser":str(userID).strip("=")}
-    GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data)
+    if not GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data):
+        return True
+    return True
 
 #Functions to get info from TPT
 def GetPostInfo(postID):
@@ -146,7 +153,8 @@ def UnlockThread(threadID):
 
 def PromotionLevel(saveID, level):
     if level >= -2 and level <= 2:
-        GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"PromoState":str(level)})
+        if not GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"PromoState":str(level)}):
+            return False
         return True
     return False
 
@@ -245,27 +253,35 @@ def GetLinkedAccounts(account):
     return " ".join(output)
 
 def DoComment(saveID, message, jacob1 = False):
-    GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s" % (saveID), GetTPTSessionInfo(0) if jacob1 else GetTPTSessionInfo(3), {"Comment":message})
+    if not GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s" % (saveID), GetTPTSessionInfo(0) if jacob1 else GetTPTSessionInfo(3), {"Comment":message}):
+        return False
+    return True
 
 def DoUnpublish(saveID):
-    GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"ActionUnpublish":"&nbsp;"})
+    if not GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"ActionUnpublish":"&nbsp;"}):
+        return False
+    return True
 
 def DoPublish(saveID):
-    GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"ActionPublish":"&nbsp;"})
+    if not GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"ActionPublish":"&nbsp;"}):
+        return False
+    return True
 
 @command("ban", minArgs = 4, owner = True)
 def Ban(username, hostmask, channel, text, account):
     """(ban <user ID> <ban time> <ban time units> <reason>). bans someone in TPT. Owner only. Add = to ban usernames that look like IDs"""
     if username != "jacob1":
         SendNotice(username, "Error, only jacob1 should be able to use this command")
-    BanUser(text[0], text[1], text[2], " ".join(text[3:]))
+    if not BanUser(text[0], text[1], text[2], " ".join(text[3:])):
+        SendMessage(channel, "An error occured while trying to ban user.")
 
 @command("unban", minArgs = 1, owner = True)
 def Unban(username, hostmask, channel, text, account):
     """(unban <user ID>). unbans someone in TPT. Owner only."""
     if username != "jacob1":
         SendNotice(username, "Error, only jacob1 should be able to use this command")
-    UnbanUser(text[0])
+    if not UnbanUser(text[0]):
+        SendMessage(channel, "An error occured while trying to unban user.")
 
 @command("post", minArgs = 1, admin = True)
 def Post(username, hostmask, channel, text, account):
@@ -409,10 +425,14 @@ def Stolen(username, hostmask, channel, text, account):
     if int(stolenID) <= int(saveID):
         SendMessage(channel, "Error: stolenID can't be less than originalID, use !!readreport instead")
         return
+    ret = False
     if arg == "copied":
-        DoUnpublish(stolenID)
+        ret = DoUnpublish(stolenID)
     else:
-        PromotionLevel(stolenID, -2)
+        ret = PromotionLevel(stolenID, -2)
+    if not ret:
+        SendMessage(channel, "Error unpublishing save.")
+        return
     info = GetSaveInfo(saveID)
     if info:
         if arg == "copied":
@@ -425,7 +445,9 @@ def Stolen(username, hostmask, channel, text, account):
                 else:
                     message += " " + " ".join(text[2:])
 
-        DoComment(stolenID, message)
-        SendMessage(channel, "Done.")
+        if DoComment(stolenID, message):
+            SendMessage(channel, "Done.")
+        else:
+            SendMessage(channel, "Error commenting.")
     else:
         SendMessage(channel, "Error getting original save info.")

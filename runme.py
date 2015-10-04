@@ -76,10 +76,13 @@ def PrintError(channel = None):
     Print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()))
     if channel:
         if channel[0] != "#":
-            channel = channels[0]
+            channel = errorchannel
         SocketSend(irc, "PRIVMSG %s :Error printed to console\n" % (channel))
         if errorCode:
-            exec(errorCode)
+            try:
+                exec(errorCode)
+            except Exception:
+                SocketSend(irc, "PRIVMSG %s :We heard you like errors, so we put an error in your error handler so you can error while you catch errors\n" % (channel))
     
 def Interrupt():
     SocketSend(irc, "QUIT :Keyboard Interrupt\n")
@@ -163,7 +166,7 @@ def main():
                     irc.close()
                     quit()
                 except Exception:
-                    PrintError(channels[0])
+                    PrintError(errorchannel or channels[0])
         try:
             #allow modules to have a "tick" function constantly run, for any updates they need
             for mod in mods:
@@ -180,7 +183,7 @@ def main():
                     sleep(1)
             messageQueue[:] = []
         except Exception:
-            PrintError(channels[0])
+            PrintError(errorchannel or channels[0])
 
 def Parse(text):
     if text[1] == "PRIVMSG":
@@ -221,7 +224,8 @@ def Parse(text):
                 return
             elif command == "%seval" % (commandChar):
                 try:
-                    ret = str(eval(" ".join(text[4:])))
+                    command = " ".join(text[4:]).replace("\\n", "\n").replace("\\t", "\t")
+                    ret = str(eval(command))
                 except Exception as e:
                     ret = str(type(e))+":"+str(e)
                 SendMessage(channel, ret)
