@@ -7,11 +7,22 @@ from datetime import datetime
 from time import sleep
 RegisterMod(__name__)
 
-ipbans = ("109.155.17.85",)
+ipbans = {"109.155.17.85"}
 def Parse(raw, text):
-    if len(text) >= 8 and text[0] == ":StewieGriffin!~Stewie@Powder/Bot/StewieGriffin" and text[1] == "PRIVMSG" and text[2] == "#powder-info" and text[3] == ":New" and text[4] == "registration:":
-        if text[7].strip("[]") in ipbans:
-            BanUser(text[5][:-1], "1", "p", "Ban evasion")
+    match = re.match("^StewieGriffin!~Stewie@Powder/Bot/StewieGriffin PRIVMSG #powder-info :New registration: (\w+)\. http://tpt\.io/@(\w+) \[([0-9.]+)\] $", raw)
+    if match:
+        #SendMessage("#powder-info", "test: %s %s %s" % (match.group(1), match.group(2), match.group(3)))
+        ip = match.group(3)
+        if ip in ipbans:
+            #BanUser(match.group(1), "1", "p", "Automatic ban: this IP address has been blacklisted")
+            SendMessage("#powder-info", "Automatic ban: this IP address has been blacklisted (FAKE)")
+        else:
+            torfile = open("torlist.txt")
+            torips = torfile.readlines()
+            torfile.close()
+            torips = map(lambda ip: ip.strip(), torips)
+            if ip in torips:
+                SendMessage("#powder-info", "Warning: This account was registered using TOR")
     match = re.match("^:StewieGriffinSub!(Stewie|jacksonmj3)@2a01:7e00::f03c:91ff:fedf:890f PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), http://tpt.io/~([0-9]+)$", raw)
     if match:
         saveID = match.group(3)
@@ -37,11 +48,8 @@ def AlwaysRun(channel):
     if now.minute == 30 and now.second ==  0:
         reportlist = ReportsList()
         if reportlist == None:
-            sleep(5)
-            reportlist = ReportsList()
-            if reportlist == None:
-                SendMessage("#powder-info", "Error fetching reports")
-                return
+            SendMessage("#powder-info", "Error fetching reports")
+            return
         reportlistunseen = [report for report in reportlist if seenReports.get(report[1]) != int(report[0])]
         for report in reportlistunseen:
             if seenReports.get(report[1]) and int(report[0]) > int(seenReports.get(report[1])):
@@ -416,38 +424,96 @@ def Stolen(username, hostmask, channel, text, account):
     DoComment(saveID, " ".join(text[1:]))
     SendMessage(channel, "Done.")
 
-@command("stolen", minArgs=2, admin = True)
-def Stolen(username, hostmask, channel, text, account):
-    """(stolen <stolenID> <originalID> [copied/long/<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
+@command("copied", minArgs=2, admin = True)
+def Copied(username, hostmask, channel, text, account):
+    """(copied <copiedID> <originalID> [long/<reason>]). Unpublishes a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end. Admin only."""
     stolenID = text[0]
     saveID = text[1]
-    arg = text[2] if len(text) > 2 else ""
-    if int(stolenID) <= int(saveID):
-        SendMessage(channel, "Error: stolenID can't be less than originalID, use !!readreport instead")
+    try:
+        if int(stolenID) <= int(saveID):
+            SendMessage(channel, "Error: stolenID can't be less than originalID.")
+            return
+    except ValueError:
+        SendMessage(channel, "Error: saveIDs must be integers")
         return
-    ret = False
-    if arg == "copied":
-        ret = DoUnpublish(stolenID)
-    else:
-        ret = PromotionLevel(stolenID, -2)
-    if not ret:
+    if not DoUnpublish(stolenID):
         SendMessage(channel, "Error unpublishing save.")
         return
     info = GetSaveInfo(saveID)
     if info:
-        if arg == "copied":
-            message = "Save unpublished: copied without credit from id:%s (save \"%s\" by %s). Please give credit to the original owner when modifying saves." % (saveID, info["Name"], info["Username"])
+        message = "Save unpublished: copied without credit from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
+        if len(text) > 2 and text[2] != "long":
+            message = "%s %s" % (message, " ".join(text[2:]))
         else:
-            message = "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
-            if len(text) > 2:
-                if text[2] == "long":
-                    message += " Do not publish copies of other player's saves, instead you should \"Favorite\" the save or save it locally to your computer."
-                else:
-                    message += " " + " ".join(text[2:])
-
+            message = message +" Please give credit to the original owner when modifying saves."
+            if len(text) > 2 and text[2] == "long":
+                message = message + "Alternatively, you can \"Favorite\" the save or save it locally to your computer."
         if DoComment(stolenID, message):
             SendMessage(channel, "Done.")
         else:
             SendMessage(channel, "Error commenting.")
     else:
         SendMessage(channel, "Error getting original save info.")
+
+@command("stolen", minArgs=2, admin = True)
+def Stolen(username, hostmask, channel, text, account):
+    """(stolen <stolenID> <originalID> [long/<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
+    stolenID = text[0]
+    saveID = text[1]
+    try:
+        if int(stolenID) <= int(saveID):
+            SendMessage(channel, "Error: stolenID can't be less than originalID.")
+            return
+    except ValueError:
+        SendMessage(channel, "Error: saveIDs must be integers")
+        return
+    if not PromotionLevel(stolenID, -2):
+        SendMessage(channel, "Error unpublishing save.")
+        return
+    info = GetSaveInfo(saveID)
+    if info:
+        message = "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
+        if len(text) > 2:
+            if text[2] == "long":
+                message += " Do not publish copies of other player's saves, instead you should \"Favorite\" the save or save it locally to your computer."
+            else:
+                message += " " + " ".join(text[2:])
+        if DoComment(stolenID, message):
+            SendMessage(channel, "Done.")
+        else:
+            SendMessage(channel, "Error commenting.")
+    else:
+        SendMessage(channel, "Error getting original save info.")
+
+@command("updatetor", admin = True)
+def UpdateTor(username, hostmask, channel, text, account):
+    """(no args). Update the list of TOR ip addresses. Admin only."""
+    torlist = GetPage("https://www.dan.me.uk/torlist/")
+    if not torlist:
+        SendMessage(channel, "Error fetching tor list")
+        return
+    torfile = open("torlist.txt", "w")
+    torfile.write(torlist)
+    torfile.close()
+    SendMessage(channel, "Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
+
+@command("ipban", minArgs = 1, owner = True)
+def IPban(username, hostmask, channel, text, account):
+    """(ipban add <ip>|remove <ip>|list). Modifies the IP bans list. Owner only."""
+    if text[0].lower() == "list":
+        if not ipbans:
+            SendMessage(channel, "Nobody is currently IP banned")
+        else:
+            SendMessage(channel, "List of currently banned IPs: " + ", ".join(ipbans))
+    elif len(text) > 1:
+        action = text[0].lower()
+        if action == "remove":
+            ipbans.discard(text[1])
+            SendMessage(channel, "Removed %s from the IP ban list" % text[1])
+        elif action == "add":
+            ipbans.add(text[1])
+            SendMessage(channel, "Added %s to the IP ban list" % text[1])
+        else:
+            SendMessage(channel, "Unknown action")
+    else:
+        SendMessage(channel, "Unknown action")

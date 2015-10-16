@@ -17,7 +17,8 @@ commandChar = "!!"
 # Don't load certain plugins from the mods/ folder
 disabledPlugins = ["stocks", "rpg", "groups", "tpt"]
 
-# encoding used to decode lines recieved from IRC. Use the 'cp1252' encoding if running from the windows console to prevent errors
+# encoding used to decode lines recieved from IRC.
+# if using the windows console, run the 'chcp' command to figure out which codepage to use, probably cp437 or cp1252
 encoding = "utf-8"
 
 # A string containing python code that is run whenever an error happens

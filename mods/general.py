@@ -56,18 +56,28 @@ def PartCmd(username, hostmask, channel, text, account):
     elif text[1] == "403":
         SendMessage(channels[2], "No such channel: "+text[3])"""
 
-@command("check", minArgs = 1)
+"""@command("check", minArgs = 1)
 def PartCmd(username, hostmask, channel, text, account):
-    """secret command."""
+    ""secret command.""
     for i in text:
-        Send("MODE %s\n" % i)
+        Send("MODE %s\n" % i)"""
 
-@command("vigenere", minArgs = 2)
+@command("msg", minArgs = 2, owner = True)
+def MsgCmd(username, hostmask, channel, text, account):
+    """(msg <channel> <message>). Sends a message to a channel."""
+    SendMessage(text[0], " ".join(text[1:]))
+
+@command("raw", minArgs = 1, owner = True)
+def MsgCmd(username, hostmask, channel, text, account):
+    """(raw <message>). Sends a raw IRC message."""
+    Send(" ".join(text) + "\n")
+
+"""@command("vigenere", minArgs = 2)
 def Viginerecmd(username, hostmask, channel, text, account):
-    """(<string> <listofkeys>...). moo"""
+    ""(<string> <listofkeys>...). moo""
     for i in text[1:]:
         (enc, dec) = Viginere(text[0], i)
-        SendMessage(channel, "Encrypted: %s, Decrypted: %s" % (enc, dec))
+        SendMessage(channel, "Encrypted: %s, Decrypted: %s" % (enc, dec))"""
 
 """@command("vigenere2", minArgs = 2)
 def Viginere2cmd(username, hostmask, channel, text, account):
