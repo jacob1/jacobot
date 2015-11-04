@@ -37,7 +37,12 @@ def SocketSend(socket, message):
 def Print(message):
     if encoding != "utf-8":
         message = message.encode(encoding, errors="replace").decode(encoding)
-    print(message)
+    try:
+        print(message)
+    except UnicodeEncodeError as e:
+        print("Error printing message")
+        print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()))
+        #raise e
 
 def Connect():
     global irc
@@ -252,15 +257,21 @@ except:
     pass
 ReadPrefs()
 while True:
+    reconnectAttempts = 0
     try:
         Connect()
         main()
+        reconnectAttempts = 0
         sleep(20)
     except KeyboardInterrupt:
         Print("Keyboard inturrupt, bot shut down")
         break
     except Exception:
         PrintError()
+        reconnectAttempts = reconnectAttempts + 1
+        if reconnectAttempts > 5:
+            Print("Too many failed reconnects, quitting")
+            break
         Print("A strange error occured, reconnecting in 10 seconds")
         sleep(10)
         pass

@@ -23,7 +23,7 @@ def Parse(raw, text):
             torips = map(lambda ip: ip.strip(), torips)
             if ip in torips:
                 SendMessage("#powder-info", "Warning: This account was registered using TOR")
-    match = re.match("^:StewieGriffinSub!(Stewie|jacksonmj3)@2a01:7e00::f03c:91ff:fedf:890f PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), http://tpt.io/~([0-9]+)$", raw)
+    match = re.match("^:StewieGriffinSub!(Stewie|jacksonmj3)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), http://tpt.io/~([0-9]+)$", raw)
     if match:
         saveID = match.group(3)
         info = GetSaveInfo(saveID)
