@@ -7,15 +7,15 @@ from datetime import datetime
 from time import sleep
 RegisterMod(__name__)
 
-ipbans = {"109.155.17.85"}
+ipbans = {"109.155.17.85", "68.228.72.192", "68.4.137.120", "192.208.242.42"}
 def Parse(raw, text):
-    match = re.match("^StewieGriffin!~Stewie@Powder/Bot/StewieGriffin PRIVMSG #powder-info :New registration: (\w+)\. http://tpt\.io/@(\w+) \[([0-9.]+)\] $", raw)
+    match = re.match("^:StewieGriffin!~Stewie@Powder\/Bot\/StewieGriffin PRIVMSG #powder-info :New registration: ([\w_-]+)\. http:\/\/tpt\.io/@([\w\_-]+) \[([0-9.]+)\] $", raw)
     if match:
         #SendMessage("#powder-info", "test: %s %s %s" % (match.group(1), match.group(2), match.group(3)))
         ip = match.group(3)
         if ip in ipbans:
-            #BanUser(match.group(1), "1", "p", "Automatic ban: this IP address has been blacklisted")
-            SendMessage("#powder-info", "Automatic ban: this IP address has been blacklisted (FAKE)")
+            BanUser(match.group(1), "1", "p", "Automatic ban: this IP address has been blacklisted")
+            SendMessage("#powder-info", "Automatic ban: this IP address has been blacklisted")
         else:
             torfile = open("torlist.txt")
             torips = torfile.readlines()
@@ -497,7 +497,7 @@ def UpdateTor(username, hostmask, channel, text, account):
     torfile.close()
     SendMessage(channel, "Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
 
-@command("ipban", minArgs = 1, owner = True)
+@command("ipban", minArgs = 1, admin = True)
 def IPban(username, hostmask, channel, text, account):
     """(ipban add <ip>|remove <ip>|list). Modifies the IP bans list. Owner only."""
     if text[0].lower() == "list":
