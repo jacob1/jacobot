@@ -1,7 +1,7 @@
 import socket
 import select
 import traceback
-from time import sleep
+from time import sleep, time
 import os
 import sys
 import atexit
@@ -88,6 +88,7 @@ def PrintError(channel = None):
                 exec(errorCode)
             except Exception:
                 SocketSend(irc, "PRIVMSG %s :We heard you like errors, so we put an error in your error handler so you can error while you catch errors\n" % (channel))
+                Print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()))
     
 def Interrupt():
     SocketSend(irc, "QUIT :Keyboard Interrupt\n")
@@ -96,6 +97,7 @@ def Interrupt():
 
 def main():
     socketQueue = b""
+    nextSend = 0
     while True:
         try:
             lines = b""
@@ -177,8 +179,15 @@ def main():
             for mod in mods:
                 if hasattr(mods[mod], "AlwaysRun"):
                     mods[mod].AlwaysRun(channels[0])
+
+            if messageQueue and time() > nextSend:
+                Print("--> %s" % messageQueue[0])
+                SocketSend(irc, messageQueue[0])
+                messageQueue.pop(0)
+                if len(messageQueue) > 3:
+                    nextSend = time()+.7
             #TODO: maybe proper rate limiting, but this works for now
-            temp = False
+            """temp = False
             if len(messageQueue) > 7:
                 temp = True
             for i in messageQueue:
@@ -186,7 +195,7 @@ def main():
                 SocketSend(irc, i)
                 if temp:
                     sleep(1)
-            messageQueue[:] = []
+            messageQueue[:] = []"""
         except Exception:
             PrintError(errorchannel or channels[0])
 
@@ -233,7 +242,9 @@ def Parse(text):
                     ret = str(eval(command))
                 except Exception as e:
                     ret = str(type(e))+":"+str(e)
-                SendMessage(channel, ret)
+                retlines = ret.splitlines()[:4]
+                for line in retlines:
+                    SendMessage(channel, line)
                 return
             elif command == "%sexec" % (commandChar):
                 try:
