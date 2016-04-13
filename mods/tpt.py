@@ -7,9 +7,9 @@ from datetime import datetime
 from time import sleep
 RegisterMod(__name__)
 
-ipbans = {"109.155.17.85", "68.228.72.192", "68.4.137.120", "192.208.242.42"}
+ipbans = {}
 def Parse(raw, text):
-    match = re.match("^:StewieGriffin!~Stewie@Powder\/Bot\/StewieGriffin PRIVMSG #powder-info :New registration: ([\w_-]+)\. http:\/\/tpt\.io/@([\w\_-]+) \[([0-9.]+)\] $", raw)
+    match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-info :New registration: ([\w_-]+)\. https?:\/\/tpt\.io\/@([\w\_-]+) \[([0-9.]+)\] ?$", raw)
     if match:
         #SendMessage("#powder-info", "test: %s %s %s" % (match.group(1), match.group(2), match.group(3)))
         ip = match.group(3)
@@ -23,9 +23,9 @@ def Parse(raw, text):
             torips = map(lambda ip: ip.strip(), torips)
             if ip in torips:
                 SendMessage("#powder-info", "Warning: This account was registered using TOR")
-    match = re.match("^:StewieGriffinSub!(Stewie|jacksonmj3)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), http://tpt.io/~([0-9]+)$", raw)
+    """match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), https?:\/\/tpt.io\/~([0-9]+)$", raw)
     if match:
-        saveID = match.group(3)
+        saveID = match.group(2)
         info = GetSaveInfo(saveID)
         if info:
             sleep(1)
@@ -36,10 +36,10 @@ def Parse(raw, text):
                 LCRYpercent = float(elementCount["LCRY"]) / (sum(elementCount.values()))
                 if LCRYpercent > .9:
                     #SendMessage("jacob1", "demoting save ID %s, %s" % (saveID, LCRYpercent))
-                    if not PromotionLevel(match.group(3), -1):
-                        SendMessage("+#powder-saves", "Error demoting save ID %s" % (match.group(3)))
+                    if not PromotionLevel(saveID, -1):
+                        SendMessage("+#powder-saves", "Error demoting save ID %s" % (saveID))
                     else:
-                        SendMessage("+#powder-saves", "Demoted save ID %s" % (match.group(3)))
+                        SendMessage("+#powder-saves", "Demoted save ID %s" % (saveID))"""
 
 seenReports = {}
 def AlwaysRun(channel):
@@ -102,7 +102,7 @@ def UnbanUser(username):
     except:
         userID = int(GetUserID(username))
     if userID < 0:
-	    return False
+        return False
     data = {"UnbanUser":str(userID).strip("=")}
     if not GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data):
         return True
@@ -130,7 +130,7 @@ def FormatDate(unixtime):
     return strftime
 
 def FormatSaveInfo(info):
-    if info["Status"] == 0:
+    if "Status" in info and info["Status"] == 0:
         return info["Error"]
     elementCount = {}
     for element in info["ElementCount"]:
@@ -188,10 +188,10 @@ def PrintReports(channel, reportlist):
     for report in reportlist:
         reporter = report[0]
         text = h.unescape(report[1])
-        for match in re.findall("((~|ID:?|id:?)? ?([0-9]+))", text):
-            if len(match[0]) > 3:
-                text = text.replace(match[0], "http://tpt.io/~"+match[2])
-        SendMessage(channel, "\00314%s\003: %s" % (reporter, text))
+        def replace(match):
+            return " http://tpt.io/~" + match.group(1)
+        text = re.sub(" ?(?:(?:~|ID:?|id:?|save | )([0-9]{4,}))", replace, text)
+        SendMessage(channel, "\00314%s\003: %s" % (reporter, text.strip()))
     if not reportlist:
         SendMessage(channel, "No reports on that save")
 
@@ -399,9 +399,19 @@ def Reports(username, hostmask, channel, text, account):
 
 @command("comment", minArgs=2, owner = True)
 def Comment(username, hostmask, channel, text, account):
-    """(comment <saveID> <comment>). Comments on a save as jacob1. Owner only."""
-    DoComment(text[0], " ".join(text[1:]), True)
-    SendMessage(channel, "Done.")
+    """(comment <saveID> <comment>). Comments on a save as jacobot. Admin only."""
+    if DoComment(text[0], " ".join(text[1:]), False):
+        SendMessage(channel, "Done.")
+    else:
+        SendMessage(channel, "Error, could not comment.")
+
+@command("commentj1", minArgs=2, owner = True)
+def Comment(username, hostmask, channel, text, account):
+    """(commentj1 <saveID> <comment>). Comments on a save as jacob1. Owner only."""
+    if DoComment(text[0], " ".join(text[1:]), True):
+        SendMessage(channel, "Done.")
+    else:
+        SendMessage(channel, "Error, could not comment.")
 
 @command("unpublish", minArgs=1, admin = True)
 def Unpublish(username, hostmask, channel, text, account):
@@ -420,9 +430,16 @@ def Stolen(username, hostmask, channel, text, account):
     """(readreport <saveID> <comment>). Disables a save and comments with a message as jacobot. Admin only."""
     saveID = text[0]
     #DoUnpublish(saveID)
-    PromotionLevel(saveID, -2)
-    DoComment(saveID, " ".join(text[1:]))
-    SendMessage(channel, "Done.")
+    ret = PromotionLevel(saveID, -2)
+    if ret:
+        print("test", " ".join(text[1:]))
+        ret = DoComment(saveID, " ".join(text[1:]))
+        if ret:
+            SendMessage(channel, "Done.")
+        else:
+            SendMessage(channel, "Error, could not comment.")
+    else:
+        SendMessage(channel, "Error, could not disable save.")
 
 @command("copied", minArgs=2, admin = True)
 def Copied(username, hostmask, channel, text, account):
