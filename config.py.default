@@ -1,4 +1,6 @@
-server = "irc.freenode.net"
+server = "chat.freenode.net"
+port = 6697
+useSSL = True
 channels = ("",)
 errorchannel = ""
 botNick = "potatobot"

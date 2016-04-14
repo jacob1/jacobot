@@ -1,5 +1,6 @@
 import socket
 import select
+import ssl
 import traceback
 from time import sleep, time
 import os
@@ -22,14 +23,19 @@ if not configured:
     print("you have not configured the bot, open up config.py to edit settings")
     quit()
 
+print("Loading modules")
 from common import *
 mods = {}
 for i in os.listdir("mods"):
     if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py" and i[:-3] not in disabledPlugins:
         try:
+            print("Loading {} ...".format(i))
             mods[i[:-3]] = imp.load_source(i[:-3], os.path.join("mods", i))
         except Exception:
+            print("Error loading {}".format(i))
+            print(traceback.format_exc())
             pass
+print("Done loading modules")
 
 def SocketSend(socket, message):
     socket.send(message.encode('utf-8'))
@@ -47,8 +53,11 @@ def Print(message):
 def Connect():
     global irc
     Print("Connecting to %s..." % (server))
-    irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    irc.connect((server,6667))
+    #irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #irc.connect((server,6667))
+    irc = socket.create_connection((server, port))
+    if useSSL:
+        irc = ssl.wrap_socket(irc)
     irc.setblocking(0)
     SocketSend(irc, "USER %s %s %s :%s\n" % (botIdent, botNick, botNick, botRealname))
     SocketSend(irc, "NICK %s\n" % (botNick))
@@ -104,6 +113,8 @@ def main():
             ready = select.select([irc], [], [], 1.0)
             if ready[0]:
                 lines = irc.recv(2040)
+        except ssl.SSLWantReadError:
+            pass
         except Exception: #socket.error, e:   or   socket.timeout, e:
             PrintError()
             return
