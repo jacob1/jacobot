@@ -220,6 +220,9 @@ def Parse(text):
             channel = username
         #if username == "FeynmanStockBot":
         #    return
+        if username == "potatorelay" and command.startswith("<") and command.endswith(">") and len(text) > 4:
+            text.pop(3)
+            command = text[3]
 
         #some special owner commands that aren't in modules
         if CheckOwner(text[0]):
