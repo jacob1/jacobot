@@ -1,3 +1,5 @@
+import time
+import json
 from common import *
 
 RegisterMod(__name__)
@@ -85,3 +87,150 @@ def Search(username, hostmask, channel, text, account):
 	output = recipes.SearchRecipe(" ".join(text[0:]))
 	for line in output.splitlines():
 		SendMessage(channel, line)
+
+
+class Dynmap(object):
+	lastFetched = 0
+	data = None
+	lastClaimFetched = {}
+	claimData = {}
+	def __init__(self):
+		self.sizeRegex = r"<strong>W<\/strong>:(\d+)\s+<strong>H<\/strong>:(\d+)\s+<strong>S<\/strong>:(\d+)<br>"
+		self.buildTrustRegex = r"<strong>Trust:<\/strong><br> (.*?)<br>"
+		self.containerTrustRegex = r"<strong>Container Trust:<\/strong><br> (.*?)<br>"
+		self.acessTrustRegex = r"<strong>Access Trust:<\/strong><br> (.*?)<br>"
+		self.permissionTrustRegex = r"<strong>Permission Trust:<\/strong><br> (.*?)<br>"
+
+	def _UpdateData(self):
+		if time.time() > self.lastFetched+5:
+			page = GetPage("http://dynmap.starcatcher.us/up/world/world/")
+			self.data = json.loads(page)
+			self.lastFetched = time.time()
+
+	def _UpdateClaimData(self, dimension):
+		if dimension not in self.lastClaimFetched or time.time() > self.lastClaimFetched[dimension]+5:
+			page = GetPage("http://dynmap.starcatcher.us/tiles/_markers_/marker_{0}.json".format(dimension))
+			self.claimData[dimension] = json.loads(page)
+			self.lastClaimFetched[dimension] = time.time()
+
+	def GetData(self):
+		self._UpdateData()
+		return self.data
+
+	def GetClaimData(self, dimension):
+		self._UpdateClaimData(dimension)
+		return self.claimData[dimension]
+
+	def GetClaimAtLocation(self, dimension, loc):
+		data = self.GetClaimData(dimension)
+		if not data:
+			return None, True
+		claims = data["sets"]["griefprevention.markerset"]["areas"]
+		claim = None
+		subclaim = None
+		for claim in claims:
+			claimposx = list(map(int, claims[claim]['x']))
+			claimposz = list(map(int, claims[claim]['z']))
+			if loc[0] in range(claimposx[0], claimposx[2]+1) and loc[2] in range(claimposz[0], claimposz[1]+1):
+				return claims[claim], False
+		return None, False
+
+	def ParseClaimData(self, data):
+		size = re.search(self.sizeRegex, data)
+		access = re.search(self.acessTrustRegex, data)
+		container = re.search(self.containerTrustRegex, data)
+		build = re.search(self.buildTrustRegex, data)
+		permission = re.search(self.permissionTrustRegex, data)
+
+		sizeStr = size and "{0}x{1} ({2})".format(size.group(1), size.group(2), size.group(3)) or ""
+		accessStr = access and access.group(1) or ""
+		containerStr = container and container.group(1) or ""
+		buildStr = build and build.group(1) or ""
+		permissionStr = permission and build.group(1) or ""
+		return sizeStr, accessStr, containerStr, buildStr, permissionStr
+
+	def GetPlayer(self, player):
+		player = player.lower()
+		data = self.GetData()
+		playerList = data['players']
+		matches = []
+		for pl in playerList:
+			if pl['name'].lower() == player:
+				return pl, False
+			elif pl['name'].lower().startswith(player):
+				matches.append(pl)
+		if len(matches) == 1:
+			return matches[0], False
+		elif len(matches) > 1:
+			return None, True
+		else:
+			return None, False
+
+	def GetPlayerNames(self):
+		data = self.GetData()
+		playerList = data['players']
+		players = []
+		for pl in playerList:
+			players.append(pl['name'])
+		players.sort()
+		return players
+
+dynmap = Dynmap()
+
+@command("getplayer")
+def GetPlayer(username, hostmask, channel, text, account):
+	"""(getplayer [<player>]). Returns information on a player (lists all visible players if no args given)"""
+	if len(text):
+		(player, duplicates) = dynmap.GetPlayer(text[0])
+		if duplicates:
+			SendMessage(channel, "There is more than one player matching {0}".format(text[0]))
+			return
+		elif not player:
+			SendMessage(channel, "Player is hidden from dynmap or not online")
+			return
+		name = player['name']
+		pos = tuple(map(int, (player['x'], player['y'], player['z'])))
+		health = player['health']
+		dimension = player['world']
+		if dimension == "world_the_end":
+			dimension = "The End"
+		elif dimension == "world_nether":
+			dimension = "The Nether"
+		elif dimension == "world":
+			dimension = "The Overworld"
+		SendMessage(channel, "{0} is in {1} at ({2}, {3}, {4}), and has {5} health".format(name, dimension, pos[0], pos[1], pos[2], health))
+	else:
+		players = dynmap.GetPlayerNames()
+		if not players:
+			SendMessage(channel, "Nobody is visible on dynmap right now")
+			return
+		SendMessage(channel, "Players currently visible on dynmap: " + ", ".join(players))
+
+@command("getclaim", minArgs=1)
+def GetClaim(username, hostmask, channel, text, account):
+	"""(getclaim <player>). Returns information on the claim <player> is standing in"""
+	(player, duplicates) = dynmap.GetPlayer(text[0])
+	if duplicates:
+		SendMessage(channel, "There is more than one player matching {0}".format(text[0]))
+		return
+	elif not player:
+		SendMessage(channel, "Player is hidden from dynmap or not online")
+		return
+	(claim, error) = dynmap.GetClaimAtLocation(player['world'], (player['x'], player['y'], player['z']))
+	if error:
+		SendMessage(channel, "Error getting claim information for {0}".format(player['world']))
+		return
+	elif not claim:
+		SendMessage(channel, "{0} is not currently inside any claims (temp: {1})".format(player['name'], player['world']))
+		return
+	(size, access, container, build, permission) = dynmap.ParseClaimData(claim['desc'])
+	endStr = []
+	if permission:
+		endStr.append("\u000303Permission:\u0003 {0}".format(permission))
+	if build:
+		endStr.append("\u000303Build:\u0003 {0}".format(build))
+	if container:
+		endStr.append("\u000303Container:\u0003 {0}".format(container))
+	if access:
+		endStr.append("\u000303Access:\u0003 {0}".format(access))
+	SendMessage(channel, "{0} is standing in a {1} claim by {2}. {3}".format(player['name'], size, claim['label'], "; ".join(endStr)))
