@@ -50,17 +50,11 @@ def PartCmd(username, hostmask, channel, text, account):
     """(no args). Make the bot part a channel (admin only)."""
     Send("PART %s\n" % text[0])
 
-"""def Parse(raw, text):
+def Parse(raw, text):
     if text[1] == "324":
         SendMessage(channels[2], "Channel exists: "+text[3] + "; " + text[4])
     elif text[1] == "403":
-        SendMessage(channels[2], "No such channel: "+text[3])"""
-
-"""@command("check", minArgs = 1)
-def PartCmd(username, hostmask, channel, text, account):
-    ""secret command.""
-    for i in text:
-        Send("MODE %s\n" % i)"""
+        SendMessage(channels[2], "No such channel: "+text[3])
 
 @command("msg", minArgs = 2, owner = True)
 def MsgCmd(username, hostmask, channel, text, account):
@@ -68,11 +62,36 @@ def MsgCmd(username, hostmask, channel, text, account):
     SendMessage(text[0], " ".join(text[1:]))
 
 @command("raw", minArgs = 1, owner = True)
-def MsgCmd(username, hostmask, channel, text, account):
+def RawCmd(username, hostmask, channel, text, account):
     """(raw <message>). Sends a raw IRC message."""
     Send(" ".join(text) + "\n")
 
-"""@command("vigenere", minArgs = 2)
+"""
+@command("check", minArgs = 1)
+def CheckCmd(username, hostmask, channel, text, account):
+    ""secret command.""
+    for i in text:
+        Send("MODE ######%s\n" % i)
+
+@command("octal", minArgs = 1)
+def OctalCmd(username, hostmask, channel, text, account):
+    ""secret command 2.""
+    for i in text:
+        str = ""
+        for char in i.replace("_", " "):
+            str = str + "-{0:03o}".format(ord(char))
+        Send("MODE ######%s\n" % str.strip("-"))
+        #Send("MODE ######%s\n" % str.replace("-", ""))
+
+@command("bruteforce", minArgs = 1, owner=True)
+def BruteforceCmd(username, hostmask, channel, text, account):
+    ""secret command 3.""
+    str = text[0]
+    for i in range(26):
+        Send("MODE ######%s\n" % str.replace("?", chr(i+65)))
+    SendMessage(channel, "Modes sent")
+
+@command("vigenere", minArgs = 2)
 def Viginerecmd(username, hostmask, channel, text, account):
     ""(<string> <listofkeys>...). moo""
     for i in text[1:]:
