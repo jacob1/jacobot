@@ -1,7 +1,15 @@
 from common import *
 import math
 import string
+from datetime import datetime
+from time import sleep
 RegisterMod(__name__)
+
+def AlwaysRun(channel):
+    now = datetime.now()
+    if now.minute%6 == 1 and now.second ==  4:
+        Send("PING checkalive\n")
+        pass
 
 @command("help", minArgs = 1)
 def HelpCmd(username, hostmask, channel, text, account):
