@@ -69,7 +69,7 @@ class CraftingList(object):
 
 recipes = CraftingList()
 
-@command("craft", minArgs = 1)
+@command("craft", minArgs = 1, rateLimit=True)
 def Craft(username, hostmask, channel, text, account):
 	"""(craft <item>). Prints a minecraft crafting recipe"""
 	output = recipes.PrintRecipe(" ".join(text[0:]))
@@ -146,7 +146,7 @@ class Dynmap(object):
 		accessStr = access and access.group(1) or ""
 		containerStr = container and container.group(1) or ""
 		buildStr = build and build.group(1) or ""
-		permissionStr = permission and build.group(1) or ""
+		permissionStr = permission and permission.group(1) or ""
 		return sizeStr, accessStr, containerStr, buildStr, permissionStr
 
 	def GetPlayer(self, player):
@@ -205,6 +205,29 @@ def GetPlayer(username, hostmask, channel, text, account):
 			SendMessage(channel, "Nobody is visible on dynmap right now")
 			return
 		SendMessage(channel, "Players currently visible on dynmap: " + ", ".join(players))
+
+@command("getmap", minArgs=1)
+def GetMap(username, hostmask, channel, text, account):
+	"""(getmap <player> [3D|cave]). Returns a dynmap link for the player listed"""
+	(player, duplicates) = dynmap.GetPlayer(text[0])
+	if duplicates:
+		SendMessage(channel, "There is more than one player matching {0}".format(text[0]))
+		return
+	elif not player:
+		SendMessage(channel, "Player is hidden from dynmap or not online")
+		return
+	name = player['name']
+	pos = tuple(map(int, (player['x'], player['y'], player['z'])))
+	health = player['health']
+	dimension = player['world']
+	maptype = "flat"
+	if len(text) > 1:
+		if text[1].upper() == "3D":
+			maptype = "surface"
+		elif text[1].lower() == "cave" and dimension == "world":
+			maptype = "cave"
+	#SendMessage(channel, "http://dynmap.starcatcher.us/?worldname={0}&mapname={1}&zoom=5&x={2}&y={3}&z={4}".format(dimension, maptype, pos[0], pos[1], pos[2]))
+	SendMessage(channel, "http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension.split("_")[-1][0], maptype[0], 5, pos[0], pos[2]))
 
 @command("getclaim", minArgs=1)
 def GetClaim(username, hostmask, channel, text, account):
