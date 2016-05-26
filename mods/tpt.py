@@ -13,20 +13,28 @@ def Parse(raw, text):
     if match:
         #SendMessage("#powder-info", "test: %s %s %s" % (match.group(1), match.group(2), match.group(3)))
         ip = match.group(3)
-        if ip in ipbans:
-            BanUser(match.group(1), "1", "p", "Automatic ban: this IP address has been blacklisted")
-            SendMessage("#powder-info", "Automatic ban: this IP address has been blacklisted")
-        else:
-            torfile = open("torlist.txt")
-            torips = torfile.readlines()
-            torfile.close()
-            torips = map(lambda ip: ip.strip(), torips)
-            if ip in torips:
-                SendMessage("#powder-info", "Warning: This account was registered using TOR")
-    """match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), https?:\/\/tpt.io\/~([0-9]+)$", raw)
+        for address in ipbans:
+            if ip.startswith(address):
+                BanUser(match.group(1), "1", "p", "Automatic ban: this IP address has been blacklisted")
+                SendMessage("#powder-info", "Automatic ban: this IP address has been blacklisted")
+        torfile = open("torlist.txt")
+        torips = torfile.readlines()
+        torfile.close()
+        torips = map(lambda ip: ip.strip(), torips)
+        if ip in torips:
+            SendMessage("#powder-info", "Warning: This account was registered using TOR")
+    #match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), https?:\/\/tpt.io\/~([0-9]+)$", raw)
+													#New: 'Deut compressor' by HugInfinity (0 comments, score 1, 1 bump); http://tpt.io/~1973995
+    match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :New: \u000302'(.+?)'\u000F by\u000305 ([\w_-]+)\u000314 \(.*?\)\u000F; https?:\/\/tpt.io\/~([0-9]+)$", raw)
     if match:
-        saveID = match.group(2)
-        info = GetSaveInfo(saveID)
+        saveID = match.group(3)
+        name = match.group(1)
+        if "cow" in name.lower():
+            if not PromotionLevel(saveID, -1):
+                SendMessage("+#powder-saves", "Error demoting save ID %s" % (saveID))
+            else:
+                SendMessage("+#powder-saves", "Demoted save ID %s" % (saveID))
+        """info = GetSaveInfo(saveID)
         if info:
             sleep(1)
             elementCount = {}
