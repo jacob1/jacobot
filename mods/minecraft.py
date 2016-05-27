@@ -208,26 +208,45 @@ def GetPlayer(username, hostmask, channel, text, account):
 
 @command("getmap", minArgs=1)
 def GetMap(username, hostmask, channel, text, account):
-	"""(getmap <player> [3D|cave]). Returns a dynmap link for the player listed"""
+	"""(getmap (<player> [3D|cave] | <coordinates> [world|nether|end] [3D|cave]). Returns a dynmap link for the player or coordintes given."""
 	(player, duplicates) = dynmap.GetPlayer(text[0])
 	if duplicates:
 		SendMessage(channel, "There is more than one player matching {0}".format(text[0]))
 		return
 	elif not player:
-		SendMessage(channel, "Player is hidden from dynmap or not online")
+		match = re.match("([\d-]+)[, ]{1,}([\d-]+)(?:[, ]{1,}([\d-]+))?(.*)", " ".join(text))
+		if not match:
+			SendMessage(channel, "Player is hidden from dynmap or not online")
+			return
+		# This is a coordinates getmap
+		args = match.group(4).lower().split()
+		dimension = "w"
+		maptype = "f"
+		if args:
+			if args[0].find("nether") > -1:
+				dimension = "n"
+			elif args[0].find("end") > -1:
+				dimension = "e"
+		if len(args) > 1:
+			if args[1] == "3d" or args[1] == "surface":
+				maptype = "s"
+			elif args[1] == "cave" and dimension == "w":
+				maptype = "c"
+		SendMessage(channel, "http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension, maptype, 5, match.group(1), match.group(3) or match.group(2)))
 		return
+	# Normal player getmap
 	name = player['name']
 	pos = tuple(map(int, (player['x'], player['y'], player['z'])))
 	health = player['health']
 	dimension = player['world']
-	maptype = "flat"
+	maptype = "f" #flat
 	if len(text) > 1:
-		if text[1].upper() == "3D":
-			maptype = "surface"
+		if text[1].upper() == "3D" or text[1].lower() == "surface":
+			maptype = "s" #surface
 		elif text[1].lower() == "cave" and dimension == "world":
-			maptype = "cave"
+			maptype = "c" #cave
 	#SendMessage(channel, "http://dynmap.starcatcher.us/?worldname={0}&mapname={1}&zoom=5&x={2}&y={3}&z={4}".format(dimension, maptype, pos[0], pos[1], pos[2]))
-	SendMessage(channel, "http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension.split("_")[-1][0], maptype[0], 5, pos[0], pos[2]))
+	SendMessage(channel, "http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension.split("_")[-1][0], maptype, 5, pos[0], pos[2]))
 
 @command("getclaim", minArgs=1)
 def GetClaim(username, hostmask, channel, text, account):
