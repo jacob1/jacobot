@@ -17,7 +17,7 @@ adminHostmasks = ("",)
 commandChar = "!!"
 
 # Don't load certain plugins from the mods/ folder
-disabledPlugins = ["stocks", "rpg", "groups", "tpt"]
+disabledPlugins = ["tpt"]
 
 # encoding used to decode lines recieved from IRC.
 # if using the windows console, run the 'chcp' command to figure out which codepage to use, probably cp437 or cp1252
