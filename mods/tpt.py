@@ -284,7 +284,7 @@ def DoPublish(saveID):
 	return True
 
 @command("ban", minArgs = 4, owner = True)
-def Ban(username, hostmask, channel, text, account):
+def Ban(username, hostmask, channel, text):
 	"""(ban <user ID> <ban time> <ban time units> <reason>). bans someone in TPT. Owner only. Add = to ban usernames that look like IDs"""
 	if username != "jacob1":
 		SendNotice(username, "Error, only jacob1 should be able to use this command")
@@ -292,7 +292,7 @@ def Ban(username, hostmask, channel, text, account):
 		SendMessage(channel, "An error occured while trying to ban user.")
 
 @command("unban", minArgs = 1, owner = True)
-def Unban(username, hostmask, channel, text, account):
+def Unban(username, hostmask, channel, text):
 	"""(unban <user ID>). unbans someone in TPT. Owner only."""
 	if username != "jacob1":
 		SendNotice(username, "Error, only jacob1 should be able to use this command")
@@ -300,37 +300,37 @@ def Unban(username, hostmask, channel, text, account):
 		SendMessage(channel, "An error occured while trying to unban user.")
 
 @command("post", minArgs = 1, admin = True)
-def Post(username, hostmask, channel, text, account):
+def Post(username, hostmask, channel, text):
 	"""(post <post ID>). Gets info on a TPT post. Admin only."""
 	GetPostInfo(text[0])
 	
 @command("hide", minArgs = 1, owner = True)
-def Hide(username, hostmask, channel, text, account):
+def Hide(username, hostmask, channel, text):
 	"""(hide <post ID> [<reason>]). Hides a post in TPT. Owner only."""
 	HidePost(text[0], False, " ".join(text[1:]))
 
 @command("remove", minArgs = 1, admin = True)
-def Remove(username, hostmask, channel, text, account):
+def Remove(username, hostmask, channel, text):
 	"""(remove <post ID> [<reason>]). Removes a post in TPT. Admin only."""
 	HidePost(text[0], True, " ".join(text[1:]))
 
 @command("unhide", minArgs = 1, admin = True)
-def Unhide(username, hostmask, channel, text, account):
+def Unhide(username, hostmask, channel, text):
 	"""(unhide <post ID>). Unhides a post in TPT. Admin only."""
 	UnhidePost(text[0])
 
 @command("lock", minArgs = 2, owner = True)
-def Lock(username, hostmask, channel, text, account):
+def Lock(username, hostmask, channel, text):
 	"""(lock <thread ID> <reason>). Locks a thread in TPT. Owner only."""
 	LockThread(text[0], " ".join(text[1:]))
 
 @command("unlock", minArgs = 1, owner = True)
-def Unlock(username, hostmask, channel, text, account):
+def Unlock(username, hostmask, channel, text):
 	"""(unlock <thread ID>). Unlocks a thread in TPT. Owner only."""
 	UnlockThread(text[0])
 
 @command("promolevel", minArgs = 2, admin = True)
-def Unlock(username, hostmask, channel, text, account):
+def Unlock(username, hostmask, channel, text):
 	"""(promolevel <save ID> <level>). Sets the promotion level on a save. Admin only."""
 	if PromotionLevel(text[0], int(text[1])):
 		SendMessage(channel, "Done.")
@@ -338,12 +338,12 @@ def Unlock(username, hostmask, channel, text, account):
 		SendMessage(channel, "Invalid promotion level.")
 
 @command("ipmap", minArgs = 1, admin = True)
-def IpMap(username, hostmask, channel, text, account):
+def IpMap(username, hostmask, channel, text):
 	"""(ipmap <username/ip>). Prints out linked accounts or IP addresses. Admin only."""
 	SendMessage(channel, GetLinkedAccounts(text[0]))
 
 @command("saveinfo", minArgs = 1, admin = True)
-def SaveInfo(username, hostmask, channel, text, account):
+def SaveInfo(username, hostmask, channel, text):
 	"""(saveinfo <saveid>). Prints out lots of useful information about TPT saves. Admin only."""
 	info = GetSaveInfo(text[0])
 	if info:
@@ -354,7 +354,7 @@ def SaveInfo(username, hostmask, channel, text, account):
 		SendMessage(channel, "Save info not found")
 
 @command("getreports", minArgs=1, admin = True)
-def GetReports(username, hostmask, channel, text, account):
+def GetReports(username, hostmask, channel, text):
 	"""(getreports <saveid> [numreports]). Prints out all (or numreports) reports from a save. Admin only."""
 	count = None
 	reportlist = SaveReports(text[0])
@@ -363,12 +363,12 @@ def GetReports(username, hostmask, channel, text, account):
 	PrintReports(channel, reportlist[:count])
 
 @command("markread", minArgs=1, admin = True)
-def MarkRead(username, hostmask, channel, text, account):
+def MarkRead(username, hostmask, channel, text):
 	"""(markread <saveid>). Marks a report on a save as read. Admin only."""
 	GetPage("http://powdertoy.co.uk/Reports.html?Read=%s" % text[0], GetTPTSessionInfo(0))
 
 @command("markallread", admin = True)
-def MarkAllRead(username, hostmask, channel, text, account):
+def MarkAllRead(username, hostmask, channel, text):
 	"""(markallread). Marks all reports that have been printed to channel previously as read. Admin only."""
 	global seenReports
 	reportlist = ReportsList()
@@ -389,7 +389,7 @@ def MarkAllRead(username, hostmask, channel, text, account):
 		SendMessage(channel, "These saves still have unread reports: %s" % (" ".join(unread)))
 
 @command("reports", admin = True)
-def Reports(username, hostmask, channel, text, account):
+def Reports(username, hostmask, channel, text):
 	"""(reports) No args. Prints out the reports list. Owner only."""
 	global seenReports
 	reportlist = ReportsList()
@@ -406,7 +406,7 @@ def Reports(username, hostmask, channel, text, account):
 		seenReports[report[1]] = report[0]
 
 @command("comment", minArgs=2, owner = True)
-def Comment(username, hostmask, channel, text, account):
+def Comment(username, hostmask, channel, text):
 	"""(comment <saveID> <comment>). Comments on a save as jacobot. Admin only."""
 	if DoComment(text[0], " ".join(text[1:]), False):
 		SendMessage(channel, "Done.")
@@ -414,7 +414,7 @@ def Comment(username, hostmask, channel, text, account):
 		SendMessage(channel, "Error, could not comment.")
 
 @command("commentj1", minArgs=2, owner = True)
-def Comment(username, hostmask, channel, text, account):
+def Comment(username, hostmask, channel, text):
 	"""(commentj1 <saveID> <comment>). Comments on a save as jacob1. Owner only."""
 	if DoComment(text[0], " ".join(text[1:]), True):
 		SendMessage(channel, "Done.")
@@ -422,19 +422,19 @@ def Comment(username, hostmask, channel, text, account):
 		SendMessage(channel, "Error, could not comment.")
 
 @command("unpublish", minArgs=1, admin = True)
-def Unpublish(username, hostmask, channel, text, account):
+def Unpublish(username, hostmask, channel, text):
 	"""(unpublish <saveID>). Unpublishes a save. Admin only."""
 	DoUnpublish(text[0])
 	SendMessage(channel, "Done.")
 
 @command("publish", minArgs=1, admin = True)
-def Publish(username, hostmask, channel, text, account):
+def Publish(username, hostmask, channel, text):
 	"""(publish <saveID>). Publishes a save. Admin only."""
 	DoPublish(text[0])
 	SendMessage(channel, "Done.")
 
 @command("readreport", minArgs=2, admin = True)
-def Stolen(username, hostmask, channel, text, account):
+def Stolen(username, hostmask, channel, text):
 	"""(readreport <saveID> <comment>). Disables a save and comments with a message as jacobot. Admin only."""
 	saveID = text[0]
 	#DoUnpublish(saveID)
@@ -450,7 +450,7 @@ def Stolen(username, hostmask, channel, text, account):
 		SendMessage(channel, "Error, could not disable save.")
 
 @command("copied", minArgs=2, admin = True)
-def Copied(username, hostmask, channel, text, account):
+def Copied(username, hostmask, channel, text):
 	"""(copied <copiedID> <originalID> [long/<reason>]). Unpublishes a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end. Admin only."""
 	stolenID = text[0]
 	saveID = text[1]
@@ -481,7 +481,7 @@ def Copied(username, hostmask, channel, text, account):
 		SendMessage(channel, "Error getting original save info.")
 
 @command("stolen", minArgs=2, admin = True)
-def Stolen(username, hostmask, channel, text, account):
+def Stolen(username, hostmask, channel, text):
 	"""(stolen <stolenID> <originalID> [long/<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
 	stolenID = text[0]
 	saveID = text[1]
@@ -511,7 +511,7 @@ def Stolen(username, hostmask, channel, text, account):
 		SendMessage(channel, "Error getting original save info.")
 
 @command("updatetor", admin = True)
-def UpdateTor(username, hostmask, channel, text, account):
+def UpdateTor(username, hostmask, channel, text):
 	"""(no args). Update the list of TOR ip addresses. Admin only."""
 	torlist = GetPage("https://www.dan.me.uk/torlist/")
 	if not torlist:
@@ -523,7 +523,7 @@ def UpdateTor(username, hostmask, channel, text, account):
 	SendMessage(channel, "Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
 
 @command("ipban", minArgs = 1, admin = True)
-def IPban(username, hostmask, channel, text, account):
+def IPban(username, hostmask, channel, text):
 	"""(ipban add <ip>|remove <ip>|list). Modifies the IP bans list. Owner only."""
 	if text[0].lower() == "list":
 		if not ipbans:

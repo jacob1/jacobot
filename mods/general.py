@@ -12,7 +12,7 @@ def AlwaysRun(channel):
 		pass
 
 @command("help", minArgs = 1)
-def HelpCmd(username, hostmask, channel, text, account):
+def HelpCmd(username, hostmask, channel, text):
 	"""<command> Shows help for a command."""
 	for mod in commands:
 		for i in commands[mod]:
@@ -25,7 +25,7 @@ def HelpCmd(username, hostmask, channel, text, account):
 	SendNotice(username, "No such command")
 
 @command("list")
-def ListCmd(username, hostmask, channel, text, account):
+def ListCmd(username, hostmask, channel, text):
 	"""(no args). Lists all commands."""
 	if len(text):
 		if not text[0] in commands:
@@ -36,7 +36,7 @@ def ListCmd(username, hostmask, channel, text, account):
 		SendMessage(channel, "Modules: "+", ".join(i for i in commands))
 
 @command("commands")
-def CommandsCmd(username, hostmask, channel, text, account):
+def CommandsCmd(username, hostmask, channel, text):
 	"""(no args). Lists all commands."""
 	cmdlist = []
 	for mod in commands:
@@ -44,17 +44,17 @@ def CommandsCmd(username, hostmask, channel, text, account):
 	SendMessage(channel, ", ".join(i[0] for i in cmdlist))
 
 @command("ping")
-def PingCmd(username, hostmask, channel, text, account):
+def PingCmd(username, hostmask, channel, text):
 	"""PONG"""
 	SendMessage(channel, "pong")
 
 @command("join", minArgs = 1, owner = True)
-def JoinCmd(username, hostmask, channel, text, account):
+def JoinCmd(username, hostmask, channel, text):
 	"""(no args). Make the bot join a channel (admin only)."""
 	Send("JOIN %s\n" % text[0])
 
 @command("part", minArgs = 1, owner = True)
-def PartCmd(username, hostmask, channel, text, account):
+def PartCmd(username, hostmask, channel, text):
 	"""(no args). Make the bot part a channel (admin only)."""
 	Send("PART %s\n" % text[0])
 
@@ -65,24 +65,24 @@ def Parse(raw, text):
 		SendMessage(channels[2], "No such channel: "+text[3])
 
 @command("msg", minArgs = 2, owner = True)
-def MsgCmd(username, hostmask, channel, text, account):
+def MsgCmd(username, hostmask, channel, text):
 	"""(msg <channel> <message>). Sends a message to a channel."""
 	SendMessage(text[0], " ".join(text[1:]))
 
 @command("raw", minArgs = 1, owner = True)
-def RawCmd(username, hostmask, channel, text, account):
+def RawCmd(username, hostmask, channel, text):
 	"""(raw <message>). Sends a raw IRC message."""
 	Send(" ".join(text) + "\n")
 
 """
 @command("check", minArgs = 1)
-def CheckCmd(username, hostmask, channel, text, account):
+def CheckCmd(username, hostmask, channel, text):
 	""secret command.""
 	for i in text:
 		Send("MODE ######%s\n" % i)
 
 @command("octal", minArgs = 1)
-def OctalCmd(username, hostmask, channel, text, account):
+def OctalCmd(username, hostmask, channel, text):
 	""secret command 2.""
 	for i in text:
 		str = ""
@@ -92,7 +92,7 @@ def OctalCmd(username, hostmask, channel, text, account):
 		#Send("MODE ######%s\n" % str.replace("-", ""))
 
 @command("bruteforce", minArgs = 1, owner=True)
-def BruteforceCmd(username, hostmask, channel, text, account):
+def BruteforceCmd(username, hostmask, channel, text):
 	""secret command 3.""
 	str = text[0]
 	for i in range(26):
@@ -100,14 +100,14 @@ def BruteforceCmd(username, hostmask, channel, text, account):
 	SendMessage(channel, "Modes sent")
 
 @command("vigenere", minArgs = 2)
-def Viginerecmd(username, hostmask, channel, text, account):
+def Viginerecmd(username, hostmask, channel, text):
 	""(<string> <listofkeys>...). moo""
 	for i in text[1:]:
 		(enc, dec) = Viginere(text[0], i)
 		SendMessage(channel, "Encrypted: %s, Decrypted: %s" % (enc, dec))"""
 
 """@command("vigenere2", minArgs = 2)
-def Viginere2cmd(username, hostmask, channel, text, account):
+def Viginere2cmd(username, hostmask, channel, text):
 	""(<string> <listofkeys>...). moo""
 	checked = []
 	for i in text[1:]:
@@ -117,7 +117,7 @@ def Viginere2cmd(username, hostmask, channel, text, account):
 	SendMessage(channels[2], "Checking: " + ", ".join(checked))
 
 @command("vigenere3", minArgs = 2)
-def Viginere3cmd(username, hostmask, channel, text, account):
+def Viginere3cmd(username, hostmask, channel, text):
 	""(<keys> <listofstrings>...). moo""
 	checked = []
 	for i in text[1:]:

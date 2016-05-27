@@ -70,14 +70,14 @@ class CraftingList(object):
 recipes = CraftingList()
 
 @command("craft", minArgs = 1, rateLimit=True)
-def Craft(username, hostmask, channel, text, account):
+def Craft(username, hostmask, channel, text):
 	"""(craft <item>). Prints a minecraft crafting recipe"""
 	output = recipes.PrintRecipe(" ".join(text[0:]))
 	for line in output.splitlines():
 		SendMessage(channel, line)
 
 @command("search", minArgs = 1)
-def Search(username, hostmask, channel, text, account):
+def Search(username, hostmask, channel, text):
 	"""(search <item>). Searches for minecraft recipes matching or containing an item"""
 	searchTerm = " ".join(text[0:])
 	if len(searchTerm) < 3:
@@ -178,7 +178,7 @@ class Dynmap(object):
 dynmap = Dynmap()
 
 @command("getplayer")
-def GetPlayer(username, hostmask, channel, text, account):
+def GetPlayer(username, hostmask, channel, text):
 	"""(getplayer [<player>]). Returns information on a player (lists all visible players if no args given)"""
 	if len(text):
 		(player, duplicates) = dynmap.GetPlayer(text[0])
@@ -207,7 +207,7 @@ def GetPlayer(username, hostmask, channel, text, account):
 		SendMessage(channel, "Players currently visible on dynmap: " + ", ".join(players))
 
 @command("getmap", minArgs=1)
-def GetMap(username, hostmask, channel, text, account):
+def GetMap(username, hostmask, channel, text):
 	"""(getmap (<player> [3D|cave] | <coordinates> [world|nether|end] [3D|cave]). Returns a dynmap link for the player or coordintes given."""
 	(player, duplicates) = dynmap.GetPlayer(text[0])
 	if duplicates:
@@ -249,7 +249,7 @@ def GetMap(username, hostmask, channel, text, account):
 	SendMessage(channel, "http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension.split("_")[-1][0], maptype, 5, pos[0], pos[2]))
 
 @command("getclaim", minArgs=1)
-def GetClaim(username, hostmask, channel, text, account):
+def GetClaim(username, hostmask, channel, text):
 	"""(getclaim <player>). Returns information on the claim <player> is standing in"""
 	(player, duplicates) = dynmap.GetPlayer(text[0])
 	if duplicates:

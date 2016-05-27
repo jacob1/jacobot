@@ -67,23 +67,12 @@ def Connect():
 		for i in channels:
 			SocketSend(irc, "JOIN %s\n" % (i))
 
+# These functions are now unused
 def ReadPrefs():
-	try:
-		with open('logins.txt') as f:
-			for line in f:
-				if len(line.strip()):
-					cookies = line.split("|")
-					logins[cookies[0]] = {"username":cookies[1], "portfolio":{}, "cookies":cookies[2].strip()}
-	except OSError:
 		pass
 
 def WritePrefs():
-	try:
-		with open('logins.txt', 'w') as f:
-			for i in logins:
-				f.write("%s|%s|%s\r\n" % (i, logins[i]["username"], logins[i]["cookies"]))
-	except OSError:
-		pass
+	pass
 atexit.register(WritePrefs)
 
 def PrintError(channel = None):
@@ -234,20 +223,7 @@ def Parse(text):
 				if not os.path.isfile(os.path.join("mods", mod+".py")):
 					return
 				commands[mod] = []
-				if mod == "stocks":
-					if "stocks" in mods:
-						logins = mods["stocks"].logins
-						history = mods["stocks"].history
-						watched = mods["stocks"].watched
-						news = mods["stocks"].news
-						specialNews = mods["stocks"].specialNews
 				mods[mod] = imp.load_source(mod, os.path.join("mods", mod+".py"))
-				if mod == "stocks":
-					mods["stocks"].logins = logins
-					mods["stocks"].history = history
-					mods["stocks"].watched = watched
-					mods["stocks"].news = news
-					mods["stocks"].specialNews = specialNews
 				SendMessage(channel, "Reloaded %s.py" % mod)
 				return
 			elif command == "%seval" % (commandChar):
@@ -276,10 +252,6 @@ def Parse(text):
 					i[1](username, hostmask, channel, text[4:])
 					return
 
-try:
-	mods["stocks"].GetStockInfo(True)
-except:
-	pass
 ReadPrefs()
 while True:
 	reconnectAttempts = 0
