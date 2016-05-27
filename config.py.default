@@ -24,10 +24,19 @@ disabledPlugins = ["stocks", "rpg", "groups", "tpt"]
 encoding = "utf-8"
 
 # A string containing python code that is run whenever an error happens
-errorCode = """with socket.socket() as sock:
-	sock.connect(("termbin.com", 9999))
-	sock.send(traceback.format_exc().encode("utf-8", "replace"))
-	SendMessage(errorchannel, "Error: " + sock.recv(1024).decode("utf-8"))"""
+errorCode = """sock = socket.create_connection(("mniip.com", 7777))
+sock.sendall(traceback.format_exc().encode("utf-8"))
+sock.settimeout(1)
+reply = b""
+while True:
+	try:
+		reply += sock.recv(4096)
+	except:
+		break
+url = {key: value for key, value, *_ in [line.split(b" ") + [None] for line in reply.split(b"\\n") if line]}[b"URL"]
+admin = {key: value for key, value, *_ in [line.split(b" ") + [None] for line in reply.split(b"\\n") if line]}[b"ADMIN"]
+SendMessage(errorchannel, "Error: {0} (admin link {1})".format(url.decode("utf-8"), admin.decode("utf-8")))
+"""
 
 #change to True when done
 configured = False
