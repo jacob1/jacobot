@@ -26,7 +26,6 @@ if not configured:
 print("Loading modules")
 mods = {}
 mods["common"] = importlib.import_module("common")
-print(mods["common"])
 globals().update(mods["common"].GetGlobals())
 for i in os.listdir("mods"):
 	if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py" and i[:-3] not in disabledPlugins:
@@ -223,7 +222,6 @@ def Parse(text):
 					return
 				modname = text[4]
 				if not mods[modname]:
-					print(mods["common"])
 					return
 				print("reloading module "+modname)
 				if modname in commands:
