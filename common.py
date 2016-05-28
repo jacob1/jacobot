@@ -3,15 +3,18 @@ import urllib.parse
 import urllib.error
 import re
 
-from config import *
+import config
+
+def GetGlobals():
+	return globals()
 
 def CheckOwner(hostmask):
 	host = hostmask.split("!")[-1]
-	return host in ownerHostmasks
+	return host in config.ownerHostmasks
 
 def CheckAdmin(hostmask):
 	host = hostmask.split("!")[-1]
-	return host in adminHostmasks or CheckOwner(hostmask)
+	return host in config.adminHostmasks or CheckOwner(hostmask)
 
 messageQueue = []
 def Send(msg):
@@ -30,6 +33,7 @@ def SendNotice(target, msg):
 plugin = ""
 def RegisterMod(name):
 	global plugin
+	name = name.split(".")[-1]
 	commands[name] = []
 	plugin = name
 

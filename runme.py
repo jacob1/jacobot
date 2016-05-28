@@ -6,7 +6,7 @@ from time import sleep, time
 import os
 import sys
 import atexit
-import imp
+import importlib
 import hashlib
 import random
 
@@ -24,13 +24,15 @@ if not configured:
 	quit()
 
 print("Loading modules")
-from common import *
 mods = {}
+mods["common"] = importlib.import_module("common")
+print(mods["common"])
+globals().update(mods["common"].GetGlobals())
 for i in os.listdir("mods"):
 	if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py" and i[:-3] not in disabledPlugins:
 		try:
 			print("Loading {} ...".format(i))
-			mods[i[:-3]] = imp.load_source(i[:-3], os.path.join("mods", i))
+			mods[i[:-3]] = importlib.import_module("mods.{0}".format(i[:-3]))
 		except Exception:
 			print("Error loading {}".format(i))
 			print(traceback.format_exc())
@@ -219,12 +221,23 @@ def Parse(text):
 				if len(text) <= 4:
 					SendNotice(username, "No module given")
 					return
-				mod = text[4]
-				if not os.path.isfile(os.path.join("mods", mod+".py")):
+				modname = text[4]
+				if not mods[modname]:
+					print(mods["common"])
 					return
-				commands[mod] = []
-				mods[mod] = imp.load_source(mod, os.path.join("mods", mod+".py"))
-				SendMessage(channel, "Reloaded %s.py" % mod)
+				print("reloading module "+modname)
+				if modname in commands:
+					commands[modname] = []
+				mods[modname] = importlib.reload(mods[modname])
+
+				output = "Reloaded %s.py" % modname
+				if modname == "common":
+					globals().update(mods["common"].GetGlobals())
+					for othermodname, othermod in mods.items():
+						if othermod.__name__[:5] == "mods.":
+							mods[othermodname] = importlib.reload(othermod)
+							output = output + ", %s.py" % othermodname
+				SendMessage(channel, output)
 				return
 			elif command == "%seval" % (commandChar):
 				try:

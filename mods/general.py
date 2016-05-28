@@ -3,6 +3,7 @@ import math
 import string
 from datetime import datetime
 from time import sleep
+
 RegisterMod(__name__)
 
 def AlwaysRun(channel):
@@ -60,9 +61,9 @@ def PartCmd(username, hostmask, channel, text):
 
 def Parse(raw, text):
 	if text[1] == "324":
-		SendMessage(channels[2], "Channel exists: "+text[3] + "; " + text[4])
+		SendMessage(config.channels[2], "Channel exists: "+text[3] + "; " + text[4])
 	elif text[1] == "403":
-		SendMessage(channels[2], "No such channel: "+text[3])
+		SendMessage(config.channels[2], "No such channel: "+text[3])
 
 @command("msg", minArgs = 2, owner = True)
 def MsgCmd(username, hostmask, channel, text):
@@ -114,7 +115,7 @@ def Viginere2cmd(username, hostmask, channel, text):
 		(enc, dec) = Viginere(text[0], i)
 		checked.append(dec)
 		Send("MODE ####%s\n" % dec)
-	SendMessage(channels[2], "Checking: " + ", ".join(checked))
+	SendMessage(config.channels[2], "Checking: " + ", ".join(checked))
 
 @command("vigenere3", minArgs = 2)
 def Viginere3cmd(username, hostmask, channel, text):
@@ -124,7 +125,7 @@ def Viginere3cmd(username, hostmask, channel, text):
 		(enc, dec) = Viginere(i, text[0])
 		checked.append(dec)
 		Send("MODE ####%s\n" % dec)
-	SendMessage(channels[2], "Checking: " + ", ".join(checked))
+	SendMessage(config.channels[2], "Checking: " + ", ".join(checked))
 	
 alpha = string.lowercase
 def Viginere(incoming, KEY, offset = 1):
@@ -191,6 +192,6 @@ def Viginere(incoming, KEY, offset = 1):
 			output_decrypted += y
 
 		return (output_encrypted.upper(), output_decrypted.upper())
-	#SendMessage(channels[2], "Encrypted: %s, Decrypted: %s" % (output_encrypted.upper(), output_decrypted.upper()))
+	#SendMessage(config.channels[2], "Encrypted: %s, Decrypted: %s" % (output_encrypted.upper(), output_decrypted.upper()))
 	#print 'Encrypted:', output_encrypted.upper()
 	#print 'Decrypted:', output_decrypted.upper()"""
