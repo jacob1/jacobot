@@ -22,7 +22,7 @@ class CraftingList(object):
 	
 	def PrintRecipe(self, name):
 		if not name in self.recipes:
-			return "Couldn't find recipe, try using {0}search".format(commandChar)
+			return "Couldn't find recipe, try using {0}search".format(config.commandChar)
 		recipe = self.recipes[name]
 		longest = [0, 0, 0]
 		for i in range(len(recipe)):
