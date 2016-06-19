@@ -264,8 +264,8 @@ def Parse(text):
 					return
 
 ReadPrefs()
+reconnectAttempts = 0
 while True:
-	reconnectAttempts = 0
 	try:
 		Connect()
 		main()

@@ -178,7 +178,7 @@ def PromotionLevel(saveID, level):
 def SaveReports(ID):
 	page = GetPage("http://powdertoy.co.uk/Reports/View.html?ID=%s" % ID, GetTPTSessionInfo(0))
 	reports = re.findall('<div class="Message">([^<]+)<div class="Clear">', page)
-	usernames = re.findall('<a href="/User.html\?ID=[0-9]+">([^<]+)</a>', page)[1:] #ignore "My Profile"
+	usernames = re.findall('<a href="/User.html\?Name=[a-zA-Z0-9_-]+">([^<]+)</a>', page)[1:] #ignore "My Profile"
 	return list(zip(usernames, reports))
 
 def ReportsList():
