@@ -1,5 +1,6 @@
 import time
 import json
+import math
 from common import *
 
 RegisterMod(__name__)
@@ -175,6 +176,25 @@ class Dynmap(object):
 		players.sort()
 		return players
 
+	def GetTime(self):
+			data = self.GetData()
+			servertime = data["servertime"]
+			CanSleep = False
+			
+			hours = (servertime / 1000) + 6
+			if hours > 24:
+				hours -= 24
+			minutes = (hours - math.floor(hours)) * 60
+			if minutes > 10:
+				formatted_time = "{0}:{1}".format(int(hours), int(minutes))
+			else:
+				formatted_time = "{0}:0{1}".format(int(hours), int(minutes))
+			if servertime >= 12541 and servertime <= 23458:
+				CanSleep = True
+			elif data["isThundering"]:
+				CanSleep = True
+			return {"time": formatted_time, "serverTime": servertime, "canSleep": CanSleep}
+
 dynmap = Dynmap()
 
 @command("getplayer")
@@ -276,3 +296,11 @@ def GetClaim(username, hostmask, channel, text):
 	if access:
 		endStr.append("\u000303Access:\u0003 {0}".format(access))
 	SendMessage(channel, "{0} is standing in a {1} claim by {2}. {3}".format(player['name'], size, claim['label'], "; ".join(endStr)))
+
+@command("gettime")
+def GetTime(username, hostmask, channel, text):
+	data = dynmap.GetTime()
+	time = data["time"]
+	if data["canSleep"]:
+		time += " (you can sleep)"
+	SendMessage(channel, "The current time is {0}".format(time))
