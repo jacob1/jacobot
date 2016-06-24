@@ -192,7 +192,7 @@ class Dynmap(object):
 			if servertime >= 12541 and servertime <= 23458:
 				CanSleep = True
 			elif data["isThundering"]:
-			    CanSleep = True
+				CanSleep = True
 			return {"time": formatted_time, "serverTime": servertime, "canSleep": CanSleep}
 
 dynmap = Dynmap()
