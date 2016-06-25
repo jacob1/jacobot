@@ -529,10 +529,18 @@ def RemoveTagCmd(username, hostmask, channel, text):
 @command("disabletag", minArgs=1, admin=True)
 def DisableTagCmd(username, hostmask, channel, text):
 	"""(disabletag <tag>). Disables a tag. Admin only."""
-	if DisableTag(text[0]):
+	if len(text) > 1:
+		fail = False
+		for tag in text:
+			if not DisableTag(tag):
+				fail = True
+				break
+	else:
+		fail = DisableTag(text[0])
+	if not fail:
 		SendMessage(channel, "Done.")
 	else:
-		SendMessage(channel, "Error, could not disable tag.")
+		SendMessage(channel, "Error, could not disable tag{0}.".format("" if len(text) == 1 else "s"))
 
 @command("enabletag", minArgs=1, admin=True)
 def DisableTagCmd(username, hostmask, channel, text):
