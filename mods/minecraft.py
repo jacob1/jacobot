@@ -134,6 +134,11 @@ class Dynmap(object):
 	data = None
 	lastClaimFetched = {}
 	claimData = {}
+	DAY_START = 22812
+	DAY_START_RAIN = 23031
+	NIGHT_START = 13187
+	NIGHT_START_RAIN = 12969
+
 	def __init__(self):
 		self.sizeRegex = r"<strong>W<\/strong>:(\d+)\s+<strong>H<\/strong>:(\d+)\s+<strong>S<\/strong>:(\d+)<br>"
 		self.buildTrustRegex = r"<strong>Trust:<\/strong><br> (.*?)<br>"
@@ -216,23 +221,23 @@ class Dynmap(object):
 		return players
 
 	def GetTime(self):
-			data = self.GetData()
-			servertime = data["servertime"]
-			CanSleep = False
-			
-			hours = (servertime / 1000) + 6
-			if hours > 24:
-				hours -= 24
-			minutes = (hours - math.floor(hours)) * 60
-			if minutes > 10:
-				formatted_time = "{0}:{1}".format(int(hours), int(minutes))
-			else:
-				formatted_time = "{0}:0{1}".format(int(hours), int(minutes))
-			if servertime >= 12541 and servertime <= 23458:
-				CanSleep = True
-			elif data["isThundering"]:
-				CanSleep = True
-			return {"time": formatted_time, "serverTime": servertime, "canSleep": CanSleep}
+		data = self.GetData()
+		servertime = data["servertime"]
+		CanSleep = False
+
+		hours = servertime / 1000
+		minutes = (hours - math.floor(hours)) * 60
+		hours = (hours + 6) % 24
+		formatted_time = "{0:02}:{1:02}{2}".format(int((hours-1)%12+1), int(minutes), "AM" if hours < 12 else "PM")
+		if servertime >= self.NIGHT_START and servertime <= self.DAY_START:
+			CanSleep = True
+		elif data["isThundering"]:
+			CanSleep = True
+		return {"time": formatted_time, "serverTime": servertime, "canSleep": CanSleep}
+
+	def GetWeather(self):
+		data = self.GetData()
+		return {"isThundering" : data["isThundering"], "hasStorm" : data["hasStorm"]}
 
 dynmap = Dynmap()
 
@@ -340,6 +345,26 @@ def GetClaim(username, hostmask, channel, text):
 def GetTime(username, hostmask, channel, text):
 	data = dynmap.GetTime()
 	time = data["time"]
-	if data["canSleep"]:
-		time += " (you can sleep)"
-	SendMessage(channel, "The current time is {0}".format(time))
+
+	# Calculate IRL time until next phase
+	serverTime = data["serverTime"]
+	isDay = True
+	if serverTime > dynmap.DAY_START:
+		serverTime = serverTime - 24000
+	if serverTime < dynmap.NIGHT_START:
+		phasetime = math.floor((dynmap.NIGHT_START-serverTime)/20)
+	else:
+		isDay = False
+		phasetime = math.floor((dynmap.DAY_START-serverTime)/20)
+
+	SendMessage(channel, "The current minecraft time is {0}. {1:02}:{2:02} minutes until {3}.{4}".format(time, math.floor(phasetime//60), phasetime%60, "night" if isDay else "day", " (you can sleep)" if data["canSleep"] else ""))
+
+@command("getweather")
+def GetTime(username, hostmask, channel, text):
+	data = dynmap.GetWeather()
+	if data["isThundering"]:
+		SendMessage(channel, "It is a thunderstorm")
+	elif data["hasStorm"]:
+		SendMessage(channel, "It is raining")
+	else:
+		SendMessage(channel, "It is clear")
