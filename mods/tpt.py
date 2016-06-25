@@ -225,8 +225,9 @@ def ReportsList():
 	return matches
 
 #Prints reports on a save (reporter and report text)
-def PrintReports(channel, reportlist):
+def PrintReports(channel, reportlist, saveID=None):
 	h = html.parser.HTMLParser()
+	showtags = False
 	for report in reportlist:
 		reporter = report[0]
 		text = h.unescape(report[1])
@@ -234,8 +235,12 @@ def PrintReports(channel, reportlist):
 			return " http://tpt.io/~" + match.group(1)
 		text = re.sub(" ?(?:(?:~|ID:?|id:?|save | )([0-9]{4,}))", replace, text)
 		SendMessage(channel, "\00314%s\003: %s" % (reporter, text.strip()))
+		if "tags" in text:
+			showtags = True
 	if not reportlist:
 		SendMessage(channel, "No reports on that save")
+	if showtags and saveID:
+		PrintTags(channel, saveID)
 
 #prints the report list (save title, save author, save ID link, report count)
 def PrintReportList(channel, reportlist):
@@ -247,7 +252,7 @@ def PrintReportList(channel, reportlist):
 		author = report[3]
 		SendMessage(channel, "\00302%s\003 by \00305%s\003:\00314 http://tpt.io/~%s#Reports, %s report%s" % (title, author, ID, count, "" if count == 1 else "s"))
 		reportlist = SaveReports(ID)
-		PrintReports(channel, reportlist[:count])
+		PrintReports(channel, reportlist[:count], ID)
 
 def GetConvoList():
 	page = GetPage("http://powdertoy.co.uk/Conversations.html", GetTPTSessionInfo(0))
@@ -322,7 +327,7 @@ def PrintTags(channel, saveID):
 	if not saveInfo:
 		SendMessage(channel, "Error: Could not load save info")
 	elif saveInfo["Tags"]:
-		SendMessage(channel, ", ".join(saveInfo["Tags"]))
+		SendMessage(channel, "Tags: {0}".format(", ".join(saveInfo["Tags"])))
 	else:
 		SendMessage(channel, "No tags on that save")
 
