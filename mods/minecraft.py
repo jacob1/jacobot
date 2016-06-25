@@ -7,24 +7,52 @@ RegisterMod(__name__)
 
 class CraftingList(object):
 	recipes = {}
+	replacements = {}
+
+	def _ParseItem(self, line):
+		pieces = line.lower().split('|')
+		(item, recipelines, amount) = "", "", 0
+		if len(pieces) != 3:
+			raise Exception("Could not parse line: {0}".format(line))
+		item = pieces[0].strip()
+		recipelines = pieces[-1].split('/')
+		if len(pieces) == 3:
+			amount = int(pieces[1].strip())
+
+		aliases = item.split(",")
+		orig = True
+		for alias in aliases:
+			fixedalias = self._Replace(alias)
+			self.recipes[fixedalias] = {"recipe" : [], "amount" : amount, "displayname" : aliases[0], "orig" : orig}
+			for something in recipelines:
+				self.recipes[fixedalias]["recipe"].append([a.strip() for a in something.split('-')])
+			orig = False
+
+	def _ParseReplacement(self, line):
+		pieces = line.lower().split('|')
+		if len(pieces) != 2:
+			raise Exception("Could not parse line: {0}".format(line))
+		old = pieces[0].strip()
+		new = pieces[1].strip()
+		self.replacements[old] = new
+
 	def __init__(self):
 		craftinglisttxt = open("mods/minecraft-craftinglist.txt")
 		lines = craftinglisttxt.readlines()
 		craftinglisttxt.close()
 		for line in lines:
-			if not len(line) or line[0] != ' ':
-				continue
-			item = line.lower().split('|')[0].strip()
-			recipelines = line.lower().split('|')[1].split('/')
+			if len(line) and line[0] == ' ':
+				self._ParseItem(line)
+			elif len(line) and line[0] == "=":
+				self._ParseReplacement(line[1:])
 
-			self.recipes[item] = []
-			for something in recipelines:
-				self.recipes[item].append([a.strip() for a in something.split('-')])
-	
 	def PrintRecipe(self, name):
-		if not name in self.recipes:
+		name = name.lower()
+		fixedname = self._Replace(name)
+		if not fixedname in self.recipes:
 			return "Couldn't find recipe, try using {0}search".format(config.commandChar)
-		recipe = self.recipes[name]
+		recipe = self.recipes[fixedname]["recipe"]
+		amount = self.recipes[fixedname]["amount"]
 		longest = [0, 0, 0]
 		for i in range(len(recipe)):
 			for j in range(len(recipe[i])):
@@ -35,38 +63,49 @@ class CraftingList(object):
 		for i in range(len(recipe)):
 			for j in range(len(recipe[i])):
 				length = len(recipe[i][j])
-				
+
 				output += "_"*int((longest[j]+2-length)/2)
 				output += recipe[i][j]
 				output += "_"*int((longest[j]+3-length)/2)
 				if j != len(recipe[i])-1:
 					output += "|"
+			if amount and i == 0:
+				output += " ({0})".format(amount)
 			output += "\n"
 		return output.strip()
-	
-	def _SearchRecipeInner(self, recipe, name):
+
+	def _SearchRecipeInner(self, recipe, name, fixedname):
 		for i in recipe:
 			for j in i:
-				if name == j:
+				if name == j or fixedname == j:
 					return name
-		
+
 	def SearchRecipe(self, name):
 		exactMatches = []
 		closeMatches = []
 		badMatches = []
-		for recipe in self.recipes:
-			if name == recipe:
-				exactMatches.append(recipe)
-			elif name in recipe:
-				closeMatches.append(recipe)
+		name = name.lower()
+		fixedname = self._Replace(name)
+		for recipe, recipedict in self.recipes.items():
+			if not recipedict["orig"]:
+				continue
+			if fixedname == recipe:
+				exactMatches.append(recipedict["displayname"])
+			elif fixedname in recipe or name in recipe:
+				closeMatches.append(recipedict["displayname"])
 			else:
-				match = self._SearchRecipeInner(self.recipes[recipe], name)
+				match = self._SearchRecipeInner(recipedict, name, fixedname)
 				if match:
-					badMatches.append(recipe)
+					badMatches.append(recipedict["displayname"])
 		if len(exactMatches) or len(closeMatches) or len(badMatches):
 			return ", ".join(exactMatches+closeMatches+badMatches)
 		else:
 			return "No matches"
+
+	def _Replace(self, name):
+		for old, new in self.replacements.items():
+			name = name.replace(old, new)
+		return name
 
 recipes = CraftingList()
 

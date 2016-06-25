@@ -2,356 +2,382 @@ Lines without spaces at the start are ignored
 Everything is automatically converted to lowercase also
 
 Recipes are formatted like this:
-ItemName | Row 1 - Row 1 - Row 1 / Row 2 - Row 2 - Row 2 / Row 3 - Row 3 - Row 3
+ItemName | Amount | Row 1 - Row 1 - Row 1 / Row 2 - Row 2 - Row 2 / Row 3 - Row 3 - Row 3
+
+Replacements here (for easier searaches)
+=Wooden | Wood
+=Iron Ingot | Iron
+=Gold Ingot | Gold
+=Lapis Lazuli | Lapis
+=Panes | Pane
+=Glistening | Glistering
+=Red Dye | Rose Red
+=Blue Dye | Lapis Lazuli
+=Yellow Dye | Dandelion Yellow
+=Green Dye | Cactus Green
+=Brown Dye | Cocoa Beans
+=Black Dye | Ink Sac
+
 
 /////////////////
 //Basic recipes//
 /////////////////
 
- Wood Plank | Wood
- Stick | Wood Plank / Wood Plank
- Crafting Table | Wood Plank - Wood Plank / Wood Plank - Wood Plank
- Furnace | Cobblestone - Cobblestone - Cobblestone / Cobblestone - - Cobblestone  / Cobblestone - Cobblestone - Cobblestone
- Chest | Wood Plank - Wood Plank - Wood Plank / Wood Plank - - Wood Plank / Wood Plank - Wood Plank - Wood Plank
- Torch | Coal / Stick
+ Wood Plank | 4 | Wood
+ Stick | 4 | Wood Plank / Wood Plank
+ Crafting Table | 1 | Wood Plank - Wood Plank / Wood Plank - Wood Plank
+ Furnace | 1 | Cobblestone - Cobblestone - Cobblestone / Cobblestone - - Cobblestone  / Cobblestone - Cobblestone - Cobblestone
+ Chest | 1 | Wood Plank - Wood Plank - Wood Plank / Wood Plank - - Wood Plank / Wood Plank - Wood Plank - Wood Plank
+ Trapped Chest | 1 | Tripwire Hook - Chest
+ Torch | 4 | Coal / Stick
 
 /////////////////////////
 //Manufactures recepies//
 /////////////////////////
 
- Glowstone | Glowstone Dust - Glowstone Dust / Glowstone Dust - Glowstone Dust
- Wool | String - String / String - String
- TNT | Gunpowder - Sand - Gunpowder / Sand - Gunpowder - Sand / Gunpowder - Sand - Gunpowder
+ Glowstone | 1 | Glowstone Dust - Glowstone Dust / Glowstone Dust - Glowstone Dust
+ Wool | 1 | String - String / String - String
+ TNT | 1 | Gunpowder - Sand - Gunpowder / Sand - Gunpowder - Sand / Gunpowder - Sand - Gunpowder
+ Bookshelf | 1 | Wood Plank - Wood Plank - Wood Plank / Book - Book - Book / Wood Plank - Wood Plank - Wood Plank
 
- Wood Slab | Wood Plank - Wood Plank - Wood Plank
- Stone Slab | Stone - Stone - Stone
- Sandstone Slab | Sandstone - Sandstone - Sandstone
- Red Sandstone Slab | Red Sandstone - Red Sandstone - Red Sandstone
- Cobblestone Slab | Cobblestone - Cobblestone - Cobblestone
- Brick Slab | Brick - Brick - Brick
- Stone Brick Slab | Stone Brick - Stone Brick - Stone Brick
- Nether Brick Slab | Nether Brick - Nether Brick - Nether Brick
- Quartz Slab | Block of Quartz - Block of Quartz - Block of Quartz
- Purpur Slab | Purpur Block | Purpur Block | Purpur Block
+ Wood Slab | 6 | Wood Plank - Wood Plank - Wood Plank
+ Stone Slab | 6 | Stone - Stone - Stone
+ Sandstone Slab | 6 | Sandstone - Sandstone - Sandstone
+ Red Sandstone Slab | 6 | Red Sandstone - Red Sandstone - Red Sandstone
+ Cobblestone Slab | 6 | Cobblestone - Cobblestone - Cobblestone
+ Brick Slab | 6 | Brick - Brick - Brick
+ Stone Brick Slab | 6 | Stone Brick - Stone Brick - Stone Brick
+ Nether Brick Slab | 6 | Nether Brick - Nether Brick - Nether Brick
+ Quartz Slab | 6 | Block of Quartz - Block of Quartz - Block of Quartz
+ Purpur Slab | 6 | Purpur Block - Purpur Block - Purpur Block
 
- Wood Stairs | Wood Plank - - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank - Wood Plank
- Stone Stairs | Stone - - / Stone - Stone - / Stone - Stone  - Stone
- Sandstone Stairs | Sandstone - - / Sandstone - Sandstone - / Sandstone - Sandstone - Sandstone
- Red Sandstone Stairs | Red Sandstone - - / Red Sandstone - Red Sandstone - / Red Sandstone - Red Sandstone - Red Sandstone
- Cobblestone Stairs | Cobblestone - - / Cobblestone - Cobblestone - / Cobblestone - Cobblestone - Cobblestone
- Brick Stairs | Brick - - / Brick - Brick - / Brick - Brick - Brick
- Stone Brick Stairs | Stone Brick - - / Stone Brick - Stone Brick - / Stone Brick - Stone Brick - Stone Brick
- Nether Brick Stairs | Nether Brick - - / Nether Brick - Nether Brick - / Nether Brick - Nether Brick - Nether Brick
- Quartz Stairs | Block of Quartz - - / Block of Quartz - Block of Quartz - / Block of Quartz - Block of Quartz - Block of Quartz
- Purpur Stairs | Purpur Block - - / Purpur Block - Purpur Block - / Purpur Block - Purpur Block - Purpur Block
+ Wood Stairs | 4 | Wood Plank - - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank - Wood Plank
+ Stone Stairs | 4 | Stone - - / Stone - Stone - / Stone - Stone  - Stone
+ Sandstone Stairs | 4 | Sandstone - - / Sandstone - Sandstone - / Sandstone - Sandstone - Sandstone
+ Red Sandstone Stairs | 4 | Red Sandstone - - / Red Sandstone - Red Sandstone - / Red Sandstone - Red Sandstone - Red Sandstone
+ Cobblestone Stairs | 4 | Cobblestone - - / Cobblestone - Cobblestone - / Cobblestone - Cobblestone - Cobblestone
+ Brick Stairs | 4 | Brick - - / Brick - Brick - / Brick - Brick - Brick
+ Stone Brick Stairs | 4 | Stone Brick - - / Stone Brick - Stone Brick - / Stone Brick - Stone Brick - Stone Brick
+ Nether Brick Stairs | 4 | Nether Brick - - / Nether Brick - Nether Brick - / Nether Brick - Nether Brick - Nether Brick
+ Quartz Stairs | 4 | Block of Quartz - - / Block of Quartz - Block of Quartz - / Block of Quartz - Block of Quartz - Block of Quartz
+ Purpur Stairs | 4 | Purpur Block - - / Purpur Block - Purpur Block - / Purpur Block - Purpur Block - Purpur Block
 
- Snow Block | Snowball - Snowball / Snowball - Snowball
- Snow Layer | Snow - Snow - Snow
- Clay Block | Clay - Clay / Clay - Clay
- Bricks | Brick - Brick / Brick - Brick
- Stone Brick | Stone - Stone / Stone - Stone
- Chiseled Stone Brick | Stone Brick Slab / Stone Brick Slab
- Mossy Stone Brick | Stone Brick - Vines
- Nether Brick Block | Nether Brick - Nether Brick / Nether Brick - Nether Brick
- End Stone Bricks | End Stone - End Stone / End Stone - End Stone
- Purpur Block | Popped Chorus Fruit - Popped Chorus Fruit / Popped Chorus Fruit - Popped Chorus Fruit
+ Snow Block,Snow | 1 | Snowball - Snowball / Snowball - Snowball
+ Snow Layer | 6 | Snow - Snow - Snow
+ Clay Block,Clay | 4 | Clay - Clay / Clay - Clay
+ Bricks | 1 | Brick - Brick / Brick - Brick
+ Stone Brick,Stone Bricks | 4 | Stone - Stone / Stone - Stone
+ Chiseled Stone Brick,Chiseled Stone Bricks | 1 | Stone Brick Slab / Stone Brick Slab
+ Mossy Stone Brick,Mossy Stone Bricks | 1 | Stone Brick - Vines
+ Nether Brick,Nether Bricks | 1 | Nether Brick (item) - Nether Brick (item) / Nether Brick (item) - Nether Brick (item)
+ Red Nether Brick,Red Nether Bricks | 1 | Nether Wart - Nether Brick (item) / Nether Brick (item) - Nether Wart
+ End Stone Bricks | 4 | End Stone - End Stone / End Stone - End Stone
+ Purpur Block | 4 | Popped Chorus Fruit - Popped Chorus Fruit / Popped Chorus Fruit - Popped Chorus Fruit
+ Bone Block | 1 | Bone Meal - Bone Meal - Bone Meal / Bone Meal - Bone Meal - Bone Meal / Bone Meal - Bone Meal - Bone Meal
+ Nether Wart Block | 1 | Nether Wart - Nether Wart - Nether Wart / Nether Wart - Nether Wart - Nether Wart / Nether Wart - Nether Wart - Nether Wart
+ Magma Block | 1 | Magma Cream - Magma Cream / Magma Cream - Magma Cream
 
- Bookshelf | Wood Plank - Wood Plank - Wood Plank / Book - Book - Book / Wood Plank - Wood Plank - Wood Plank
+ Sandstone | 1 | Sand - Sand / Sand - Sand
+ Smooth Sandstone | 4 | Sandstone - Sandstone / Sandstone - Sandstone
+ Chiseled Sandstone | 1 | Sandstone Slab / Sandstone Slab
+ Red Sandstone | 1 | Red Sand - Red Sand / Red Sand - Red Sand
+ Smooth Red Sandstone | 4 | Red Sandstone - Red Sandstone / Red Sandstone - Red Sandstone
+ Chiseled Red Sandstone | 1 | Red Sandstone Slab / Red Sandstone Slab
+ Block of Quartz | 1 | Nether Quartz - Nether Quartz / Nether Quartz - Nether Quartz
+ Pillar Quartz Block | 2 | Block of Quartz / Block of Quartz
+ Chiseled Quartz Block | 1 | Quartz Slab / Quartz Slab
+ Purpur Pillar | 1 | Purpur Slab / Purpur Slab
+ End Rod | 4 | Blaze Rod / Popped Chorus Fruit
+ Jack 'o' Lantern | 1 | Pumpkin / Torch
+ Granite | 2 | Diorite - Nether Quartz
+ Polished Granite | 4 | Granite - Granite / Granite - Granite
+ Diorite | 2 | Cobblestone - Nether Quartz / Nether Quartz - Cobblestone
+ Polished Diorite | 4 | Diorite - Diorite / Diorite - Diorite
+ Andesite | 2 | Cobblestone - Doirite
+ Polished Andesite | 4 | Andesite - Andesite / Andesite - Andesite
+ Coarse Dirt | 4 | Dirt - Gravel / Gravel - Dirt
+ Bone Meal | 9 | Bone Block
 
- Sandstone | Sand - Sand / Sand - Sand
- Smooth Sandstone | Sandstone - Sandstone / Sandstone - Sandstone
- Chiseled Sandstone | Sandstone Slab / Sandstone Slab
- Red Sandstone | Red Sand - Red Sand / Red Sand - Red Sand
- Smooth Red Sandstone | Red Sandstone - Red Sandstone / Red Sandstone - Red Sandstone
- Chiseled Red Sandstone | Red Sandstone Slab / Red Sandstone Slab
- Block of Quartz | Nether Quartz - Nether Quartz / Nether Quartz - Nether Quartz
- Pillar Quartz Block | Block of Quartz / Block of Quartz
- Chiseled Quartz Block | Quartz Slab / Quartz Slab
- Purpur Pillar | Purpur Slab / Purpur Slab
- End Rod | Blaze Rod / Popped Chorus Fruit
- Jack 'o' Lantern | Pumpkin / Torch
- Ender Chest | Obsidian - Obsidian - Obsidian / Obsidian - Eye of Ender - Obsidian / Obsidian - Obsidian - Obsidian
- Anvil | Block of Iron - Block of Iron - Block of Iron / - Iron - / Iron - Iron - Iron
- Beacon | Glass - Glass - Glass / Glass - Nether Star - Glass / Obsidian - Obsidian - Obsidian
- Granite | Diorite - Nether Quartz
- Polished Granite | Granite - Granite / Granite - Granite
- Diorite | Cobblestone - Nether Quartz / Nether Quartz - Cobblestone
- Polished Diorite | Diorite - Diorite / Diorite - Diorite
- Andesite | Cobblestone - Doirite
- Polished Andesite | Andesite - Andesite / Andesite - Andesite
- Coarse Dirt | Dirt - Gravel / Gravel - Dirt
+ Ender Chest | 1 | Obsidian - Obsidian - Obsidian / Obsidian - Eye of Ender - Obsidian / Obsidian - Obsidian - Obsidian
+ Anvil | 1 | Block of Iron - Block of Iron - Block of Iron / - Iron - / Iron - Iron - Iron
+ Beacon | 1 | Glass - Glass - Glass / Glass - Nether Star - Glass / Obsidian - Obsidian - Obsidian
 
 //////////////////////////
 //Transportation recipes//
 //////////////////////////
 
- Rail | Iron - - Iron / Iron - Stick - Iron / Iron - - Iron
- Activator Rail | Iron - Stick - Iron / Iron - Redstone Torch - Iron / Iron - Stick - Iron
- Powered Rail | Gold - - Gold / Gold - Stick - Gold / Gold - Redstone - Gold
- Detector Rail | Iron - - Iron / Iron - Stone Pressure Plate - Iron / Iron - Redstone - Iron
- Minecart with Chest | Chest / Minecart
- Carrot on a Stick | Fishing Rod / - Carrot
- Minecart with Furnace | Furnace / Minecart
- Minecart with Hopper | Hopper / Minecart
- Minecart | - - / Iron - - Iron / Iron - Iron - Iron
- Minecart with TNT | TNT / Minecart
- Boat | - - / Wood Plank - - Wood Plank / Wood Plank - Wood Plank - Wood Plank
+ Rail | 16 | Iron - - Iron / Iron - Stick - Iron / Iron - - Iron
+ Activator Rail | 6 | Iron - Stick - Iron / Iron - Redstone Torch - Iron / Iron - Stick - Iron
+ Powered Rail | 6 | Gold - - Gold / Gold - Stick - Gold / Gold - Redstone - Gold
+ Detector Rail | 6 | Iron - - Iron / Iron - Stone Pressure Plate - Iron / Iron - Redstone - Iron
+ Minecart | 1 | - - / Iron - - Iron / Iron - Iron - Iron
+ Minecart with Chest,Chest Minecart | 1 | Chest / Minecart
+ Minecart with Furnace,Furnace Minecart | 1 | Furnace / Minecart
+ Minecart with Hopper,Hopper Minecraft | 1 | Hopper / Minecart
+ Minecart with TNT,TNT Minecart | 1 | TNT / Minecart
+ Carrot on a Stick | 1 | Fishing Rod / - Carrot
+ Boat | 1 | - - / Wood Plank - - Wood Plank / Wood Plank - Wood Plank - Wood Plank
+ Boat (pocket edition) | 1 | Wood Plank - Wooden Shovel - Wood Plank / Wood Plank - Wood Plank - Wood Plank
 
 ////////////////
 //Tool recipes//
 ////////////////
 
- Wood Axe | Wood Plank - Wood Plank - / Wood Plank - Stick - / - Stick -
- Iron Axe | Iron - Iron - / Iron - Stick - / - Stick -
- Gold Axe | Gold - Gold - / Gold - Stick - / - Stick -
- Diamond Axe | Diamond - Diamond - / Diamond - Stick - / - Stick -
- Stone Axe | Cobblestone - Cobblestone - / Cobblestone - Stick - / - Stick -
+ Wood Axe | 1 | Wood Plank - Wood Plank - / Wood Plank - Stick - / - Stick -
+ Iron Axe | 1 | Iron - Iron - / Iron - Stick - / - Stick -
+ Gold Axe | 1 | Gold - Gold - / Gold - Stick - / - Stick -
+ Diamond Axe | 1 | Diamond - Diamond - / Diamond - Stick - / - Stick -
+ Stone Axe | 1 | Cobblestone - Cobblestone - / Cobblestone - Stick - / - Stick -
 
- Wood Pickaxe | Wood Plank - Wood Plank - Wood Plank / - Stick - / - Stick -
- Iron Pickaxe | Iron - Iron - Iron / - Stick - / - Stick -
- Gold Pickaxe | Gold - Gold - Gold / - Stick - / - Stick -
- Diamond Pickaxe | Diamond - Diamond - Diamond / - Stick - / - Stick -
- Stone Pickaxe | Cobblestone - Cobblestone - Cobblestone / - Stick - / - Stick -
+ Wood Pickaxe | 1 | Wood Plank - Wood Plank - Wood Plank / - Stick - / - Stick -
+ Iron Pickaxe | 1 | Iron - Iron - Iron / - Stick - / - Stick -
+ Gold Pickaxe | 1 | Gold - Gold - Gold / - Stick - / - Stick -
+ Diamond Pickaxe | 1 | Diamond - Diamond - Diamond / - Stick - / - Stick -
+ Stone Pickaxe | 1 | Cobblestone - Cobblestone - Cobblestone / - Stick - / - Stick -
 
- Wood Shovel | Wood Plank / Stick / Stick
- Iron Shovel | Iron / Stick / Stick
- Gold Shovel | Gold / Stick / Stick
- Diamond Shovel | Diamond / Stick / Stick
- Stone Shovel | Cobblestone / Stick / Stick
+ Wood Shovel | 1 | Wood Plank / Stick / Stick
+ Iron Shovel | 1 | Iron / Stick / Stick
+ Gold Shovel | 1 | Gold / Stick / Stick
+ Diamond Shovel | 1 | Diamond / Stick / Stick
+ Stone Shovel | 1 | Cobblestone / Stick / Stick
 
- Wood Sword | - Wood Plank - / - Wood Plank - / - Stick -
- Iron Sword | - Iron - / - Iron - / - Stick -
- Gold Sword | - Gold - / - Gold - / - Stick -
- Diamond Sword | - Diamond - / - Diamond - / - Stick -
- Stone Sword | - Cobblestone - / - Cobblestone - / - Stick -
+ Wood Sword | 1 | - Wood Plank - / - Wood Plank - / - Stick -
+ Iron Sword | 1 | - Iron - / - Iron - / - Stick -
+ Gold Sword | 1 | - Gold - / - Gold - / - Stick -
+ Diamond Sword | 1 | - Diamond - / - Diamond - / - Stick -
+ Stone Sword | 1 | - Cobblestone - / - Cobblestone - / - Stick -
 
- Wood Hoe | Wood Plank - Wood Plank - / - Stick - / - Stick -
- Iron Hoe | Iron - Iron - / - Stick - / - Stick -
- Gold Hoe | Gold - Gold - / - Stick - / - Stick -
- Diamond Hoe | Diamond - Diamond - / - Stick - / - Stick -
- Stone Hoe | Cobblestone - Cobblestone - / - Stick - / - Stick -
+ Wood Hoe | 1 | Wood Plank - Wood Plank - / - Stick - / - Stick -
+ Iron Hoe | 1 | Iron - Iron - / - Stick - / - Stick -
+ Gold Hoe | 1 | Gold - Gold - / - Stick - / - Stick -
+ Diamond Hoe | 1 | Diamond - Diamond - / - Stick - / - Stick -
+ Stone Hoe | 1 | Cobblestone - Cobblestone - / - Stick - / - Stick -
 
- Flint and Steel | Iron - / - Flint
- Bucket | Iron - - Iron / - Iron -
- Compass | - Iron - / Iron - Redstone - Iron / - Iron -
+ Flint and Steel | 1 | Iron - / - Flint
+ Bucket | 1 | Iron - - Iron / - Iron -
+ Compass | 1 | - Iron - / Iron - Redstone - Iron / - Iron -
 
- Map | Paper - Paper - Paper / Paper - Compass - Paper / Paper - Paper - Paper
- Map (zoomed out) | Paper - Paper - Paper / Paper - Map - Paper / Paper - Paper - Paper
- Clock | - Gold - / Gold - Redstone - Gold / - Gold -
- Fishing Rod | - - Stick / - Stick - String / Stick - - String
- Shears | - Iron / Iron -
- Fire Charge | Blaze Powder - Coal / - Gunpowder
+ Map | 1 | Paper - Paper - Paper / Paper - Compass - Paper / Paper - Paper - Paper
+ Map (zoomed out) | 1 | Paper - Paper - Paper / Paper - Map - Paper / Paper - Paper - Paper
+ Clock | 1 | - Gold - / Gold - Redstone - Gold / - Gold -
+ Fishing Rod | 1 | - - Stick / - Stick - String / Stick - - String
+ Shears | 1 | - Iron / Iron -
+ Fire Charge | 3 | Blaze Powder - Coal / - Gunpowder
 
- Bow | - Stick - String / Stick - - String / - Stick - String
- Arrow | Flint / Stick / Feather
- Spectral Arrow | - Glowstone Dust - / Glowstone Dust - Arrow - Glowstone Dust / - Glowstone Dust - 
- Tipped Arrow | Arrow - Arrow - Arrow / Arrow - Lingering Potion - Arrow / Arrow - Arrow - Arrow
+ Bow | 1 | - Stick - String / Stick - - String / - Stick - String
+ Arrow | 4 | Flint / Stick / Feather
+ Spectral Arrow | 2 | - Glowstone Dust - / Glowstone Dust - Arrow - Glowstone Dust / - Glowstone Dust - 
+ Tipped Arrow | 8 | Arrow - Arrow - Arrow / Arrow - Lingering Potion - Arrow / Arrow - Arrow - Arrow
 
- Shield | Wood Plank - Iron - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Wood Plank - 
+ Shield | 1 | Wood Plank - Iron - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Wood Plank - 
 
- Leather Helmet | Leather - Leather - Leather / Leather - - Leather
- Gold Helmet | Gold - Gold - Gold / Gold - - Gold
- Chainmail Helmet | Fire - Fire - Fire / Fire - - Fire
- Iron Helmet | Iron - Iron - Iron / Iron - - Iron
- Diamond Helmet | Diamond - Diamond - Diamond / Diamond - - Diamond
+ Leather Helmet | 1 | Leather - Leather - Leather / Leather - - Leather
+ Gold Helmet | 1 | Gold - Gold - Gold / Gold - - Gold
+ Iron Helmet | 1 | Iron - Iron - Iron / Iron - - Iron
+ Diamond Helmet | 1 | Diamond - Diamond - Diamond / Diamond - - Diamond
 
- Leather Leggings | Leather - Leather - Leather / Leather - - Leather / Leather - - Leather
- Gold Leggings | Gold - Gold - Gold / Gold - - Gold / Gold - - Gold
- Chainmail Leggings | Fire - Fire - Fire / Fire - - Fire / Fire - - Fire
- Iron Leggings | Iron - Iron - Iron / Iron - - Iron / Iron - - Iron
- Diamond Leggings | Diamond - Diamond - Diamond / Diamond - - Diamond / Diamond - - Diamond
+ Leather Leggings | 1 | Leather - Leather - Leather / Leather - - Leather / Leather - - Leather
+ Gold Leggings | 1 | Gold - Gold - Gold / Gold - - Gold / Gold - - Gold
+ Iron Leggings | 1 | Iron - Iron - Iron / Iron - - Iron / Iron - - Iron
+ Diamond Leggings | 1 | Diamond - Diamond - Diamond / Diamond - - Diamond / Diamond - - Diamond
 
- Leather Chestplate | Leather - - Leather / Leather - Leather - Leather / Leather - Leather - Leather
- Gold Chestplate | Gold - - Gold / Gold - Gold - Gold / Gold - Gold - Gold
- Chainmail Chestplate | Fire - - Fire / Fire - Fire - Fire / Fire - Fire - Fire
- Iron Chestplate | Iron - - Iron / Iron - Iron - Iron / Iron - Iron - Iron
- Diamond Chestplate | Diamond - - Diamond / Diamond - Diamond - Diamond / Diamond - Diamond - Diamond
+ Leather Chestplate | 1 | Leather - - Leather / Leather - Leather - Leather / Leather - Leather - Leather
+ Gold Chestplate | 1 | Gold - - Gold / Gold - Gold - Gold / Gold - Gold - Gold
+ Iron Chestplate | 1 | Iron - - Iron / Iron - Iron - Iron / Iron - Iron - Iron
+ Diamond Chestplate | 1 | Diamond - - Diamond / Diamond - Diamond - Diamond / Diamond - Diamond - Diamond
 
- Leather Boots | Leather - - Leather / Leather - - Leather
- Gold Boots | Gold - - Gold / Gold - - Gold
- Chainmail Boots | Fire - - Fire / Fire - - Fire
- Iron Boots | Iron - - Iron / Iron - - Iron
- Diamond Boots | Diamond - - Diamond / Diamond - - Diamond
+ Leather Boots | 1 | Leather - - Leather / Leather - - Leather
+ Gold Boots | 1 | Gold - - Gold / Gold - - Gold
+ Iron Boots | 1 | Iron - - Iron / Iron - - Iron
+ Diamond Boots | 1 | Diamond - - Diamond / Diamond - - Diamond
 
 /////////////////////
 //Mechanism recipes//
 /////////////////////
 
- Wooden Trapdoor | - - / Wood Plank - Wood Plank - Wood Plank / Wood Plank - Wood Plank - Wood PLank
- Iron Trapdoor | Iron - Iron / Iron - Iron
- Wooden Pressure Plate | Wood Plank - Wood Plank
- Stone Pressure Plate | Stone - Stone
- Weighted Pressure Plate | Iron - Iron
- Weighted Pressure Plate (Gold) | Gold - Gold
- Button | Stone
- Wooden Button | Wood Plank
- Note Block | Wood Plank - Wood Plank - Wood Plank / Wood Plank - Redstone - Wood Plank / Wood Plank - Wood Plank - Wood Plank
- Jukebox | Wood Plank - Wood Plank - Wood Plank / Wood Plank - Diamond - Wood Plank / Wood Plank - Wood Plank - Wood Plank
+ Wooden Trapdoor,Trapdoor | 2 | - - / Wood Plank - Wood Plank - Wood Plank / Wood Plank - Wood Plank - Wood PLank
+ Iron Trapdoor | 1 | Iron - Iron / Iron - Iron
+ Wooden Pressure Plate,Pressure Plate | 1 | Wood Plank - Wood Plank
+ Stone Pressure Plate | 1 | Stone - Stone
+ Weighted Pressure Plate | 1 | Iron - Iron
+ Weighted Pressure Plate (Gold) | 1 | Gold - Gold
+ Stone Button,Button | 1 | Stone
+ Wooden Button | 1 | Wood Plank
+ Note Block | 1 | Wood Plank - Wood Plank - Wood Plank / Wood Plank - Redstone - Wood Plank / Wood Plank - Wood Plank - Wood Plank
+ Jukebox | 1 | Wood Plank - Wood Plank - Wood Plank / Wood Plank - Diamond - Wood Plank / Wood Plank - Wood Plank - Wood Plank
 
- Dispenser | Cobblestone - Cobblestone - Cobblestone / Cobblestone - Bow - Cobblestone / Cobblestone - Redstone - Cobblestone
- Dropper | Cobblestone - Cobblestone - Cobblestone / Cobblestone - - Cobblestone / Cobblestone - Redstone - Cobblestone
- Piston | Wood Plank - Wood Plank - Wood Plank / Cobblestone - Iron - Cobblestone / Cobblestone - Redstone - Cobblestone
- Sticky Piston | Slimeball / Piston
- Redstone Lamp | - Redstone - / Redstone - Glowstone - Redstone / - Redstone -
- Redstone Torch | Redstone / Stick
- Lever | Stick / Cobblestone
- Tripwire Hook | - Iron - / - Stick - / - Wood Plank -
- Daylight Sensor | Glass - Glass - Glass / Nether Quartz - Nether Quartz - Nether Quartz / Wood Slab - Wood Slab - Wood Slab
- Hopper | Iron - - Iron / Iron - Chest - Iron / - Iron -
- Trapped Chest | Tripwire Hook - Chest
+ Dispenser | 1 | Cobblestone - Cobblestone - Cobblestone / Cobblestone - Bow - Cobblestone / Cobblestone - Redstone - Cobblestone
+ Dropper | 1 | Cobblestone - Cobblestone - Cobblestone / Cobblestone - - Cobblestone / Cobblestone - Redstone - Cobblestone
+ Piston | 1 | Wood Plank - Wood Plank - Wood Plank / Cobblestone - Iron - Cobblestone / Cobblestone - Redstone - Cobblestone
+ Sticky Piston | 1 | Slimeball / Piston
+ Redstone Lamp | 1 | - Redstone - / Redstone - Glowstone - Redstone / - Redstone -
+ Redstone Torch | 1 | Redstone / Stick
+ Lever | 1 | Stick / Cobblestone
+ Tripwire Hook | 2 | - Iron - / - Stick - / - Wood Plank -
+ Daylight Sensor | 1 | Glass - Glass - Glass / Nether Quartz - Nether Quartz - Nether Quartz / Wood Slab - Wood Slab - Wood Slab
+ Hopper | 1 | Iron - - Iron / Iron - Chest - Iron / - Iron -
 
- Wood Door | Wood Plank - Wood Plank / Wood Plank - Wood Plank / Wood Plank - Wood Plank
- Iron Door | Iron - Iron / Iron - Iron / Iron - Iron
+ Wood Door,Door | 3 | Wood Plank - Wood Plank / Wood Plank - Wood Plank / Wood Plank - Wood Plank
+ Iron Door | 3 | Iron - Iron / Iron - Iron / Iron - Iron
 
- Redstone Repeater | - - / Redstone Torch - Redstone - Redstone Torch / Stone - Stone - Stone
- Redstone Comparator | - Redstone Torch - / Redstone Torch - Nether Quartz - Redstone Torch / Stone - Stone - Stone
+ Redstone Repeater | 1 | - - / Redstone Torch - Redstone - Redstone Torch / Stone - Stone - Stone
+ Redstone Comparator | 1 | - Redstone Torch - / Redstone Torch - Nether Quartz - Redstone Torch / Stone - Stone - Stone
+ Observer | 1 | Cobblestone - Cobblestone - Cobblestone / Redstone - Redstone - Nether Quartz / Cobblestone - Cobblestone - Cobblestone 
 
 ////////////////
 //Food recipes//
 ////////////////
 
- Bowl | - - / Wood Plank - - Wood Plank / - Wood Plank -
- Mushroom Stew | Red Mushroom - Brown Mushroom / - Bowl
- Rabbit Stew | - Cooked Rabbit - / Carrot - Baked Potato - Mushroom / - Bowl -
- Beetroot Soup | Beetroot - Beetroot - Beetroot / Beetroot - Beetroot - Beetroot / - Bowl -
+ Bowl | 4 | - - / Wood Plank - - Wood Plank / - Wood Plank -
+ Mushroom Stew | 1 | Red Mushroom - Brown Mushroom / - Bowl
+ Rabbit Stew | 1 | - Cooked Rabbit - / Carrot - Baked Potato - Mushroom / - Bowl -
+ Beetroot Soup | 1 | Beetroot - Beetroot - Beetroot / Beetroot - Beetroot - Beetroot / - Bowl -
 
- Bread | Wheat - Wheat - Wheat
- Sugar | Sugar Cane
- Cake | Milk - Milk - Milk / Sugar - Egg - Sugar / Wheat - Wheat - Wheat
- Cookie | Wheat - Cocoa Beans - Wheat
- Golden Apple | Gold - Gold - Gold / Gold - Apple - Gold / Gold - Gold - Gold
- Enchanted Golden Apple | Gold Block - Gold Block - Gold Block / Gold Block - Apple - Gold Block / Gold Block - Gold Block - Gold Block
- Melon Seeds | Melon
- Pumpkin Seeds | Pumpkin
- Pumpkin Pie | Egg - / Sugar - Pumpkin
- Hay Bale | Wheat - Wheat - Wheat / Wheat - Wheat - Wheat / Wheat - Wheat - Wheat
- Wheat | Hay Bale
- Golden Carrot | Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Carrot - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget
- Baked Potato | jacob614 - / Furnace - Coal
+ Bread | 1 | Wheat - Wheat - Wheat
+ Sugar | 1 | Sugar Cane
+ Cake | 1 | Milk - Milk - Milk / Sugar - Egg - Sugar / Wheat - Wheat - Wheat
+ Cookie | 8 | Wheat - Cocoa Beans - Wheat
+ Golden Apple | 1 | Gold - Gold - Gold / Gold - Apple - Gold / Gold - Gold - Gold
+ Enchanted Golden Apple | 1 | Gold Block - Gold Block - Gold Block / Gold Block - Apple - Gold Block / Gold Block - Gold Block - Gold Block
+ Melon Seeds | 1 | Melon
+ Pumpkin Seeds | 4 | Pumpkin
+ Pumpkin Pie | 1 | Egg - / Sugar - Pumpkin
+ Hay Bale | 1 | Wheat - Wheat - Wheat / Wheat - Wheat - Wheat / Wheat - Wheat - Wheat
+ Wheat | 9 | Hay Bale
+ Golden Carrot | 1 | Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Carrot - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget
+ Baked Potato | 614 |jacob614 - / Furnace - Coal
 
 /////////////////////////
 //Miscellaneous recipes//
 /////////////////////////
 
- Block of Gold | Gold - Gold - Gold / Gold - Gold - Gold / Gold - Gold - Gold
- Block of Iron | Iron - Iron - Iron / Iron - Iron - Iron / Iron - Iron - Iron
- Diamond Block | Diamond - Diamond - Diamond / Diamond - Diamond - Diamond / Diamond - Diamond - Diamond
- Lapis Lazuli Block | Lapiz Lazuli - Lapiz Lazuli - Lapiz Lazuli / Lapiz Lazuli - Lapiz Lazuli - Lapiz Lazuli / Lapiz Lazuli - Lapiz Lazuli - Lapiz Lazuli
- Block of Emerald | Emerald - Emerald - Emerald / Emerald - Emerald - Emerald / Emerald - Emerald - Emerald
- Block of Redstone | Redstone - Redstone - Redstone / Redstone - Redstone - Redstone / Redstone - Redstone - Redstone
- Block of Coal | Coal - Coal - Coal / Coal - Coal - Coal / Coal - Coal - Coal
- Slime Block | Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball
- Melon Block | Melon - Melon - Melon /  Melon - Melon - Melon /  Melon - Melon - Melon
+ Block of Gold,Gold Block | 1 | Gold - Gold - Gold / Gold - Gold - Gold / Gold - Gold - Gold
+ Block of Iron,Iron Block | 1 | Iron - Iron - Iron / Iron - Iron - Iron / Iron - Iron - Iron
+ Diamond Block | 1 | Diamond - Diamond - Diamond / Diamond - Diamond - Diamond / Diamond - Diamond - Diamond
+ Lapis Lazuli Block | 1 | Lapis Lazuli - Lapis Lazuli - Lapis Lazuli / Lapis Lazuli - Lapis Lazuli - Lapis Lazuli / Lapis Lazuli - Lapis Lazuli - Lapis Lazuli
+ Block of Emerald,Emerald Block | 1 | Emerald - Emerald - Emerald / Emerald - Emerald - Emerald / Emerald - Emerald - Emerald
+ Block of Redstone,Redstone Block | 1 | Redstone - Redstone - Redstone / Redstone - Redstone - Redstone / Redstone - Redstone - Redstone
+ Block of Coal,Coal Block | 1 | Coal - Coal - Coal / Coal - Coal - Coal / Coal - Coal - Coal
+ Slime Block | 1 | Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball
+ Melon Block,Melon | 1 | Melon - Melon - Melon /  Melon - Melon - Melon /  Melon - Melon - Melon
 
- Lead | String - String - / String - Slimeball - / - - String
- Ladder | Stick - - Stick / Stick - Stick - Stick / Stick - - Stick
- Glass Pane | Glass - Glass - Glass / Glass - Glass - Glass
- Iron Bars | - - / Iron - Iron - Iron / Iron - Iron - Iron 
- Wood Fence | - - / Wood Plank - Stick - Wood Plank / Wood Plank - Stick - Wood Plank
- Nether Brick Fence | - - / Nether Brick - Nether Brick - Nether Brick / Nether Brick - Nether Brick - Nether Brick
- Fence Gate | - - / Stick - Wood Plank - Stick / Stick - Wood Plank - Stick
- Cobblestone Wall | - - / Cobblestone - Cobblestone - Cobblestone / Cobblestone - Cobblestone - Cobblestone
- Mossy Cobblestone Wall | - - / Moss Stone - Moss Stone - Moss Stone / Moss Stone - Moss Stone - Moss Stone
- Moss Stone | Cobblestone - Vines
+ Lead | 2 | String - String - / String - Slimeball - / - - String
+ Ladder | 3 | Stick - - Stick / Stick - Stick - Stick / Stick - - Stick
+ Glass Pane | 16 | Glass - Glass - Glass / Glass - Glass - Glass
+ Iron Bars | 16 | - - / Iron - Iron - Iron / Iron - Iron - Iron 
+ Wood Fence,Fence | 3 | - - / Wood Plank - Stick - Wood Plank / Wood Plank - Stick - Wood Plank
+ Nether Brick Fence | 6 | - - / Nether Brick - Nether Brick - Nether Brick / Nether Brick - Nether Brick - Nether Brick
+ Fence Gate,Gate | 1 | - - / Stick - Wood Plank - Stick / Stick - Wood Plank - Stick
+ Cobblestone Wall | 6 | - - / Cobblestone - Cobblestone - Cobblestone / Cobblestone - Cobblestone - Cobblestone
+ Mossy Cobblestone Wall | 6 | - - / Moss Stone - Moss Stone - Moss Stone / Moss Stone - Moss Stone - Moss Stone
+ Moss Stone | 1 | Cobblestone - Vines
 
- Iron | Iron Block
- Gold | Gold Block
- Diamond | Block of Diamond
- Lapiz | Lapiz Lazuli Block
- Emerald | Block of Emerald
- Redstone | Block of Redstone
- Slimeball | Slime Block
+ Iron | 9 | Iron Block
+ Gold | 9 | Gold Block
+ Diamond | 9 | Block of Diamond
+ Lapis Lazuli | 9 | Lapis Lazuli Block
+ Emerald | 9 | Block of Emerald
+ Redstone | 9 | Block of Redstone
+ Coal | 9 | Block of Coal
+ Slimeball | 9 | Slime Block
 
- Painting | Stick - Stick - Stick / Stick - Wool - Stick / Stick - Stick - Stick
- Item Frame | Stick - Stick - Stick / Stick - Leather - Stick / Stick - Stick - Stick
- Sign | Wood Plank - Wood Plank - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Stick -
- Armor Stand | Stick - Stick - Stick / - Stick - / Stick - Stone Slab - Stick
+ Painting | 1 | Stick - Stick - Stick / Stick - Wool - Stick / Stick - Stick - Stick
+ Item Frame | 1 | Stick - Stick - Stick / Stick - Leather - Stick / Stick - Stick - Stick
+ Sign | 3 | Wood Plank - Wood Plank - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Stick -
+ Armor Stand | 1 | Stick - Stick - Stick / - Stick - / Stick - Stone Slab - Stick
 
- Paper | Sugar Cane - Sugar Cane - Sugar Cane
- Book | Paper - Paper / Paper - Leather
- Book and Quill | Feather - / Ink Sac - Book
- Leather | Rabbit Hide - Rabbit Hide / Rabbit Hide - Rabbit Hide
- Bed | Wool - Wool - Wool / Wood Plank - Wood Plank - Wood Plank
- Gold | Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget
- Eye of Ender | Ender Pearl / Blaze Powder
- End Crystal | Glass - Glass - Glass / Glass - Eye of ender - Glass / Glass - Ghast Tear - Glass
- Flower Pot | - - / Brick - - Brick / - Brick -
- Banner | Wool - Wool - Wool / Wool - Wool - Wool / - Stick -
+ Paper | 3 | Sugar Cane - Sugar Cane - Sugar Cane
+ Book | 1 | Paper - Paper / Paper - Leather
+ Book and Quill | 1 | Feather - / Ink Sac - Book
+ Leather | 1 | Rabbit Hide - Rabbit Hide / Rabbit Hide - Rabbit Hide
+ Bed | 1 | Wool - Wool - Wool / Wood Plank - Wood Plank - Wood Plank
+ Gold | 1 | Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget
+ Eye of Ender | 1 | Ender Pearl / Blaze Powder
+ End Crystal | 1 | Glass - Glass - Glass / Glass - Eye of ender - Glass / Glass - Ghast Tear - Glass
+ Flower Pot | 1 | - - / Brick - - Brick / - Brick -
+ Banner | 1 | Wool - Wool - Wool / Wool - Wool - Wool / - Stick -
 
- Sea Lantern | Prismarine Shard - Prismarine Crystals - Prismarine Shard / Prismarine Crystals - Prismarine Crystals - Prismarine Crystals / Prismarine Shard - Prismarine Crystals - Prismarine Shard
- Prismarine | Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard
- Prismarine Brick | Prismarine Shard - Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard - Prismarine Shard
- Dark Prismarine | Prismarine Shard - Prismarine Shard - Prismarine Shard / Prismarine Shard - Ink Sac - Prismarine Shard / Prismarine Shard - Prismarine Shard - Prismarine Shard
+ Sea Lantern | 1 | Prismarine Shard - Prismarine Crystals - Prismarine Shard / Prismarine Crystals - Prismarine Crystals - Prismarine Crystals / Prismarine Shard - Prismarine Crystals - Prismarine Shard
+ Prismarine | 1 | Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard
+ Prismarine Brick | 1 | Prismarine Shard - Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard - Prismarine Shard
+ Dark Prismarine | 1 | Prismarine Shard - Prismarine Shard - Prismarine Shard / Prismarine Shard - Ink Sac - Prismarine Shard / Prismarine Shard - Prismarine Shard - Prismarine Shard
 
 ///////////////
 //Dye recipes//
 ///////////////
 
- Bone Meal | Bone
- Light Gray Dye | Bone Meal / Ink Sac - Bone Meal
- Light Gray Dye 2 | Gray Dye - Bone Meal
- Gray Dye | Ink Sac - Bone Meal
- Red Dye | Red Tulip
- Red Dye (var.) | Poppy
- Red Dye (var. 2) | Rose Bush
- Red Dye (var. 2) | Beetroot
- Orange Dye | Red Dye - Yellow Dye
- Orange Dye (var.) | Orange Tulip
- Yellow Dye | Dandelion
- Yellow Dye (var.) | Sunflower
- Lime Dye | Green Dye - Bone Meal
- Light Blue Dye | Lapiz Lazuli - Bone Meal
- Cyan Dye | Lapiz Lazuli - Green Dye
- Purple Dye | Lapiz Lazuli - Red Dye
- Magenta Dye | Pink Dye / Purple Dye
- Magenta Dye (var.) | Lilac
- Magenta Dye (var. 2) | Allium
- Magenta Dye (var. 3) | Lapiz Lazuli - Bone Meal / Red Dye - Red Dye
- Magenta Dye (var. 4) | Lapiz Lazuli - / Pink Dye - Red Dye
- Pink Dye | Pink Tulip
- Pink Dye (var.) | Peony
- Pink Dye (var. 2) | Red Dye - Bone Meal
- Cactus Green | Cactus - / Furnace - Coal
+ Bone Meal | 3 | Bone
+ Light Gray Dye | 3 | Bone Meal / Ink Sac - Bone Meal
+ Light Gray Dye 2 | 2 | Gray Dye - Bone Meal
+ Gray Dye | 2 | Ink Sac - Bone Meal
+ Rose Red | 1 | Red Tulip
+ Rose Red (var.) | 1 | Poppy
+ Rose Red (var. 2) | 1 | Rose Bush
+ Rose Red (var. 3) | 1 | Beetroot
+ Orange Dye | 2 | Rose Red - Dandelion Yellow
+ Orange Dye (var.) | 1 | Orange Tulip
+ Dandelion Yellow | 1 | Dandelion
+ Dandelion Yellow (var.) | 2 | Sunflower
+ Lime Dye | 2 | Green Dye - Bone Meal
+ Light Blue Dye | 2 | Lapis Lazuli - Bone Meal
+ Light Blue Dye | 1 | Blue Orchid
+ Cyan Dye | 2 | Lapis Lazuli - Green Dye
+ Purple Dye | 1 | Lapis Lazuli - Rose Red
+ Magenta Dye | 2 | Pink Dye / Purple Dye
+ Magenta Dye (var.) | 2 | Lilac
+ Magenta Dye (var. 2) | 1 | Allium
+ Magenta Dye (var. 3) | 4 | Lapis Lazuli - Bone Meal / Rose Red - Rose Red
+ Magenta Dye (var. 4) | 3 | Lapis Lazuli - / Pink Dye - Rose Red
+ Pink Dye | 1 | Pink Tulip
+ Pink Dye (var.) | 2 | Peony
+ Pink Dye (var. 2) | 2 | Rose Red - Bone Meal
+ Cactus Green | 1 | Cactus - / Furnace - Coal
 
 ////////////////
 //Wool recipes//
 ////////////////
 
- Orange Wool | White Wool - Orange Dye
- Magenta Wool | White Wool - Magenta Dye
- Light Blue Wool | White Wool - Light Blue Dye
- Yellow Wool | White Wool - Yellow Dye
- Lime Wool | White Wool - Lime Dye
- Pink Wool | White Wool - Pink Dye
- Gray Wool | White Wool - Gray Dye
- Light Gray Wool | White Wool - Light Gray Dye
- Cyan Wool | White Wool - Cyan Dye
- Purple Wool | White Wool - Pueple Dye
- Blue Wool | White Wool - Lapis Lazuli
- Brown Wool | White Wool - Cocoa Beans
- Green Wool | White Wool - Cactus Green
- Red Wool | White Wool - Red Dye
- Black Wool | White Wool - Ink Sac
- Carpet | Wool - Wool
+ Orange Wool | 1 | White Wool - Orange Dye
+ Magenta Wool | 1 | White Wool - Magenta Dye
+ Light Blue Wool | 1 | White Wool - Light Blue Dye
+ Yellow Wool | 1 | White Wool - Dandelion Yellow
+ Lime Wool | 1 | White Wool - Lime Dye
+ Pink Wool | 1 | White Wool - Pink Dye
+ Gray Wool | 1 | White Wool - Gray Dye
+ Light Gray Wool | 1 | White Wool - Light Gray Dye
+ Cyan Wool | 1 | White Wool - Cyan Dye
+ Purple Wool | 1 | White Wool - Pueple Dye
+ Blue Wool | 1 | White Wool - Lapis Lazuli
+ Brown Wool | 1 | White Wool - Cocoa Beans
+ Green Wool | 1 | White Wool - Cactus Green
+ Red Wool | 1 | White Wool - Rose Red
+ Black Wool | 1 | White Wool - Ink Sac
+ Carpet | 3 | Wool - Wool
 
 //////////////////////
 //Dyed Block Recipes//
 //////////////////////
- Stained Clay | Hardened Clay - Hardened Clay - Hardened Clay / Hardened Clay - Dye - Hardened Clay / Hardened Clay - Hardened Clay - Hardened Clay
- Stained Glass | Glass - Glass - Glass / Glass - Dye - Glass / Glass - Glass - Glass
- Stained Glass Panes | Stained Glass - Stained Glass - Stained Glass / Stained Glass - Stained Glass - Stained Glass
+ Stained Clay | 8 | Hardened Clay - Hardened Clay - Hardened Clay / Hardened Clay - Dye - Hardened Clay / Hardened Clay - Hardened Clay - Hardened Clay
+ Stained Glass | 8 | Glass - Glass - Glass / Glass - Dye - Glass / Glass - Glass - Glass
+ Stained Glass Panes | 16 | Stained Glass - Stained Glass - Stained Glass / Stained Glass - Stained Glass - Stained Glass
+
+ Firework Star | 1 | Gunpowder - Any Dye / - Extra Ingredients
+ Firework Star (fade) | 1 | Firework Star - Any Dye
+ Firework Rocket (plain) | 3 | Paper - / Gunpowder - Gunpowder
+ Firework Rocket | 3 | - Up to 3 Gunpowder - / - Paper - / - Up to 7 Firework Stars -
 
 ///////////////////////////////////
 //Enchantment and brewing recipes//
 ///////////////////////////////////
 
- Enchantment Table | - Book - / Diamond - Obsidian - Diamond / Obsidian - Obsidian - Obsidian
- Glass Bottle | Glass - - Glass / - Glass -
- Cauldron | Iron - - Iron / Iron - - Iron / Iron - Iron - Iron
+ Enchantment Table | 1 | - Book - / Diamond - Obsidian - Diamond / Obsidian - Obsidian - Obsidian
+ Glass Bottle | 3 | Glass - - Glass / - Glass -
+ Cauldron | 1 | Iron - - Iron / Iron - - Iron / Iron - Iron - Iron
 
- Brewing Stand | - - / - Blaze Rod - / Cobblestone - Cobblestone - Cobblestone
- Blaze Powder | Blaze Rod
- Magma Cream | Slimeball / Blaze Powder
- Fermented Spider Eye | Spider Eye - Brown Mushroom / - Sugar
- Glistering Melon | Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Melon - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget
- Gold Nugget | Gold
+ Brewing Stand | 1 | - - / - Blaze Rod - / Cobblestone - Cobblestone - Cobblestone
+ Blaze Powder | 2 | Blaze Rod
+ Magma Cream | 1 | Slimeball / Blaze Powder
+ Fermented Spider Eye | 1 | Spider Eye - Brown Mushroom / - Sugar
+ Glistering Melon | 1 | Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Melon - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget
+ Gold Nugget | 9 | Gold
+
