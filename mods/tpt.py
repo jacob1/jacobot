@@ -233,7 +233,7 @@ def PrintReports(channel, reportlist, saveID=None):
 		text = h.unescape(report[1])
 		def replace(match):
 			return " http://tpt.io/~" + match.group(1)
-		text = re.sub(" ?(?:(?:~|ID:?|id:?|save | )([0-9]{4,}))", replace, text)
+		text = re.sub(" ?(?:(?:~|ID:?|id:?|save | |^)([0-9]{4,}))", replace, text)
 		SendMessage(channel, "\00314%s\003: %s" % (reporter, text.strip()))
 		if "tags" in text:
 			showtags = True
