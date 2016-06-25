@@ -2,13 +2,26 @@ import html.parser
 import json
 import time
 import re
+import ast
 from common import *
 from datetime import datetime
 from time import sleep
+from collections import defaultdict
 
 RegisterMod(__name__)
 
-ipbans = {}
+# Load banned ips / tags from file
+try:
+	bannedfile = open("mods/BANNED.txt")
+	bannedstuff = bannedfile.readlines()
+	bannedfile.close()
+	ipbans = ast.literal_eval(bannedstuff[0])
+	bannedtags = ast.literal_eval(bannedstuff[1])
+except IOError:
+	ipbans = {}
+	bannedtags = {}
+	pass
+
 def Parse(raw, text):
 	match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-info :New registration: ([\w_-]+)\. https?:\/\/tpt\.io\/@([\w\_-]+) \[([0-9.]+)\] ?$", raw)
 	if match:
@@ -26,7 +39,7 @@ def Parse(raw, text):
 			SendMessage("#powder-info", "Warning: This account was registered using TOR")
 	#match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), https?:\/\/tpt.io\/~([0-9]+)$", raw)
 													#New: 'Deut compressor' by HugInfinity (0 comments, score 1, 1 bump); http://tpt.io/~1973995
-	match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :New: \u000302'(.+?)'\u000F by\u000305 ([\w_-]+)\u000314 \(.*?\)\u000F; https?:\/\/tpt.io\/~([0-9]+)$", raw)
+	"""match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :New: \u000302'(.+?)'\u000F by\u000305 ([\w_-]+)\u000314 \(.*?\)\u000F; https?:\/\/tpt.io\/~([0-9]+)$", raw)
 	if match:
 		saveID = match.group(3)
 		name = match.group(1)
@@ -35,7 +48,7 @@ def Parse(raw, text):
 				SendMessage("+#powder-saves", "Error demoting save ID %s" % (saveID))
 			else:
 				SendMessage("+#powder-saves", "Demoted save ID %s" % (saveID))
-		"""info = GetSaveInfo(saveID)
+		info = GetSaveInfo(saveID)
 		if info:
 			sleep(1)
 			elementCount = {}
@@ -49,6 +62,26 @@ def Parse(raw, text):
 						SendMessage("+#powder-saves", "Error demoting save ID %s" % (saveID))
 					else:
 						SendMessage("+#powder-saves", "Demoted save ID %s" % (saveID))"""
+	# Nicer formated PowderBot parser, that doesn't duplicate the long regex (TODO: move stuff to this)
+	powderBotMatch = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG (#{1,}[\w-]+) :(.*)$", raw)
+	if powderBotMatch:
+		channel = powderBotMatch.group(1)
+		message = powderBotMatch.group(2)
+		if channel == "#powder-saves":
+			CheckTag(message)
+
+def CheckTag(message):
+	tagMatch = re.match("^New tag: \u000303(\w+)\u0003 \(http://tpt.io/~(\d+)\)$", message)
+	if tagMatch:
+		tag = tagMatch.group(1)
+		saveID = tagMatch.group(2)
+		for banned in bannedtags:
+			if re.fullmatch(banned, tag):
+				username = GetTagUsage(tag, saveID)
+				if DisableTag(tag):
+					SendMessage("+#powder-saves", "Disabled tag {0} by {1}".format(tag, username if username else "UNKNOWN"))
+				else:
+					SendMessage("+#powder-saves", "Error: couldn't disable tag {0}".format(tag))
 
 seenReports = {}
 def AlwaysRun(channel):
@@ -284,6 +317,35 @@ def DoPublish(saveID):
 		return False
 	return True
 
+def PrintTags(channel, saveID):
+	saveInfo = GetSaveInfo(saveID)
+	if not saveInfo:
+		SendMessage(channel, "Error: Could not load save info")
+	elif saveInfo["Tags"]:
+		SendMessage(channel, ", ".join(saveInfo["Tags"]))
+	else:
+		SendMessage(channel, "No tags on that save")
+
+def GetTagUsage(tag, saveID):
+	usages = GetPage("http://powdertoy.co.uk/Browse/Tag.xhtml?Tag={0}&SaveID={1}".format(tag, saveID), GetTPTSessionInfo(0))
+	username = re.search("<a href=\"\/User\.html\?Name=([\w_]+)\">[\w_]+<\/a>", usages)
+	return username.group(1) if username else None
+
+def GetTagUsages(tag):
+	usages = GetPage("http://powdertoy.co.uk/Browse/Tag.xhtml?Tag={0}".format(tag), GetTPTSessionInfo(0))
+	tags = re.findall("<a href=\"\/Browse\/View.html\?ID=(\d+)\">\d+<\/a> by <a href=\"\/User.html\?Name=([\w-]+)\">[\w-]+<\/a>", usages)
+	return {"count":len(tags), "usages":tags}
+
+def RemoveTag(tag, saveID):
+	if GetPage("http://powdertoy.co.uk/Browse/EditTag.json?Op=delete&ID={0}&Tag={1}&Key={2}".format(saveID, tag, GetTPTSessionInfo(1)), GetTPTSessionInfo(0)):
+		return True
+	return False
+
+def DisableTag(tag, undelete=False):
+	if GetPage("http://powdertoy.co.uk/Browse/Tags.json?{0}={1}&Key={2}".format("UnDelete" if undelete else "Delete", tag, GetTPTSessionInfo(1)), GetTPTSessionInfo(0)):
+		return True
+	return False
+
 @command("ban", minArgs = 4, owner = True)
 def Ban(username, hostmask, channel, text):
 	"""(ban <user ID> <ban time> <ban time units> <reason>). bans someone in TPT. Owner only. Add = to ban usernames that look like IDs"""
@@ -434,6 +496,71 @@ def Publish(username, hostmask, channel, text):
 	DoPublish(text[0])
 	SendMessage(channel, "Done.")
 
+@command("listtags", minArgs=1, admin=True)
+def ListTags(username, hostmask, channel, text):
+	"""(listtags <saveID>). Lists tags on a save. Admin only."""
+	PrintTags(channel, text[0])
+
+@command("showtag", minArgs=1, admin=True)
+def ShowTag(username, hostmask, channel, text):
+	"""(showtag <tag>). Shows where tags have been used. Admin only."""
+	data = GetTagUsages(text[0])
+	if data["count"] > 40:
+		usercounts = defaultdict(int)
+		for tag in data["usages"]:
+			usercounts[tag[1]] = usercounts[tag[1]] + 1
+		top = sorted(usercounts.items(), key=lambda a: a[1])[:-30:-1]
+		SendMessage(channel, "Tag used {0} times, by: {1}".format(data["count"], ", ".join(["{0} x{1}".format(usertag[0], usertag[1]) for usertag in top])))
+	else:
+		prepend = "http://tpt.io/:" if data["count"] < 20 else ""
+		msg = []
+		for tag in data["usages"]:
+			msg.append("{0}{1} : {2}".format(prepend, tag[0], tag[1]))
+		SendMessage(channel, "Tag used {0} times. {1}".format(data["count"], ", ".join(msg)))
+
+@command("removetag", minArgs=2, admin=True)
+def RemoveTagCmd(username, hostmask, channel, text):
+	"""(removetag <tag> <saveID>). Removes a tag on a save. Admin only."""
+	if RemoveTag(text[0], text[1]):
+		SendMessage(channel, "Done.")
+	else:
+		SendMessage(channel, "Error, could not remove tag.")
+
+@command("disabletag", minArgs=1, admin=True)
+def DisableTagCmd(username, hostmask, channel, text):
+	"""(disabletag <tag>). Disables a tag. Admin only."""
+	if DisableTag(text[0]):
+		SendMessage(channel, "Done.")
+	else:
+		SendMessage(channel, "Error, could not disable tag.")
+
+@command("enabletag", minArgs=1, admin=True)
+def DisableTagCmd(username, hostmask, channel, text):
+	"""(enabetag <tag>). Enables a tag. Admin only."""
+	if DisableTag(text[0], True):
+		SendMessage(channel, "Done.")
+	else:
+		SendMessage(channel, "Error, could not disable tag.")
+
+@command("bannedtags", minArgs = 1, admin = True)
+def IPban(username, hostmask, channel, text):
+	"""(bannedtags add <tagregex>|remove <tagregex>|list). Modifies the banned tag regex list. Admin only."""
+	if text[0].lower() == "list":
+		if not bannedtags:
+			SendMessage(channel, "No banned tag regexes")
+		else:
+			SendMessage(channel, "Banned tag regexes: " + ", ".join(bannedtags))
+		return
+	action = text[0].lower()
+	if action == "remove":
+		bannedtags.discard(text[1])
+		SendMessage(channel, "Removed %s from the banned tag regex list" % text[1])
+	elif action == "add":
+		bannedtags.add(text[1])
+		SendMessage(channel, "Added %s to the banned tag regex list" % text[1])
+	else:
+		SendMessage(channel, "Unknown action")
+
 @command("readreport", minArgs=2, admin = True)
 def Stolen(username, hostmask, channel, text):
 	"""(readreport <saveID> <comment>). Disables a save and comments with a message as jacobot. Admin only."""
@@ -525,7 +652,7 @@ def UpdateTor(username, hostmask, channel, text):
 
 @command("ipban", minArgs = 1, admin = True)
 def IPban(username, hostmask, channel, text):
-	"""(ipban add <ip>|remove <ip>|list). Modifies the IP bans list. Owner only."""
+	"""(ipban add <ip>|remove <ip>|list). Modifies the IP bans list. Admin only."""
 	if text[0].lower() == "list":
 		if not ipbans:
 			SendMessage(channel, "Nobody is currently IP banned")
