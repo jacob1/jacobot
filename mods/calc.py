@@ -1,4 +1,5 @@
 import string
+import math
 from common import *
 
 RegisterMod(__name__)
@@ -7,9 +8,19 @@ class _calculator(object):
 	def __init__(self):
 		pass
 
-	def test(self, expression):
-		return float(expression)+1
+	# Functions go here, any function in this class not starting in _ can be called by the calculator
+	"""def pow(self, expression, offset):
+		pieces = expression.split(",")
+		num = self._parse(pieces[0], offset)
+		root = self._parse(pieces[1], offset+len(pieces[0])+1)
+		return math.pow(num, root)
 
+	def sqrt(self, expression, offset):
+		pieces = expression.split(",")
+		num = self._parse(pieces[0], offset)
+		return math.sqrt(num)"""
+
+	# Convert a string to a number (string is assumed to actually be a number)
 	def _converttonumber(self, expression, isNegative):
 		if not "." in expression and not "e" in expression:
 			ret = int(expression)
@@ -17,6 +28,7 @@ class _calculator(object):
 			ret = float(expression)
 		return -ret if isNegative else ret
 
+	# Convert a string to a complex number (python built-in)
 	def _getcomplex(self, expression, offset):
 		if expression[0] != "(":
 			raise ValueError("Expected complex number at character {0}".format(offset))
@@ -28,7 +40,7 @@ class _calculator(object):
 			raise ValueError("Expected complex number closing ')' at character {0}".format(offset+2+length+length2))
 		return (complex(expression[:3+length+length2]), 3+length+length2)
 
-	# Parses a number
+	# Parses something that is assumed to be a number, stops parsing when the next character would be an operator / invalid in a number
 	def _getnumber(self, expression, offset):
 		if expression[0] == "(":
 			return self._getcomplex(expression, offset)
@@ -41,6 +53,7 @@ class _calculator(object):
 		isNegative = False
 		for i in range(len(expression)):
 			char = expression[i]
+			# Allows unlimited -s and +s before the number starts. Once it starts, anything after is assumed to be an operator and number parsing stops
 			if char == "-" or char == "+":
 				if foundInt and (not foundE or foundEExponent):
 					return (self._converttonumber(expression[start:i], isNegative), i)
@@ -55,16 +68,16 @@ class _calculator(object):
 						start = i
 				if foundE:
 					foundEExponent = True
+			# Only one dot is allowed. Any subsequent dots are assumed to be an operator and number parsing stops
 			elif char == ".":
-				if foundE:
-					raise ValueError("Found '.' inside e notation at character {0}".format(i+offset))
 				if foundDot:
-					if not foundInt:
+					if not foundInt and not foundE:
 						raise ValueError("Expected number in float at character {0}".format(i+offset))
 					return (self._converttonumber(expression[start:i], isNegative), i)
 				elif not foundInt:
 					start = i
 				foundDot = True
+			# Ignore whitespace (maybe it shouldn't always ignore whitespace though)
 			elif char in string.whitespace:
 				continue
 			elif char == "e":
@@ -80,6 +93,7 @@ class _calculator(object):
 			raise ValueError("Expected bagels at character {0}".format(i+offset))
 		return (self._converttonumber(expression[start:], isNegative), len(expression))
 
+	# Parses looking for an operator
 	def _getoperator(self, expression, offset):
 		for i in range(len(expression)):
 			char = expression[i]
@@ -91,10 +105,12 @@ class _calculator(object):
 				break
 		raise ValueError("Expected operator at character {0}".format(i+offset))
 
+	# Parses an arbitrary expression without any function calls or parenthesis
 	def _parse(self, expression, offset):
 		i = 0
 		parsed = []
 		num = True
+		# Alternate looking for numbers and operators, and put the results into parsed[]
 		while i < len(expression):
 			if num:
 				(piece, length) = self._getnumber(expression[i:], i+offset)
@@ -103,15 +119,18 @@ class _calculator(object):
 			parsed.append(piece)
 			i += length
 			num = not num
+		# Can't end in an operator
 		if num:
 			raise ValueError("Expected number to end expression at character {0}".format(i+offset))
 
+		# Continuously loop through parsed, doing operations in the order of operations
 		for i in range(len(parsed))[-2::-2]:
 			operator = parsed[i]
 			if operator == "^":
 				(prev, next) = parsed[i-1], parsed[i+1]
 				if type(prev) == complex or type(next) == complex:
 					raise ValueError("Cannot do exponents on complex numbers")
+				# Convert to float to prevent DOS
 				parsed = parsed[:i-1] + [float(prev)**float(next)] + parsed[i+2:]
 		for i in range(len(parsed))[-2::-2]:
 			operator = parsed[i]
@@ -131,6 +150,8 @@ class _calculator(object):
 				parsed = parsed[:i-1] + [prev-next] + parsed[i+2:]
 		return parsed[0]
 
+	# Parses an expression, looking for any function calls and parenthesis and replacing those with a _parse result
+	# functions don't function at the moment
 	def _calc(self, expression, offset=0):
 		if not "(" in expression and not ")" in expression:
 			return self._parse(expression, offset)
@@ -142,7 +163,7 @@ class _calculator(object):
 			if i >= len(expression):
 				break
 			char = expression[i]
-			if funcNameStart >= 0 and char not in string.ascii_letters:
+			if funcNameStart >= 0 and char not in string.ascii_letters and not (char == ")" and i > 0 and expression[i-1] == "j"):
 				if char == "(":
 					stack.append((i, expression[funcNameStart:i]))
 					funcNameStart = -2
@@ -155,12 +176,17 @@ class _calculator(object):
 					funcNameStart = i
 			elif char == ")":
 				if stack:
+					funcNameStart = -1
 					(start, funcname) = stack.pop()
+					if not funcname and i > 0 and expression[i-1] == "j":
+						self._getcomplex(expression[start:], offset)
+						i = i + 1
+						continue
 					replace = self._calc(expression[start+1:i], start+1)
 					if funcname:
 						if funcname == "calc" or not hasattr(self, funcname):
 							raise ValueError("Not a function: {0}".format(funcname))
-						replace = getattr(self, funcname)(replace)
+						replace = getattr(self, funcname)(replace, i+offset)
 						start = start - len(funcname)
 					replace = str(replace)
 					expression = expression[:start] + replace + expression[i+1:]
