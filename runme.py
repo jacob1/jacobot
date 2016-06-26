@@ -221,7 +221,8 @@ def Parse(text):
 					SendNotice(username, "No module given")
 					return
 				modname = text[4]
-				if not mods[modname]:
+				if not modname in mods:
+					SendMessage(channel, "No such module")
 					return
 				print("reloading module "+modname)
 				if modname in commands:
