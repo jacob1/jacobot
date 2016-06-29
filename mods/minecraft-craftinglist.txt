@@ -377,7 +377,7 @@ Replacements here (for easier searaches)
  Brewing Stand | 1 | - - / - Blaze Rod - / Cobblestone - Cobblestone - Cobblestone
  Blaze Powder | 2 | Blaze Rod
  Magma Cream | 1 | Slimeball / Blaze Powder
- Fermented Spider Eye | 1 | Spider Eye - Brown Mushroom / - Sugar
+ Fermented Spider Eye,Fermented Eye,Spider Eye | 1 | Spider Eye - Brown Mushroom / - Sugar
  Glistering Melon | 1 | Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Melon - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget
  Gold Nugget | 9 | Gold
 

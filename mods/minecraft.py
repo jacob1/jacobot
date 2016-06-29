@@ -327,7 +327,7 @@ def GetClaim(username, hostmask, channel, text):
 		SendMessage(channel, "Error getting claim information for {0}".format(player['world']))
 		return
 	elif not claim:
-		SendMessage(channel, "{0} is not currently inside any claims (temp: {1})".format(player['name'], player['world']))
+		SendMessage(channel, "{0} is not currently inside any claims".format(player['name']))
 		return
 	(size, access, container, build, permission) = dynmap.ParseClaimData(claim['desc'])
 	endStr = []
@@ -368,3 +368,7 @@ def GetTime(username, hostmask, channel, text):
 		SendMessage(channel, "It is raining")
 	else:
 		SendMessage(channel, "It is clear")
+
+@command("brewingchart")
+def BrewingChart(username, hostmask, channel, text):
+	SendMessage(channel, "https://hydra-media.cursecdn.com/minecraft.gamepedia.com/7/7b/Minecraft_brewing_en.png")
