@@ -120,11 +120,14 @@ class _calculator(object):
 			i += length
 			num = not num
 		# Can't end in an operator
+		if not parsed:
+			raise ValueError("Empty expression at character {0}".format(i+offset))
 		if num:
 			raise ValueError("Expected number to end expression at character {0}".format(i+offset))
 
 		# Continuously loop through parsed, doing operations in the order of operations
-		for i in range(len(parsed))[-2::-2]:
+		i = 1
+		while i < len(parsed):
 			operator = parsed[i]
 			if operator == "^":
 				(prev, next) = parsed[i-1], parsed[i+1]
@@ -132,7 +135,10 @@ class _calculator(object):
 					raise ValueError("Cannot do exponents on complex numbers")
 				# Convert to float to prevent DOS
 				parsed = parsed[:i-1] + [float(prev)**float(next)] + parsed[i+2:]
-		for i in range(len(parsed))[-2::-2]:
+			else:
+				i += 2
+		i = 1
+		while i < len(parsed):
 			operator = parsed[i]
 			if operator == "*":
 				(prev, next) = parsed[i-1], parsed[i+1]
@@ -140,7 +146,10 @@ class _calculator(object):
 			elif operator == "/":
 				(prev, next) = parsed[i-1], parsed[i+1]
 				parsed = parsed[:i-1] + [prev/next] + parsed[i+2:]
-		for i in range(len(parsed))[-2::-2]:
+			else:
+				i += 2
+		i = 1
+		while i < len(parsed):
 			operator = parsed[i]
 			if operator == "+":
 				(prev, next) = parsed[i-1], parsed[i+1]
@@ -148,6 +157,8 @@ class _calculator(object):
 			elif operator == "-":
 				(prev, next) = parsed[i-1], parsed[i+1]
 				parsed = parsed[:i-1] + [prev-next] + parsed[i+2:]
+			else:
+				i += 2
 		return parsed[0]
 
 	# Parses an expression, looking for any function calls and parenthesis and replacing those with a _parse result
