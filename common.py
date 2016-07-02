@@ -30,6 +30,24 @@ def SendNotice(target, msg):
 	msg = msg[:450]
 	Send("NOTICE %s :%s\n" % (target, msg))
 
+rateLimit = False
+def SetRateLimiting(rateLimiting):
+	global rateLimit
+	rateLimit = rateLimiting
+
+def DoRateLimiting():
+	global rateLimit
+	return rateLimit
+
+currentChannel = None
+def SetCurrentChannel(channel):
+	global currentChannel
+	currentChannel = channel
+
+def GetCurrentChannel():
+	global currentChannel
+	return currentChannel
+
 plugin = ""
 def RegisterMod(name):
 	global plugin

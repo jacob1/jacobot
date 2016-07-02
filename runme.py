@@ -7,8 +7,6 @@ import os
 import sys
 import atexit
 import importlib
-import hashlib
-import random
 
 if sys.version_info < (3, 0):
 	print('Python 3 is required to run the bot.')
@@ -18,25 +16,33 @@ if not os.path.isfile("config.py"):
 	import shutil
 	shutil.copyfile("config.py.default", "config.py")
 	print("config.py.default copied to config.py")
-from config import *
+
+try:
+	config = importlib.import_module("config")
+	globals().update(config.GetGlobals())
+except Exception:
+	print("Error loading config.py, cannot start bot")
+	print(traceback.format_exc())
+	sys.exit(1)
+
 if not configured:
 	print("you have not configured the bot, open up config.py to edit settings")
-	quit()
+	sys.exit(0)
 
-print("Loading modules")
-mods = {}
-mods["common"] = importlib.import_module("common")
-globals().update(mods["common"].GetGlobals())
-for i in os.listdir("mods"):
-	if os.path.isfile(os.path.join("mods", i)) and i[-3:] == ".py" and i[:-3] not in disabledPlugins:
-		try:
-			print("Loading {} ...".format(i))
-			mods[i[:-3]] = importlib.import_module("mods.{0}".format(i[:-3]))
-		except Exception:
-			print("Error loading {}".format(i))
-			print(traceback.format_exc())
-			pass
-print("Done loading modules")
+try:
+	import common
+except Exception:
+	print("Error loading common.py, cannot start bot")
+	print(traceback.format_exc())
+	sys.exit(1)
+
+try:
+	import handlers
+	handlers.LoadMods()
+except Exception:
+	print("Error loading handlers.py, cannot start bot")
+	print(traceback.format_exc())
+	sys.exit(1)
 
 def SocketSend(socket, message):
 	socket.send(message.encode('utf-8'))
@@ -70,24 +76,24 @@ def Connect():
 
 # These functions are now unused
 def ReadPrefs():
-		pass
+	pass
 
 def WritePrefs():
 	pass
 atexit.register(WritePrefs)
 
-def PrintError(channel = None):
-	Print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()))
-	if channel:
-		if channel[0] != "#":
-			channel = errorchannel
-		SocketSend(irc, "PRIVMSG %s :Error printed to console\n" % (channel))
+def PrintError():
+	Print("=======ERROR=======\n{0}========END========\n".format(traceback.format_exc()))
+	currentChannel = common.GetCurrentChannel()
+	if currentChannel:
+		SocketSend(irc, "PRIVMSG {0} :Error printed to console\n".format(currentChannel))
 		if errorCode:
 			try:
 				exec(errorCode)
 			except Exception:
-				SocketSend(irc, "PRIVMSG %s :We heard you like errors, so we put an error in your error handler so you can error while you catch errors\n" % (channel))
-				Print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()))
+				SocketSend(irc, "PRIVMSG {0} :We heard you like errors, so we put an error in your error handler so you can error while you catch errors\n".format(currentChannel))
+				Print("=======ERROR=======\n{0}========END========\n".format(traceback.format_exc()))
+	common.SetCurrentChannel(None)
 	
 def Interrupt():
 	SocketSend(irc, "QUIT :Keyboard Interrupt\n")
@@ -95,6 +101,9 @@ def Interrupt():
 	quit()
 
 def main():
+	global config
+	global common
+
 	socketQueue = b""
 	nextSend = 0
 	while True:
@@ -119,150 +128,64 @@ def main():
 					line = line.decode("utf-8", errors="replace")
 					Print("<-- "+line+"\n")
 					text = line.split()
-
-					if len(text) > 0:
+					
+					if text:
 						#Reply to server pings
 						if text[0] == "PING":
 							SocketSend(irc, "PONG %s\n" % (text[1]))
 						elif text[0] == "ERROR":
 							irc.close()
-							return #try to reconnect
+							return
 
-					if len(text) > 1:
-						#Only join channel once identified
-						if text[1] == "396":
-							for i in channels:
-								SocketSend(irc, "JOIN %s\n" % (i))
-						#Nickname already in use
-						elif text[1] == "433":
-							SocketSend(irc, "NICK %s-\n" % (text[3]))
-							if NickServ:
-								SocketSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
-								SocketSend(irc, "ns ghost %s\n" % (botNick))
-								SocketSend(irc, "NICK %s\n" % (botNick))
-						elif text[1] == "437":
-							SocketSend(irc, "NICK %s-\n" % text[3])
-							if NickServ:
-								SocketSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
-								SocketSend(irc, "ns release %s\n" % (botNick))
-								SocketSend(irc, "NICK %s\n" % (botNick))
-
-					if len(text) > 2:
-						#Get channel to reply to
-						if text[1] == "PRIVMSG":
-							reply = text[2]
-							if reply == botNick:
-								reply = text[0].split("!")[0].lstrip(":")
-						elif text[1] == "NICK" and text[0].split("!")[0][1:] == botNick:
-							SocketSend(irc, "NICK %s\n" % (botNick))
-
-					if len(text) >= 4:
-						#Parse line in stocks.py
-						if len(text):
-							Parse(text)
-
-					if len(text) >= 5:
-						if text[1] == "MODE" and text[2] == "##powder-bots" and text[3] == "+o" and text[4] == botNick:
-							SocketSend(irc, "MODE ##powder-bots -o %s\n" % (botNick))
-
-					#allow modules to do their own text parsing if needed, outside of raw commands
-					for mod in mods:
-						if hasattr(mods[mod], "Parse"):
-							mods[mod].Parse(line, text)
+					handlers.HandleLine(line, text)
+					common.SetCurrentChannel(None)
+				except handlers.ReloadedModuleException as e:
+					reloadedModule = e.args[0]["module"]
+					if reloadedModule == "common":
+						common = importlib.reload(common)
+						globals().update(common.GetGlobals())
+						common.SetCurrentChannel(None)
+						common.SetRateLimiting(True)
+						sys.modules["common"] = common
+					elif reloadedModule == "config":
+						config = importlib.reload(config)
+						globals().update(config.GetGlobals())
+					elif reloadedModule == "handlers":
+						print("Reloading handlers")
+						try:
+							importlib.reload(sys.modules["handlers"])
+							handlers.LoadMods()
+							SocketSend(irc, "PRIVMSG {0} :Reloaded handlers.py\n".format(e.args[0]["channel"]))
+						except Exception:
+							common.SetCurrentChannel(e.args[0]["channel"])
+							PrintError()
+							common.SetCurrentChannel(None)
+						else:
+							print("Reloaded")
 				except SystemExit:
 					SocketSend(irc, "QUIT :i'm a potato\n")
 					irc.close()
 					quit()
 				except Exception:
-					PrintError(errorchannel or channels[0])
+					PrintError()
 		try:
-			#allow modules to have a "tick" function constantly run, for any updates they need
-			for mod in mods:
-				if hasattr(mods[mod], "AlwaysRun"):
-					mods[mod].AlwaysRun(channels[0])
-
-			if messageQueue and time() > nextSend:
-				Print("--> %s" % messageQueue[0])
-				SocketSend(irc, messageQueue[0])
-				messageQueue.pop(0)
-				if len(messageQueue) > 3:
-					nextSend = time()+.7
-			#TODO: maybe proper rate limiting, but this works for now
-			"""temp = False
-			if len(messageQueue) > 7:
-				temp = True
-			for i in messageQueue:
-				Print("--> %s" % i)
-				SocketSend(irc, i)
-				if temp:
-					sleep(1)
-			messageQueue[:] = []"""
+			handlers.Tick()
+			common.SetCurrentChannel(None)
+			
+			if common.messageQueue and (time() > nextSend or not common.DoRateLimiting()):
+				if not common.DoRateLimiting():
+					while common.messageQueue:
+						Print("--> %s" % common.messageQueue[0])
+						SocketSend(irc, common.messageQueue[0])
+						common.messageQueue.pop(0)
+				elif time() > nextSend:
+					Print("--> %s" % common.messageQueue[0])
+					SocketSend(irc, common.messageQueue[0])
+					common.messageQueue.pop(0)
+					if len(common.messageQueue) > 3:
+						nextSend = time()+.7
 		except Exception:
-			PrintError(errorchannel or channels[0])
-
-def Parse(text):
-	if text[1] == "PRIVMSG":
-		channel = text[2]
-		username = text[0].split("!")[0].lstrip(":")
-		hostmask = text[0].split("!")[1]
-		command = text[3].lower().lstrip(":")
-		if channel == botNick:
-			channel = username
-		#if username == "FeynmanStockBot":
-		#	return
-		if username == "potatorelay" and command.startswith("<") and command.endswith(">") and len(text) > 4:
-			text.pop(3)
-			command = text[3]
-
-		#some special owner commands that aren't in modules
-		if CheckOwner(text[0]):
-			if command == "%sreload" % (commandChar):
-				if len(text) <= 4:
-					SendNotice(username, "No module given")
-					return
-				modname = text[4]
-				if not modname in mods:
-					SendMessage(channel, "No such module")
-					return
-				print("reloading module "+modname)
-				if modname in commands:
-					commands[modname] = []
-				mods[modname] = importlib.reload(mods[modname])
-
-				output = "Reloaded %s.py" % modname
-				if modname == "common":
-					globals().update(mods["common"].GetGlobals())
-					for othermodname, othermod in mods.items():
-						if othermod.__name__[:5] == "mods.":
-							mods[othermodname] = importlib.reload(othermod)
-							output = output + ", %s.py" % othermodname
-				SendMessage(channel, output)
-				return
-			elif command == "%seval" % (commandChar):
-				try:
-					command = " ".join(text[4:]).replace("\\n", "\n").replace("\\t", "\t")
-					ret = str(eval(command))
-				except Exception as e:
-					ret = str(type(e))+":"+str(e)
-				retlines = ret.splitlines()[:4]
-				for line in retlines:
-					SendMessage(channel, line)
-				return
-			elif command == "%sexec" % (commandChar):
-				try:
-					exec(" ".join(text[4:]))
-				except Exception as e:
-					SendMessage(channel, str(type(e))+":"+str(e))
-				return
-			elif command == "%squit" % (commandChar):
-				quit()
-
-		#actual commands here
-		for mod in commands:
-			for i in commands[mod]:
-				if command == "%s%s" % (commandChar, i[0]):
-					i[1](username, hostmask, channel, text[4:])
-					return
+			PrintError()
 
 ReadPrefs()
 reconnectAttempts = 0

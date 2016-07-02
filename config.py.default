@@ -2,7 +2,7 @@ server = "chat.freenode.net"
 port = 6697
 useSSL = True
 channels = ("",)
-errorchannel = ""
+errorChannel = ""
 botNick = "potatobot"
 botIdent = "potatobot"
 botRealname = "unnoficial jacobot clone"
@@ -31,12 +31,16 @@ reply = b""
 while True:
 	try:
 		reply += sock.recv(4096)
-	except:
+	except Exception:
 		break
 url = {key: value for key, value, *_ in [line.split(b" ") + [None] for line in reply.split(b"\\n") if line]}[b"URL"]
 admin = {key: value for key, value, *_ in [line.split(b" ") + [None] for line in reply.split(b"\\n") if line]}[b"ADMIN"]
-SendMessage(errorchannel, "Error: {0} (admin link {1})".format(url.decode("utf-8"), admin.decode("utf-8")))
+SocketSend(irc, "PRIVMSG {0} :Error: {1} (admin link {2})\\n".format(errorChannel, url.decode("utf-8"), admin.decode("utf-8")))
 """
 
 #change to True when done
 configured = False
+
+# Don't touch this function
+def GetGlobals():
+	return globals()
