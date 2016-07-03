@@ -30,15 +30,15 @@ if not configured:
 	sys.exit(0)
 
 try:
-	import common
+	common = importlib.import_module("common")
 except Exception:
 	print("Error loading common.py, cannot start bot")
 	print(traceback.format_exc())
 	sys.exit(1)
 
 try:
-	import handlers
-	handlers.LoadMods()
+	handler = importlib.import_module("handlers")
+	handler.LoadMods()
 except Exception:
 	print("Error loading handlers.py, cannot start bot")
 	print(traceback.format_exc())
@@ -103,6 +103,7 @@ def Interrupt():
 def main():
 	global config
 	global common
+	global handler
 
 	socketQueue = b""
 	nextSend = 0
@@ -137,31 +138,37 @@ def main():
 							irc.close()
 							return
 
-					handlers.HandleLine(line, text)
+					handler.HandleLine(line, text)
 					common.SetCurrentChannel(None)
-				except handlers.ReloadedModuleException as e:
+				except handler.ReloadedModuleException as e:
 					reloadedModule = e.args[0]["module"]
-					if reloadedModule == "common":
-						common = importlib.reload(common)
-						globals().update(common.GetGlobals())
-						common.SetCurrentChannel(None)
-						common.SetRateLimiting(True)
-						sys.modules["common"] = common
-					elif reloadedModule == "config":
-						config = importlib.reload(config)
-						globals().update(config.GetGlobals())
+					if reloadedModule == "config":
+						globals().update(handler.mods["config"].GetGlobals())
+						SocketSend(irc, "PRIVMSG {0} :Reloaded config.py\n".format(e.args[0]["channel"]))
 					elif reloadedModule == "handlers":
 						print("Reloading handlers")
 						try:
-							importlib.reload(sys.modules["handlers"])
-							handlers.LoadMods()
-							SocketSend(irc, "PRIVMSG {0} :Reloaded handlers.py\n".format(e.args[0]["channel"]))
+							for modname, mod in handler.mods.items():
+								if mod.__name__ in sys.modules:
+									del sys.modules[mod.__name__]
+							del sys.modules["handlers"]
+							handler = importlib.import_module("handlers")
+							common = importlib.import_module("common")
+							handler.LoadMods()
 						except Exception:
 							common.SetCurrentChannel(e.args[0]["channel"])
 							PrintError()
 							common.SetCurrentChannel(None)
 						else:
-							print("Reloaded")
+							globals().update(handler.mods["common"].GetGlobals())
+							common.SetCurrentChannel(None)
+							common.SetRateLimiting(True)
+							SocketSend(irc, "PRIVMSG {0} :Reloaded handlers.py\n".format(e.args[0]["channel"]))
+					if reloadedModule == "common":
+						globals().update(handler.mods["common"].GetGlobals())
+						common.SetCurrentChannel(None)
+						common.SetRateLimiting(True)
+						SocketSend(irc, "PRIVMSG {0} :Reloaded common.py\n".format(e.args[0]["channel"]))
 				except SystemExit:
 					SocketSend(irc, "QUIT :i'm a potato\n")
 					irc.close()
@@ -169,7 +176,7 @@ def main():
 				except Exception:
 					PrintError()
 		try:
-			handlers.Tick()
+			handler.Tick()
 			common.SetCurrentChannel(None)
 			
 			if common.messageQueue and (time() > nextSend or not common.DoRateLimiting()):

@@ -1,8 +1,10 @@
 import time
 import json
 import math
-from common import *
 
+from common import *
+def UpdateGlobals(newglobals):
+	globals().update(newglobals)
 RegisterMod(__name__)
 
 class CraftingList(object):

@@ -96,28 +96,33 @@ def HandlePrivmsg(text):
 				SendNotice(username, "No module given")
 				return
 			modname = text[4]
-			#if modname == "handlers":
-			#	raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
-			if not modname in mods:
+			if modname == "common":
+				commandlist = mods["common"].commands
+				mods["common"] = importlib.reload(mods["common"])
+				mods["common"].commands = commandlist
+				globals().update(mods["common"].GetGlobals())
+				for othermodname, othermod in mods.items():
+					if othermod.__name__[:5] == "mods.":
+						mods[othermodname].UpdateGlobals(mods["common"].GetGlobals())
+				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
+			elif modname == "config":
+				del sys.modules["config"]
+				mods["config"] = importlib.import_module("config")
+				globals().update(mods["config"].GetGlobals())
+				mods["common"].adminHostmasks = mods["config"].adminHostmasks
+				mods["common"].ownerHostmasks = mods["config"].ownerHostmasks
+				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
+			elif modname == "handlers":
+				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
+			elif modname not in mods:
 				SendMessage(channel, "No such module")
 				return
-			print("reloading module "+modname)
+
 			if modname in commands:
 				commands[modname] = []
 			mods[modname] = importlib.reload(mods[modname])
 
-			output = "Reloaded %s.py" % modname
-			if modname == "common":
-				globals().update(mods["common"].GetGlobals())
-				for othermodname, othermod in mods.items():
-					if othermod.__name__[:5] == "mods.":
-						mods[othermodname] = importlib.reload(othermod)
-						output = output + ", %s.py" % othermodname
-			elif modname == "config":
-				globals().update(mods["config"].GetGlobals())
-			SendMessage(channel, output)
-			if modname == "common" or modname == "config":
-				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname})
+			SendMessage(channel, "Reloaded {0}.py".format(modname))
 			return
 		elif command == "%seval" % (commandChar):
 			try:
@@ -137,8 +142,6 @@ def HandlePrivmsg(text):
 			return
 		elif command == "%squit" % (commandChar):
 			quit()
-		elif command == "%smoo" % (commandChar):
-			SendMessage(channel, "MOOO Test")
 
 	#actual commands here
 	for mod in commands:

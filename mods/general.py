@@ -1,9 +1,11 @@
-from common import *
 import math
 import string
 from datetime import datetime
 from time import sleep
 
+from common import *
+def UpdateGlobals(newglobals):
+	globals().update(newglobals)
 RegisterMod(__name__)
 
 def AlwaysRun(channel):
@@ -49,14 +51,14 @@ def PingCmd(username, hostmask, channel, text):
 	"""PONG"""
 	SendMessage(channel, "pong")
 
-@command("join", minArgs = 1, owner = True)
+@command("join", minArgs = 1, admin = True)
 def JoinCmd(username, hostmask, channel, text):
-	"""(no args). Make the bot join a channel (admin only)."""
+	"""(no args). Make the bot join a channel (owner only)."""
 	Send("JOIN %s\n" % text[0])
 
 @command("part", minArgs = 1, owner = True)
 def PartCmd(username, hostmask, channel, text):
-	"""(no args). Make the bot part a channel (admin only)."""
+	"""(no args). Make the bot part a channel (owner only)."""
 	Send("PART %s\n" % text[0])
 
 def Parse(raw, text):

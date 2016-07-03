@@ -3,18 +3,18 @@ import urllib.parse
 import urllib.error
 import re
 
-import config
+from config import adminHostmasks, ownerHostmasks
 
 def GetGlobals():
 	return globals()
 
 def CheckOwner(hostmask):
 	host = hostmask.split("!")[-1]
-	return host in config.ownerHostmasks
+	return host in ownerHostmasks
 
 def CheckAdmin(hostmask):
 	host = hostmask.split("!")[-1]
-	return host in config.adminHostmasks or CheckOwner(hostmask)
+	return host in adminHostmasks or CheckOwner(hostmask)
 
 messageQueue = []
 def Send(msg):
