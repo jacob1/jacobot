@@ -51,7 +51,7 @@ def PingCmd(username, hostmask, channel, text):
 	"""PONG"""
 	SendMessage(channel, "pong")
 
-@command("join", minArgs = 1, admin = True)
+@command("join", minArgs = 1, owner = True)
 def JoinCmd(username, hostmask, channel, text):
 	"""(no args). Make the bot join a channel (owner only)."""
 	Send("JOIN %s\n" % text[0])
