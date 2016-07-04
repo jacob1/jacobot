@@ -96,12 +96,7 @@ def HandlePrivmsg(text):
 				SendNotice(username, "No module given")
 				return
 			modname = text[4]
-			if modname == "common":
-				for _, mod in mods.items():
-					if mod.__name__ in sys.modules:
-						del sys.modules[mod.__name__]
-				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
-			elif modname == "config":
+			if modname == "config":
 				del sys.modules["config"]
 				mods["config"] = importlib.import_module("config")
 				globals().update(mods["config"].GetGlobals())
