@@ -4,8 +4,6 @@ from datetime import datetime
 from time import sleep
 
 from common import *
-def UpdateGlobals(newglobals):
-	globals().update(newglobals)
 RegisterMod(__name__)
 
 def AlwaysRun(channel):

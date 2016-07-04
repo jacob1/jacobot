@@ -8,8 +8,6 @@ from time import sleep
 from collections import defaultdict
 
 from common import *
-def UpdateGlobals(newglobals):
-	globals().update(newglobals)
 RegisterMod(__name__)
 
 # Load banned ips / tags from file

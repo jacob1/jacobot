@@ -3,8 +3,6 @@ import json
 import math
 
 from common import *
-def UpdateGlobals(newglobals):
-	globals().update(newglobals)
 RegisterMod(__name__)
 
 class CraftingList(object):

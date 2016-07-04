@@ -97,13 +97,9 @@ def HandlePrivmsg(text):
 				return
 			modname = text[4]
 			if modname == "common":
-				commandlist = mods["common"].commands
-				mods["common"] = importlib.reload(mods["common"])
-				mods["common"].commands = commandlist
-				globals().update(mods["common"].GetGlobals())
-				for othermodname, othermod in mods.items():
-					if othermod.__name__[:5] == "mods.":
-						mods[othermodname].UpdateGlobals(mods["common"].GetGlobals())
+				for _, mod in mods.items():
+					if mod.__name__ in sys.modules:
+						del sys.modules[mod.__name__]
 				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
 			elif modname == "config":
 				del sys.modules["config"]
@@ -112,7 +108,7 @@ def HandlePrivmsg(text):
 				mods["common"].adminHostmasks = mods["config"].adminHostmasks
 				mods["common"].ownerHostmasks = mods["config"].ownerHostmasks
 				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
-			elif modname == "handlers":
+			elif modname == "handlers" or modname == "common":
 				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
 			elif modname not in mods:
 				SendMessage(channel, "No such module")
