@@ -2,7 +2,7 @@ import socket
 import select
 import ssl
 import traceback
-from time import sleep, time
+import time
 import os
 import sys
 import atexit
@@ -74,13 +74,9 @@ def Connect():
 		for i in channels:
 			SocketSend(irc, "JOIN %s\n" % (i))
 
-# These functions are now unused
-def ReadPrefs():
-	pass
-
-def WritePrefs():
-	pass
-atexit.register(WritePrefs)
+def WriteAllData():
+	common.WriteAllData(force=True)
+atexit.register(WriteAllData)
 
 def PrintError():
 	Print("=======ERROR=======\n{0}========END========\n".format(traceback.format_exc()))
@@ -180,29 +176,28 @@ def main():
 			handler.Tick()
 			common.SetCurrentChannel(None)
 			
-			if common.messageQueue and (time() > nextSend or not common.DoRateLimiting()):
+			if common.messageQueue and (time.time() > nextSend or not common.DoRateLimiting()):
 				if not common.DoRateLimiting():
 					while common.messageQueue:
 						Print("--> %s" % common.messageQueue[0])
 						SocketSend(irc, common.messageQueue[0])
 						common.messageQueue.pop(0)
-				elif time() > nextSend:
+				elif time.time() > nextSend:
 					Print("--> %s" % common.messageQueue[0])
 					SocketSend(irc, common.messageQueue[0])
 					common.messageQueue.pop(0)
 					if len(common.messageQueue) > 3:
-						nextSend = time()+.7
+						nextSend = time.time()+.7
 		except Exception:
 			PrintError()
 
-ReadPrefs()
 reconnectAttempts = 0
 while True:
 	try:
 		Connect()
 		main()
 		reconnectAttempts = 0
-		sleep(20)
+		time.sleep(20)
 	except KeyboardInterrupt:
 		Print("Keyboard inturrupt, bot shut down")
 		break
@@ -213,5 +208,5 @@ while True:
 			Print("Too many failed reconnects, quitting")
 			break
 		Print("A strange error occured, reconnecting in 10 seconds")
-		sleep(10)
+		time.sleep(10)
 		pass

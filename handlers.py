@@ -2,6 +2,7 @@ import os
 import sys
 import traceback
 import importlib
+from datetime import datetime
 
 class ReloadedModuleException(Exception):
 	pass
@@ -26,11 +27,20 @@ def LoadMods():
 				pass
 	print("Done loading modules")
 
+lastSecond = 0
 def Tick():
+	global lastSecond
+	now = datetime.now()
+	if now.second == lastSecond:
+		return
+	lastSecond = now.second
+	
 	#allow modules to have a "tick" function constantly run, for any updates they need
 	for mod in mods:
 		if hasattr(mods[mod], "AlwaysRun"):
 			mods[mod].AlwaysRun(channels[0])
+	if now.second == 30:
+		mods["common"].WriteAllData()
 
 def HandleLine(line, text):
 	if len(text) > 1:
@@ -133,11 +143,19 @@ def HandlePrivmsg(text):
 			return
 		elif command == "%squit" % (commandChar):
 			quit()
+		elif command == "%swritedata".format(commandChar):
+			mods["common"].WriteAllData(force=True)
+		elif command == "%scleardata".format(commandChar):
+			mods["common"].initialized = {}
 
 	#actual commands here
 	for mod in commands:
 		for i in commands[mod]:
 			if command == "%s%s" % (commandChar, i[0]):
-				i[1](username, hostmask, channel, text[4:])
+				try:
+					i[1](username, hostmask, channel, text[4:])
+				except mods["common"].ShowHelpException:
+					if i[1].__doc__:
+						SendMessage(channel, "Usage: %s" % (i[1].__doc__))
 				return
 

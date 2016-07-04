@@ -2,8 +2,14 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import re
+import time
+import os
+import json
 
 from config import adminHostmasks, ownerHostmasks
+
+class ShowHelpException(Exception):
+	pass
 
 def GetGlobals():
 	return globals()
@@ -92,3 +98,49 @@ def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect
 	except urllib.error.URLError:
 	#except IOError:
 		return None
+
+data = {}
+lastData = {}
+initialized = {}
+def StoreData(plugin, key, value):
+	if plugin not in data:
+		data[plugin] = {}
+	if plugin not in lastData:
+		lastData[plugin] = 0
+	node = data[plugin]
+	for k in key.split(".")[:-1]:
+		if not k in node:
+			node[k] = {}
+		node = node[k]
+	node[key.split(".")[-1]] = value
+	
+	lastData[plugin] = time.time()
+
+def WriteAllData(force = False):
+	for plugin in data:
+		if not force and plugin in lastData and time.time() - lastData[plugin] > 65:
+			continue
+		if not os.path.isdir("data"):
+			os.mkdir("data")
+		f = open("data/{0}.json".format(plugin), "w")
+		json.dump(data[plugin], f)
+		f.close()
+		print("wrote data for " + plugin)
+
+def GetData(plugin, key):
+	if plugin not in initialized:
+		if not os.path.isdir("data"):
+			os.mkdir("data")
+			return None
+		f = open("data/{0}.json".format(plugin))
+		data[plugin] = json.load(f)
+		f.close()
+		initialized[plugin] = True
+
+	node = data[plugin]
+	for k in key.split("."):
+		if not k in node:
+			return None
+		node = node[k]
+	return node
+
