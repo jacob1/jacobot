@@ -122,17 +122,17 @@ def WriteAllData(force = False):
 			continue
 		if not os.path.isdir("data"):
 			os.mkdir("data")
-		f = open("data/{0}.json".format(plugin), "w")
+		f = open(os.path.join("data", "{0}.json".format(plugin)), "w")
 		json.dump(data[plugin], f)
 		f.close()
 		print("wrote data for " + plugin)
 
 def GetData(plugin, key):
 	if plugin not in initialized:
-		if not os.path.isdir("data"):
-			os.mkdir("data")
+		try:
+			f = open(os.path.join("data", "{0}.json".format(plugin)).format(plugin))
+		except FileNotFoundError:
 			return None
-		f = open("data/{0}.json".format(plugin))
 		data[plugin] = json.load(f)
 		f.close()
 		initialized[plugin] = True
