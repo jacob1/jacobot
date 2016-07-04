@@ -25,7 +25,7 @@ def Seen(username, hostmask, channel, text):
 		chan = text.pop(0)
 	lastSeen = GetData(__name__, "{0}.{1}".format(chan, text[0]))
 	if not lastSeen:
-		SendMessage(channel, "{1} has not been seen in {1}".format(text[0], chan))
+		SendMessage(channel, "{0} has not been seen in {1}".format(text[0], chan))
 	else:
 		timemsg = datetime.datetime.utcfromtimestamp(lastSeen["time"]).strftime("%a %b %d %Y at %I:%M:%S%p UTC")
 		SendMessage(channel, "{0} was last seen in {1} on {2}: {3}".format(text[0], chan, timemsg, lastSeen["message"]))
