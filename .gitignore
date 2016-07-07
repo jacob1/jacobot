@@ -1,4 +1,5 @@
 config.py
 data/
+settings/
 *.txt
 *.pyc

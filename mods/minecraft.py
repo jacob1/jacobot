@@ -6,6 +6,10 @@ import config
 from common import *
 RegisterMod(__name__)
 
+AddSetting(__name__, "craftinglist-filename", "mods/minecraft-craftinglist.txt")
+AddSetting(__name__, "dynmap-url", "http://dynmap.starcatcher.us")
+LoadSettings(__name__)
+
 class CraftingList(object):
 	recipes = {}
 	replacements = {}
@@ -38,7 +42,7 @@ class CraftingList(object):
 		self.replacements[old] = new
 
 	def __init__(self):
-		craftinglisttxt = open("mods/minecraft-craftinglist.txt")
+		craftinglisttxt = open(GetSetting(__name__, "craftinglist-filename"))
 		lines = craftinglisttxt.readlines()
 		craftinglisttxt.close()
 		for line in lines:
@@ -149,13 +153,13 @@ class Dynmap(object):
 
 	def _UpdateData(self):
 		if time.time() > self.lastFetched+5:
-			page = GetPage("http://dynmap.starcatcher.us/up/world/world/")
+			page = GetPage("{0}/up/world/world/".format(GetSetting(__name__, "dynmap-url")))
 			self.data = json.loads(page)
 			self.lastFetched = time.time()
 
 	def _UpdateClaimData(self, dimension):
 		if dimension not in self.lastClaimFetched or time.time() > self.lastClaimFetched[dimension]+5:
-			page = GetPage("http://dynmap.starcatcher.us/tiles/_markers_/marker_{0}.json".format(dimension))
+			page = GetPage("{0}/tiles/_markers_/marker_{1}.json".format(GetSetting(__name__, "dynmap-url"), dimension))
 			self.claimData[dimension] = json.loads(page)
 			self.lastClaimFetched[dimension] = time.time()
 

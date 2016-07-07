@@ -99,6 +99,7 @@ def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect
 	#except IOError:
 		return None
 
+# Functions for saving / storing data in a "database" (really a json file stored on disk)
 data = {}
 lastData = {}
 initialized = {}
@@ -130,7 +131,7 @@ def WriteAllData(force = False):
 
 def InitializeData(plugin):
 	try:
-		f = open(os.path.join("data", "{0}.json".format(plugin)).format(plugin))
+		f = open(os.path.join("data", "{0}.json".format(plugin)))
 	except FileNotFoundError:
 		return None
 	data[plugin] = json.load(f)
@@ -150,3 +151,30 @@ def GetData(plugin, key):
 		node = node[k]
 	return node
 
+settings = {}
+# Functions for loading settings. If the settings file doesn't exist it is created with default values
+def AddSetting(plugin, setting, default):
+	if plugin not in settings:
+		settings[plugin] = {}
+	
+	settings[plugin][setting] = default
+
+def LoadSettings(plugin):
+	if not os.path.isdir("settings"):
+		os.mkdir("settings")
+	try:
+		f = open(os.path.join("settings", "{0}.json".format(plugin)))
+		foundSettings = json.load(f)
+		for (k,v) in foundSettings.items():
+			if k in settings[plugin]:
+				settings[plugin][k] = v
+		f.close()
+	except FileNotFoundError:
+		pass
+
+	f = open(os.path.join("settings", "{0}.json".format(plugin)), "w")
+	json.dump(settings[plugin], f, indent="\t")
+	f.close()
+
+def GetSetting(plugin, setting):
+	return settings[plugin][setting]
