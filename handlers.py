@@ -48,7 +48,6 @@ def HandleLine(line, text):
 		if text[1] == "396":
 			for i in channels:
 				Send("JOIN %s\n" % (i))
-			SetRateLimiting(True)
 		#Nickname already in use
 		elif text[1] == "433":
 			Send("NICK %s-\n" % (text[3]))
@@ -74,6 +73,7 @@ def HandleLine(line, text):
 
 	if len(text) >= 4:
 		if len(text) and text[1] == "PRIVMSG":
+			SetRateLimiting(True)
 			HandlePrivmsg(text)
 
 	if len(text) >= 5:
@@ -144,9 +144,9 @@ def HandlePrivmsg(text):
 		elif command == "%squit" % (commandChar):
 			quit()
 		elif command == "%swritedata".format(commandChar):
-			mods["common"].WriteAllData(force=True)
+			WriteAllData(force=True)
 		elif command == "%scleardata".format(commandChar):
-			mods["common"].initialized = {}
+			initialized = {}
 
 	#actual commands here
 	for mod in commands:

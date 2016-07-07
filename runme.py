@@ -143,6 +143,7 @@ def main():
 						SocketSend(irc, "PRIVMSG {0} :Reloaded config.py\n".format(e.args[0]["channel"]))
 					elif reloadedModule == "handlers":
 						try:
+							common.WriteAllData(force=True)
 							for modname, mod in handler.mods.items():
 								if mod.__name__ in sys.modules:
 									del sys.modules[mod.__name__]
@@ -160,10 +161,13 @@ def main():
 							common.SetRateLimiting(True)
 							SocketSend(irc, "PRIVMSG {0} :Reloaded handlers.py, common.py, and all plugins\n".format(e.args[0]["channel"]))
 					elif reloadedModule == "common":
+						common.WriteAllData(force=True)
 						for modname, mod in handler.mods.items():
 							if mod.__name__ in sys.modules:
 								del sys.modules[mod.__name__]
 						common = importlib.import_module("common")
+						common.SetCurrentChannel(None)
+						common.SetRateLimiting(True)
 						handler.LoadMods()
 						SocketSend(irc, "PRIVMSG {0} :Reloaded common.py and all plugins\n".format(e.args[0]["channel"]))
 				except SystemExit:

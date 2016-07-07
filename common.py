@@ -103,6 +103,8 @@ data = {}
 lastData = {}
 initialized = {}
 def StoreData(plugin, key, value):
+	if plugin not in initialized:
+		InitializeData(plugin)
 	if plugin not in data:
 		data[plugin] = {}
 	if plugin not in lastData:
@@ -125,17 +127,21 @@ def WriteAllData(force = False):
 		f = open(os.path.join("data", "{0}.json".format(plugin)), "w")
 		json.dump(data[plugin], f)
 		f.close()
-		print("wrote data for " + plugin)
+
+def InitializeData(plugin):
+	try:
+		f = open(os.path.join("data", "{0}.json".format(plugin)).format(plugin))
+	except FileNotFoundError:
+		return None
+	data[plugin] = json.load(f)
+	f.close()
+	initialized[plugin] = True
 
 def GetData(plugin, key):
 	if plugin not in initialized:
-		try:
-			f = open(os.path.join("data", "{0}.json".format(plugin)).format(plugin))
-		except FileNotFoundError:
-			return None
-		data[plugin] = json.load(f)
-		f.close()
-		initialized[plugin] = True
+		InitializeData(plugin)
+	if plugin not in data:
+		return None
 
 	node = data[plugin]
 	for k in key.split("."):

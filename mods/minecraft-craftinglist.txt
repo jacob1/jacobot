@@ -220,8 +220,8 @@ Replacements here (for easier searaches)
  Wood Door,Door | 3 | Wood Plank - Wood Plank / Wood Plank - Wood Plank / Wood Plank - Wood Plank
  Iron Door | 3 | Iron - Iron / Iron - Iron / Iron - Iron
 
- Redstone Repeater | 1 | - - / Redstone Torch - Redstone - Redstone Torch / Stone - Stone - Stone
- Redstone Comparator | 1 | - Redstone Torch - / Redstone Torch - Nether Quartz - Redstone Torch / Stone - Stone - Stone
+ Redstone Repeater,Repeater | 1 | - - / Redstone Torch - Redstone - Redstone Torch / Stone - Stone - Stone
+ Redstone Comparator,Comparator | 1 | - Redstone Torch - / Redstone Torch - Nether Quartz - Redstone Torch / Stone - Stone - Stone
  Observer | 1 | Cobblestone - Cobblestone - Cobblestone / Redstone - Redstone - Nether Quartz / Cobblestone - Cobblestone - Cobblestone 
 
 ////////////////
