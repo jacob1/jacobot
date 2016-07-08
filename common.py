@@ -133,9 +133,13 @@ def InitializeData(plugin):
 	try:
 		f = open(os.path.join("data", "{0}.json".format(plugin)))
 	except FileNotFoundError:
-		return None
-	data[plugin] = json.load(f)
-	f.close()
+		return
+	try:
+		data[plugin] = json.load(f)
+		f.close()
+	except json.decoder.JSONDecodeError:
+		f.close()
+		os.rename(os.path.join("data", "{0}.json".format(plugin)), os.path.join("data", "{0}-backup-{1}.json".format(plugin, int(time.time()))))
 	initialized[plugin] = True
 
 def GetData(plugin, key):
