@@ -143,9 +143,9 @@ def HandlePrivmsg(text):
 			return
 		elif command == "%squit" % (commandChar):
 			quit()
-		elif command == "%swritedata".format(commandChar):
+		elif command == "{0}writedata".format(commandChar):
 			WriteAllData(force=True)
-		elif command == "%scleardata".format(commandChar):
+		elif command == "{0}cleardata".format(commandChar):
 			initialized = {}
 
 	#actual commands here
