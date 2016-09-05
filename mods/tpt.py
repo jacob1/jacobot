@@ -37,6 +37,7 @@ def Parse(raw, text):
 		torips = map(lambda ip: ip.strip(), torips)
 		if ip in torips:
 			SendMessage("#powder-info", "Warning: This account was registered using TOR")
+			BanUser(match.group(1), "1", "p", "Automatic ban: Registeration using TOR has been temporarily disabled due to abuse")
 	#match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), https?:\/\/tpt.io\/~([0-9]+)$", raw)
 													#New: 'Deut compressor' by HugInfinity (0 comments, score 1, 1 bump); http://tpt.io/~1973995
 	"""match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :New: \u000302'(.+?)'\u000F by\u000305 ([\w_-]+)\u000314 \(.*?\)\u000F; https?:\/\/tpt.io\/~([0-9]+)$", raw)
@@ -112,6 +113,15 @@ def AlwaysRun(channel):
 		for convo in convolist:
 			SendMessage("jacob1", "Conversation: {0} by {1} ({2} messages)".format(convo["Subject"], convo["MostRecent"], convo["MessageCount"]))
 		sleep(1)
+	if now.hour == 6 and now.minute == 1 and now.second == 4:
+		torlist = GetPage("https://www.dan.me.uk/torlist/")
+		if not torlist:
+			SendMessage("#powder-info", "Error fetching tor list")
+			return
+		torfile = open("torlist.txt", "w")
+		torfile.write(torlist)
+		torfile.close()
+		SendMessage("#powder-info", "Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
 
 #Generic useful functions
 def GetTPTSessionInfo(line):
@@ -190,10 +200,13 @@ def HidePost(postID, remove, reason):
 	data = {"Hide_Reason":reason,"Hide_Hide":"Hide Post"}
 	if remove:
 		data["Hide_Remove"] = "1"
-	GetPage("http://powdertoy.co.uk/Discussions/Thread/HidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data)
+	page = GetPage("http://powdertoy.co.uk/Discussions/Thread/HidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data)
+	if page and page.find("The post you are trying to edit could not be found.") == -1:
+		return True
+	return False
 
 def UnhidePost(postID):
-	GetPage("http://powdertoy.co.uk/Discussions/Thread/UnhidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0))
+	return GetPage("http://powdertoy.co.uk/Discussions/Thread/UnhidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0))
 
 def LockThread(threadID, reason):
 	GetPage("http://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Lock":"Lock Thread", "Moderation_LockReason":reason})
@@ -235,7 +248,7 @@ def PrintReports(channel, reportlist, saveID=None):
 			return " http://tpt.io/~" + match.group(1)
 		text = re.sub(" ?(?:(?:~|ID:?|id:?|save | |^)([0-9]{4,}))", replace, text)
 		SendMessage(channel, "\00314%s\003: %s" % (reporter, text.strip()))
-		if "tags" in text:
+		if re.search("(?:tags| tag(?:$| |\.))", text.lower()):
 			showtags = True
 	if not reportlist:
 		SendMessage(channel, "No reports on that save")
@@ -351,6 +364,28 @@ def DisableTag(tag, undelete=False):
 		return True
 	return False
 
+def GetUserComments(username, page=0):
+	try:
+		userID = int(username)
+	except:
+		userID = int(GetUserID(username))
+	page = GetPage("http://powdertoy.co.uk/User/Moderation.html?ID={0}&PageNum={1}".format(userID, page), GetTPTSessionInfo(0))
+	comments = re.findall("\?ID=(\d+)&DeleteComment=(\d+)&.*\n.*\n.*Message\">(.*?)<", page)
+	return comments
+
+def GetSaveComments(saveID, page=0):
+	page = GetPage("http://powdertoy.co.uk/Browse/View.html?ID={0}&PageNum={1}".format(saveID, page), GetTPTSessionInfo(0))
+	comments = re.findall("\/User\.html\?Name=([\w_-]+)\">.*\n.*\n.*\n.*\/Browse\/View\.html\?ID=(\d+)&amp;DeleteComment=(\d+)\".*\n.*\n.*Message\">(.*?)<", page)
+	return comments
+
+def DeleteComment(saveID, commentID, safe=True):
+	saveComments = GetSaveComments(saveID)
+	if saveComments[0][2] != commentID:
+		return True
+	if GetPage("http://powdertoy.co.uk/Browse/View.html?ID={0}&DeleteComment={1}".format(saveID, commentID), GetTPTSessionInfo(0)):
+		return True
+	return False
+
 @command("ban", minArgs = 4, owner = True)
 def Ban(username, hostmask, channel, text):
 	"""(ban <user ID> <ban time> <ban time units> <reason>). bans someone in TPT. Owner only. Add = to ban usernames that look like IDs"""
@@ -375,17 +410,26 @@ def Post(username, hostmask, channel, text):
 @command("hide", minArgs = 1, owner = True)
 def Hide(username, hostmask, channel, text):
 	"""(hide <post ID> [<reason>]). Hides a post in TPT. Owner only."""
-	HidePost(text[0], False, " ".join(text[1:]))
+	if HidePost(text[0], False, " ".join(text[1:])):
+		SendMessage(channel, "Done.")
+	else:
+		SendMessage(channel, "Error hiding post.")
 
 @command("remove", minArgs = 1, admin = True)
 def Remove(username, hostmask, channel, text):
 	"""(remove <post ID> [<reason>]). Removes a post in TPT. Admin only."""
-	HidePost(text[0], True, " ".join(text[1:]))
+	if HidePost(text[0], True, " ".join(text[1:])):
+		SendMessage(channel, "Done.")
+	else:
+		SendMessage(channel, "Error hiding post.")
 
 @command("unhide", minArgs = 1, admin = True)
 def Unhide(username, hostmask, channel, text):
 	"""(unhide <post ID>). Unhides a post in TPT. Admin only."""
-	UnhidePost(text[0])
+	if UnhidePost(text[0]):
+		SendMessage(channel, "Done.")
+	else:
+		SendMessage(channel, "Error hiding post.")
 
 @command("lock", minArgs = 2, owner = True)
 def Lock(username, hostmask, channel, text):
@@ -683,3 +727,23 @@ def IPban(username, hostmask, channel, text):
 			SendMessage(channel, "Unknown action")
 	else:
 		SendMessage(channel, "Unknown action")
+
+@command("getusercomments", minArgs=1, owner = True)
+def GetUserCommentsCmd(username, hostmask, channel, text):
+	"""(getusercomments <userID/username> [<pagenumber>]) Debug command to print comments by a certain user. Owner only."""
+	SendMessage(channel, str(GetUserComments(text[0], text[1] if len(text) > 1 else 0)))
+
+@command("getsavecomments", minArgs=1, owner = True)
+def GetSaveCommentsCmd(username, hostmask, channel, text):
+	"""(getsavecomments <saveID> [<pagenum>]) Debug command to print comments on a save. Owner only."""
+	SendMessage(channel, str(GetSaveComments(text[0], text[1] if len(text) > 1 else 0)))
+
+@command("deleteusercomments", minArgs=1, owner=True)
+def DeleteUserCommentsCmd(username, hostmask, channel, text):
+	"""(deleteusercomments <userID/username> [<pagenumber>]) Deletes all comments by a user on a certain page (as long as the comments are the most recent comments on their respective saves). Owner only."""
+	comments = GetUserComments(text[0], text[1] if len(text) > 1 else 0)
+	for comment in comments:
+		if not DeleteComment(comment[0], comment[1]):
+			SendMessage(channel, "Error deleting comment #{0} on ID:{1}".format(comment[0], comment[1]))
+			break
+	SendMessage(channel, "Done.")
