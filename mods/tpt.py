@@ -22,6 +22,18 @@ except IOError:
 	bannedtags = {}
 	pass
 
+def CheckIP(IP):
+	torfile = open("torlist.txt")
+	torips = torfile.readlines()
+	torfile.close()
+	torips = map(lambda ip: ip.strip(), torips)
+	if IP in torips:
+		return (True, "tor")
+	for address in ipbans:
+		if IP.startswith(address):
+			return (True, "ipban")
+	return (False, "")
+
 def Parse(raw, text):
 	match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-info :New registration: ([\w_-]+)\. https?:\/\/tpt\.io\/@([\w\_-]+) \[([0-9.]+)\] ?$", raw)
 	if match:
@@ -49,7 +61,7 @@ def Parse(raw, text):
 				SendMessage("+#powder-saves", "Error demoting save ID %s" % (saveID))
 			else:
 				SendMessage("+#powder-saves", "Demoted save ID %s" % (saveID))
-		info = GetSaveInfo(saveID)
+		info = GetSaveInfoDetailed(saveID)
 		if info:
 			sleep(1)
 			elementCount = {}
@@ -70,6 +82,10 @@ def Parse(raw, text):
 		message = powderBotMatch.group(2)
 		if channel == "#powder-saves":
 			CheckTag(message)
+		elif channel == "#powder-forum":
+			CheckPost(message)
+		#elif channel == "#powder-info":
+		#	CheckPost(message)
 
 def CheckTag(message):
 	tagMatch = re.match("^New tag: \u000303(\w+)\u0003 \(http://tpt.io/~(\d+)\)$", message)
@@ -83,6 +99,38 @@ def CheckTag(message):
 					SendMessage("+#powder-saves", "Disabled tag {0} by {1}".format(tag, username if username else "UNKNOWN"))
 				else:
 					SendMessage("+#powder-saves", "Error: couldn't disable tag {0}".format(tag))
+
+def CheckPost(message):
+	logchan = "+#powder-forum"
+	postMatch = re.match("^Post by \u000305(\w+)\u000F in '\u000302([^\u000F]+)\u000F'; http://tpt.io/.(\d+)$", message)
+	if postMatch:
+		#SendMessage("#powder-info", "Match: {0}, {1}, {2}".format(postMatch.group(1), postMatch.group(2), postMatch.group(3)))
+		postID = postMatch.group(3)
+		IP = GetPostIP(postID)
+		username = postMatch.group(1)
+		check = CheckIP(IP)
+		if check[0] and check[1] == "tor":
+			if HidePost(postID, True, "This post has been automatically removed due to potential abuse."):
+				SendMessage(logchan, "Warning: This post was made using TOR. Removed post.")
+			else:
+				SendMessage(logchan, "Warning: This post was made using TOR. Error removing post, please remove manually.")
+		elif check[0] and check[1] == "ipban":
+			if HidePost(postID, True, "This post has been automatically removed due to potential abuse."):
+				SendMessage(logchan, "Warning: This post was made from a suspicious IP address. Removed post.")
+			else:
+				SendMessage(logchan, "Warning: This post was made from a suspicious IP address. Error removing post, please remove manually.")
+	threadMatch = re.match("^Thread '\u000302([^']+)\u000F' by \u000305(\w+)\u000F in (?:.*?); http://tpt.io/:(\d+)$", message)
+	if threadMatch:
+		#SendMessage("#powder-info", "Thread Match: {0}, {1}, {2}".format(threadMatch.group(1), threadMatch.group(2), threadMatch.group(3)))
+		threadID = threadMatch.group(3)
+		IP = GetThreadPostIP(threadMatch.group(3))
+		check = CheckIP(IP)
+		if check[0] and check[1] == "tor":
+			SendMessage(logchan, "Warning: This thread was made using TOR. Removing thread.")
+			MoveThread(threadID, 7)
+			LockThread(threadID, "Thread automatically moved and locked because it was posted with TOR")
+		elif check[0]:
+			SendMessage(logchan, "Warning: This thread was made from a suspicious IP address.")
 
 seenReports = {}
 def AlwaysRun(channel):
@@ -161,16 +209,17 @@ def UnbanUser(username):
 	return True
 
 #Functions to get info from TPT
-def GetPostInfo(postID):
-	page = GetPage("http://tpt.io/.%s" % postID)
-	match = re.search("<div class=\"Comment\">(.+?<div id=\"MessageContainer-%s\" class=\"Message\">.+?)</li>" % postID, page, re.DOTALL)
-	matchinfo = filter(None, re.split("[ \n\t]*<.+?>[ \n\t]*", match.group(1)))
-	#"[ \n\t]*</?div.+?>[ \n\t+]*"
-	print(matchinfo)
+def GetSaveInfoDetailed(saveID):
+	try:
+		page = GetPage("http://powdertoythings.co.uk/Powder/Saves/ViewDetailed.json?ID=%s" % saveID)
+		info = json.loads(page)
+		return info
+	except Exception:
+		return None
 
 def GetSaveInfo(saveID):
 	try:
-		page = GetPage("http://powdertoythings.co.uk/Powder/Saves/ViewDetailed.json?ID=%s" % saveID)
+		page = GetPage("http://powdertoy.co.uk/Browse/View.json?ID=%s" % saveID)
 		info = json.loads(page)
 		return info
 	except Exception:
@@ -213,6 +262,9 @@ def LockThread(threadID, reason):
 
 def UnlockThread(threadID):
 	GetPage("http://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Unlock":"Unlock"})
+
+def MoveThread(threadID, newSection):
+	GetPage("http://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Move":"Move Thread", "Moderation_MoveCategory":newSection})
 
 def PromotionLevel(saveID, level):
 	if level >= -2 and level <= 2:
@@ -339,7 +391,7 @@ def PrintTags(channel, saveID):
 	saveInfo = GetSaveInfo(saveID)
 	if not saveInfo:
 		SendMessage(channel, "Error: Could not load save info")
-	elif saveInfo["Tags"]:
+	elif "Tags" in saveInfo and saveInfo["Tags"]:
 		SendMessage(channel, "Tags: {0}".format(", ".join(saveInfo["Tags"])))
 	else:
 		SendMessage(channel, "No tags on that save")
@@ -380,11 +432,32 @@ def GetSaveComments(saveID, page=0):
 
 def DeleteComment(saveID, commentID, safe=True):
 	saveComments = GetSaveComments(saveID)
-	if saveComments[0][2] != commentID:
+	try:
+		if saveComments[0][2] != commentID:
+			return True
+	# Save doesn't exist
+	except IndexError:
 		return True
 	if GetPage("http://powdertoy.co.uk/Browse/View.html?ID={0}&DeleteComment={1}".format(saveID, commentID), GetTPTSessionInfo(0)):
 		return True
 	return False
+
+def GetPostIP(postID):
+	redirect = GetPage("http://powdertoy.co.uk/Discussions/Thread/View.html?Post={0}".format(postID), getredirect=True)
+	if redirect:
+		page = GetPage(redirect, GetTPTSessionInfo(0))
+		IP = re.search("\/IPTools\.html[^>]+>(\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}})<\/a>\s+<a[^>]+EditPost.html\?Post={0}\"".format(postID), page)
+		if IP:
+			return IP.group(1)
+	return None
+
+def GetThreadPostIP(threadID):
+	page = GetPage("http://powdertoy.co.uk/Discussions/Thread/View.html?Thread={0}".format(threadID), GetTPTSessionInfo(0))
+	if page:
+		IP = re.search("\/IPTools\.html[^>]+>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})<\/a>", page)
+		if IP:
+			return IP.group(1)
+	return None
 
 @command("ban", minArgs = 4, owner = True)
 def Ban(username, hostmask, channel, text):
@@ -402,11 +475,6 @@ def Unban(username, hostmask, channel, text):
 	if not UnbanUser(text[0]):
 		SendMessage(channel, "An error occured while trying to unban user.")
 
-@command("post", minArgs = 1, admin = True)
-def Post(username, hostmask, channel, text):
-	"""(post <post ID>). Gets info on a TPT post. Admin only."""
-	GetPostInfo(text[0])
-	
 @command("hide", minArgs = 1, owner = True)
 def Hide(username, hostmask, channel, text):
 	"""(hide <post ID> [<reason>]). Hides a post in TPT. Owner only."""
@@ -435,11 +503,19 @@ def Unhide(username, hostmask, channel, text):
 def Lock(username, hostmask, channel, text):
 	"""(lock <thread ID> <reason>). Locks a thread in TPT. Owner only."""
 	LockThread(text[0], " ".join(text[1:]))
+	SendMessage(channel, "No output.")
 
 @command("unlock", minArgs = 1, owner = True)
 def Unlock(username, hostmask, channel, text):
 	"""(unlock <thread ID>). Unlocks a thread in TPT. Owner only."""
 	UnlockThread(text[0])
+	SendMessage(channel, "No output.")
+
+@command("move", minArgs = 2, admin = True)
+def Unlock(username, hostmask, channel, text):
+	"""(move <thread ID> <new section>). Moves a thread into a new section. Must use forum section IDs, not names. Admin only."""
+	MoveThread(text[0], text[1])
+	SendMessage(channel, "No output.")
 
 @command("promolevel", minArgs = 2, admin = True)
 def Unlock(username, hostmask, channel, text):
@@ -457,7 +533,7 @@ def IpMap(username, hostmask, channel, text):
 @command("saveinfo", minArgs = 1, admin = True)
 def SaveInfo(username, hostmask, channel, text):
 	"""(saveinfo <saveid>). Prints out lots of useful information about TPT saves. Admin only."""
-	info = GetSaveInfo(text[0])
+	info = GetSaveInfoDetailed(text[0])
 	if info:
 		formatted = FormatSaveInfo(info)
 		for line in formatted.split("\n"):
@@ -730,20 +806,50 @@ def IPban(username, hostmask, channel, text):
 
 @command("getusercomments", minArgs=1, owner = True)
 def GetUserCommentsCmd(username, hostmask, channel, text):
-	"""(getusercomments <userID/username> [<pagenumber>]) Debug command to print comments by a certain user. Owner only."""
+	"""(getusercomments <userID/username> [<pagenumber>]). Debug command to print comments by a certain user. Owner only."""
 	SendMessage(channel, str(GetUserComments(text[0], text[1] if len(text) > 1 else 0)))
 
 @command("getsavecomments", minArgs=1, owner = True)
 def GetSaveCommentsCmd(username, hostmask, channel, text):
-	"""(getsavecomments <saveID> [<pagenum>]) Debug command to print comments on a save. Owner only."""
+	"""(getsavecomments <saveID> [<pagenum>]). Debug command to print comments on a save. Owner only."""
 	SendMessage(channel, str(GetSaveComments(text[0], text[1] if len(text) > 1 else 0)))
 
-@command("deleteusercomments", minArgs=1, owner=True)
+@command("deleteusercomments", minArgs=1, admin=True)
 def DeleteUserCommentsCmd(username, hostmask, channel, text):
-	"""(deleteusercomments <userID/username> [<pagenumber>]) Deletes all comments by a user on a certain page (as long as the comments are the most recent comments on their respective saves). Owner only."""
+	"""(deleteusercomments <userID/username> [<pagenumber>]). Deletes all comments by a user on a certain page (as long as the comments are the most recent comments on their respective saves). Admin only."""
+	pagenum = text[1] if len(text) > 1 else 0
+	try:
+		if int(pagenum) < 0:
+			SendMessage(channel, "Error: pagenum must be a positive integer")
+			return
+	except ValueError:
+		SendMessage(channel, "Error: pagenum must be a positive integer")
+		return
 	comments = GetUserComments(text[0], text[1] if len(text) > 1 else 0)
 	for comment in comments:
 		if not DeleteComment(comment[0], comment[1]):
-			SendMessage(channel, "Error deleting comment #{0} on ID:{1}".format(comment[0], comment[1]))
+			SendMessage(channel, "Error deleting comment #{0} on ID:{1}".format(comment[1], comment[0]))
 			break
 	SendMessage(channel, "Done.")
+
+@command("getpostip", minArgs=1, admin=True)
+def GetPostIPCmd(username, hostmask, channel, text):
+	"""(getpostip <postID>). Returns the IP used to make a forum post. Admin only."""
+	postIP = GetPostIP(text[0])
+	if postIP:
+		suspicious, reason = CheckIP(postIP)
+		if suspicious:
+			SendMessage(channel, "{0}: this IP is in the {1} blacklist".format(postIP, reason))
+		else:
+			SendMessage(channel, postIP)
+	else:
+		SendMessage(channel, "Error: Could not get IP")
+
+@command("getthreadpostip", minArgs=1, admin=True)
+def GetThreadPostIPCmd(username, hostmask, channel, text):
+	"""(getthreadpostip <postID>). Returns the IP used to make a forum thread. Admin only."""
+	threadIP = GetThreadPostIP(text[0])
+	if threadIP:
+		SendMessage(channel, threadIP)
+	else:
+		SendMessage(channel, "Error: Could not get IP")
