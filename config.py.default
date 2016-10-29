@@ -24,7 +24,7 @@ disabledPlugins = ["tpt"]
 encoding = "utf-8"
 
 # A string containing python code that is run whenever an error happens
-errorCode = """sock = socket.create_connection(("mniip.com", 7777))
+errorCode = """sock = socket.create_connection(("tcpst.net", 7777))
 sock.sendall(traceback.format_exc().encode("utf-8"))
 sock.settimeout(1)
 reply = b""
