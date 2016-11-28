@@ -81,7 +81,6 @@ atexit.register(WriteAllData)
 def PrintError():
 	Print("=======ERROR=======\n{0}========END========\n".format(traceback.format_exc()))
 	currentChannel = common.GetCurrentChannel()
-	print(currentChannel)
 	if currentChannel:
 		SocketSend(irc, "PRIVMSG {0} :Error printed to console\n".format(currentChannel))
 		if errorCode:
