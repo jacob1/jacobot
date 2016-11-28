@@ -101,6 +101,7 @@ Replacements here (for easier searaches)
  Ender Chest | 1 | Obsidian - Obsidian - Obsidian / Obsidian - Eye of Ender - Obsidian / Obsidian - Obsidian - Obsidian
  Anvil | 1 | Block of Iron - Block of Iron - Block of Iron / - Iron - / Iron - Iron - Iron
  Beacon | 1 | Glass - Glass - Glass / Glass - Nether Star - Glass / Obsidian - Obsidian - Obsidian
+ Shulker Box | 1 | Shulker Shell / Chest / Shulker Shell
 
 //////////////////////////
 //Transportation recipes//
@@ -169,7 +170,7 @@ Replacements here (for easier searaches)
  Spectral Arrow | 2 | - Glowstone Dust - / Glowstone Dust - Arrow - Glowstone Dust / - Glowstone Dust - 
  Tipped Arrow | 8 | Arrow - Arrow - Arrow / Arrow - Lingering Potion - Arrow / Arrow - Arrow - Arrow
 
- Shield | 1 | Wood Plank - Iron - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Wood Plank - 
+ Shield,Sheild | 1 | Wood Plank - Iron - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Wood Plank - 
 
  Leather Helmet | 1 | Leather - Leather - Leather / Leather - - Leather
  Gold Helmet | 1 | Gold - Gold - Gold / Gold - - Gold

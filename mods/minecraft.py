@@ -377,3 +377,20 @@ def GetTime(username, hostmask, channel, text):
 @command("brewingchart")
 def BrewingChart(username, hostmask, channel, text):
 	SendMessage(channel, "https://hydra-media.cursecdn.com/minecraft.gamepedia.com/7/7b/Minecraft_brewing_en.png")
+
+@command("registerusername", minArgs=1, admin=True)
+def RegisterUsername(username, hostmask, channel, text):
+	"""(registerplayer <mcusername> <tptusername>). Sets the TPT username of a minecraft player."""
+	if len(text) > 1:
+		StoreData(__name__, "usernamemap.{0}".format(text[0]), text[1])
+	else:
+		StoreData(__name__, "usernamemap.{0}".format(text[0]), False)
+	SendMessage(channel, "Done.")
+
+@command("getusername", minArgs=1)
+def GetUsername(username, hostmask, channel, text):
+	tptusername = GetData(__name__, "usernamemap.{0}".format(text[0]))
+	if tptusername:
+		SendMessage(channel, "{0}'s TPT username is {1}".format(text[0], tptusername))
+	else:
+		SendMessage(channel, "Could not find player with that username")

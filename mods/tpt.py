@@ -578,7 +578,7 @@ def MarkAllRead(username, hostmask, channel, text):
 
 @command("reports", admin = True)
 def Reports(username, hostmask, channel, text):
-	"""(reports) No args. Prints out the reports list. Owner only."""
+	"""(reports) No args. Prints out the reports list. Admin only."""
 	global seenReports
 	reportlist = ReportsList()
 	if reportlist == None:
@@ -593,7 +593,7 @@ def Reports(username, hostmask, channel, text):
 	for report in reportlist:
 		seenReports[report[1]] = report[0]
 
-@command("comment", minArgs=2, owner = True)
+@command("comment", minArgs=2, admin = True)
 def Comment(username, hostmask, channel, text):
 	"""(comment <saveID> <comment>). Comments on a save as jacobot. Admin only."""
 	if DoComment(text[0], " ".join(text[1:]), False):
