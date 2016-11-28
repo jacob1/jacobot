@@ -74,7 +74,7 @@ def HandleLine(line, text):
 	if len(text) >= 4:
 		if len(text) and text[1] == "PRIVMSG":
 			SetRateLimiting(True)
-			HandlePrivmsg(text)
+			HandlePrivmsg(line, text)
 
 	if len(text) >= 5:
 		if text[1] == "MODE" and text[2] == "##powder-bots" and text[3] == "+o" and text[4] == botNick:
@@ -85,23 +85,15 @@ def HandleLine(line, text):
 		if hasattr(mods[mod], "Parse"):
 			mods[mod].Parse(line, text)
 
-def HandlePrivmsg(text):
-	channel = text[2]
-	SetCurrentChannel(channel)
-	username = text[0].split("!")[0].lstrip(":")
-	hostmask = text[0].split("!")[1]
-	command = text[3].lower().lstrip(":")
-	if channel == botNick:
-		channel = username
-	#if username == "FeynmanStockBot":
-	#	return
-	if username == "potatorelay" and command.startswith("<") and command.endswith(">") and len(text) > 4:
-		text.pop(3)
-		command = text[3]
+def HandlePrivmsg(line, text):
+	message = Message(line)
+	SetCurrentChannel(message.replyChannel)
+	if not message.isCommand:
+		return
 
 	#some special owner commands that aren't in modules
 	if CheckOwner(text[0]):
-		if command == "%sreload" % (commandChar):
+		if message.command == "reload":
 			if len(text) <= 4:
 				SendNotice(username, "No module given")
 				return
@@ -112,20 +104,20 @@ def HandlePrivmsg(text):
 				globals().update(mods["config"].GetGlobals())
 				mods["common"].adminHostmasks = mods["config"].adminHostmasks
 				mods["common"].ownerHostmasks = mods["config"].ownerHostmasks
-				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
+				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":message.channel})
 			elif modname == "handlers" or modname == "common":
-				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":channel})
+				raise ReloadedModuleException({"message":"Reloading {0}.py".format(modname), "module":modname, "channel":message.channel})
 			elif modname not in mods:
-				SendMessage(channel, "No such module")
+				message.Reply("No such module")
 				return
 
 			if modname in commands:
 				commands[modname] = []
 			mods[modname] = importlib.reload(mods[modname])
 
-			SendMessage(channel, "Reloaded {0}.py".format(modname))
+			message.Reply("Reloaded {0}.py".format(modname))
 			return
-		elif command == "%seval" % (commandChar):
+		elif message.command == "eval":
 			try:
 				command = " ".join(text[4:]).replace("\\n", "\n").replace("\\t", "\t")
 				ret = str(eval(command))
@@ -133,29 +125,29 @@ def HandlePrivmsg(text):
 				ret = str(type(e))+":"+str(e)
 			retlines = ret.splitlines()[:4]
 			for line in retlines:
-				SendMessage(channel, line)
+				message.Reply(line)
 			return
-		elif command == "%sexec" % (commandChar):
+		elif message.command == "exec":
 			try:
 				exec(" ".join(text[4:]))
 			except Exception as e:
-				SendMessage(channel, str(type(e))+":"+str(e))
+				message.Reply(str(type(e))+":"+str(e))
 			return
-		elif command == "%squit" % (commandChar):
+		elif message.command == "quit":
 			quit()
-		elif command == "{0}writedata".format(commandChar):
+		elif message.command == "writedata":
 			WriteAllData(force=True)
-		elif command == "{0}cleardata".format(commandChar):
+		elif message.command == "cleardata":
 			initialized = {}
 
 	#actual commands here
 	for mod in commands:
 		for i in commands[mod]:
-			if command == "%s%s" % (commandChar, i[0]):
+			if message.command == i[0]:
 				try:
-					i[1](username, hostmask, channel, text[4:])
+					i[1](message)
 				except mods["common"].ShowHelpException:
 					if i[1].__doc__:
-						SendMessage(channel, "Usage: %s" % (i[1].__doc__))
+						message.Reply("Usage: %s" % (i[1].__doc__))
 				return
 

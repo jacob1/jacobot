@@ -6,7 +6,7 @@ import time
 import os
 import json
 
-from config import adminHostmasks, ownerHostmasks
+from config import botNick, adminHostmasks, ownerHostmasks, commandChar
 
 class ShowHelpException(Exception):
 	pass
@@ -36,6 +36,57 @@ def SendNotice(target, msg):
 	msg = msg[:450]
 	Send("NOTICE %s :%s\n" % (target, msg))
 
+class Message(object):
+	privmsgRegex = r"^:(([^!]+)!([^@]+)@([^ ]+)) PRIVMSG ([^ ]+) :(.+)$"
+	commandRegex = r"^{0}([^ ]+)(?: (.+))?$".format(commandChar)
+	minecraftRegex = r"^:(?:potatorelay!~mcrelay@unaffiliated/jacob1/bot/jacobot|creativerelay!~mcrelay@75-108-75-104-nbrn.nca.dyn.suddenlink.net) PRIVMSG ##powder-mc :<([^>]+)\x0F> (.+)$"
+
+	def __init__(self, rawline):
+		parsed = re.search(self.privmsgRegex, rawline)
+		self.raw = rawline
+		self.fullhost = parsed.group(1)
+		self.nick = parsed.group(2)
+		self.ident = parsed.group(3)
+		self.host = parsed.group(4)
+		self.channel = parsed.group(5)
+		self.replyChannel = self.channel if self.channel != botNick else self.nick
+		self.message = parsed.group(6)
+
+		mcCheck = re.search(self.minecraftRegex, rawline)
+		self.isMinecraft = False
+		if mcCheck:
+			self.isMinecraft = True
+			self.mcusername = mcCheck.group(1)
+			self.message = mcCheck.group(2)
+
+		self.isCommand = False
+		if self.message.startswith(commandChar):
+			commandParsed = re.search(self.commandRegex, self.message)
+			if commandParsed:
+				self.isCommand = True
+				self.command = commandParsed.group(1)
+				self.commandLine = commandParsed.group(2)
+				if not self.commandLine:
+					self.commandLine = ""
+
+	def Reply(self, message):
+		SendMessage(self.replyChannel, message)
+
+	def ReplyNotice(self, message):
+		SendNotice(self.nick, message)
+
+	def GetArg(self, num, endLine=False):
+		if not self.isCommand:
+			return None
+		if not hasattr(self, "_commandSplit"):
+			self._commandSplit = self.commandLine.split()
+		if num < len(self._commandSplit):
+			if endLine:
+				return " ".join(self._commandSplit[num:])
+			else:
+				return self._commandSplit[num]
+		return None
+
 rateLimit = False
 def SetRateLimiting(rateLimiting):
 	global rateLimit
@@ -64,20 +115,20 @@ def RegisterMod(name):
 commands = {}
 def command(name, minArgs = 0, owner = False, admin = False, rateLimit = False):
 	def real_command(func):
-		def call_func(username, hostmask, channel, text):
-			if owner and not CheckOwner(hostmask):
-				SendNotice(username, "This command is owner only")
+		def call_func(message):
+			if owner and not CheckOwner(message.fullhost):
+				message.ReplyNotice("This command is owner only")
 				return
-			if admin and not CheckAdmin(hostmask):
-				SendNotice(username, "This command is admin only")
+			if admin and not CheckAdmin(message.fullhost):
+				message.ReplyNotice("This command is admin only")
 				return
-			if len(text) < minArgs:
-				SendNotice(username, "Usage: %s" % func.__doc__)
+			if minArgs and not message.GetArg(minArgs-1):
+				raise ShowHelpException()
 				return
 			if rateLimit and len(messageQueue) > 2:
-				SendNotice(username, "This command has been rate limited")
+				message.ReplyNotice("This command has been rate limited")
 				return
-			return func(username, hostmask, channel, text)
+			return func(message)
 		call_func.__doc__ = func.__doc__
 		commands[plugin].append((name, call_func))
 		return call_func

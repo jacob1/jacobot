@@ -11,67 +11,72 @@ def AlwaysRun(channel):
 		Send("PING checkalive\n")
 
 @command("help", minArgs = 1)
-def HelpCmd(username, hostmask, channel, text):
+def HelpCmd(message):
 	"""<command> Shows help for a command."""
+	helpCmd = message.GetArg(0)
 	for mod in commands:
 		for i in commands[mod]:
-			if i[0] == text[0]:
+			if i[0] == helpCmd:
 				if i[1].__doc__:
-					SendMessage(channel, "%s: %s" % (text[0], i[1].__doc__))
+					message.Reply("%s: %s" % (helpCmd, i[1].__doc__))
 				else:
-					SendMessage(channel, "No help text available for %s." % (text[0]))
+					message.Reply("No help text available for %s." % (helpCmd))
 				return
-	SendNotice(username, "No such command")
+	message.ReplyNotice("No such command")
 
 @command("list")
-def ListCmd(username, hostmask, channel, text):
+def ListCmd(message):
 	"""(no args). Lists all commands."""
-	if len(text):
-		if not text[0] in commands:
-			SendNotice(username, "No such module")
+	listMod = message.GetArg(0)
+	if listMod:
+		if not listMod in commands:
+			message.ReplyNotice("No such module")
 		else:
-			SendMessage(channel, "Commands: "+", ".join(i[0] for i in commands[text[0]]))
+			message.Reply("Commands: "+", ".join(i[0] for i in commands[listMod]))
 	else:
-		SendMessage(channel, "Modules: "+", ".join(i for i in commands))
+		message.Reply("Modules: "+", ".join(i for i in commands))
 
 @command("commands")
-def CommandsCmd(username, hostmask, channel, text):
+def CommandsCmd(message):
 	"""(no args). Lists all commands."""
 	cmdlist = []
 	for mod in commands:
 		cmdlist += commands[mod]
-	SendMessage(channel, ", ".join(i[0] for i in cmdlist))
+	message.Reply(", ".join(i[0] for i in cmdlist))
 
 @command("ping")
-def PingCmd(username, hostmask, channel, text):
+def PingCmd(message):
 	"""PONG"""
-	SendMessage(channel, "pong")
+	if message.commandLine:
+		message.Reply("pong %s" % message.commandLine)
+	else:
+		message.Reply("pong")
 
 @command("join", minArgs = 1, owner = True)
-def JoinCmd(username, hostmask, channel, text):
+def JoinCmd(message):
 	"""(no args). Make the bot join a channel (owner only)."""
-	Send("JOIN %s\n" % text[0])
+	Send("JOIN %s\n" % message.GetArg(0))
 
 @command("part", minArgs = 1, owner = True)
-def PartCmd(username, hostmask, channel, text):
+def PartCmd(message):
 	"""(no args). Make the bot part a channel (owner only)."""
-	Send("PART %s\n" % text[0])
+	Send("PART %s\n" % message.GetArg(0))
 
-def Parse(raw, text):
-	if text[1] == "324":
-		SendMessage(config.channels[2], "Channel exists: "+text[3] + "; " + text[4])
-	elif text[1] == "403":
-		SendMessage(config.channels[2], "No such channel: "+text[3])
+#def Parse(raw, text):
+#	if text[1] == "324":
+#		SendMessage(config.channels[2], "Channel exists: "+text[3] + "; " + text[4])
+#	elif text[1] == "403":
+#		SendMessage(config.channels[2], "No such channel: "+text[3])
 
 @command("msg", minArgs = 2, owner = True)
-def MsgCmd(username, hostmask, channel, text):
+def MsgCmd(message):
 	"""(msg <channel> <message>). Sends a message to a channel."""
-	SendMessage(text[0], " ".join(text[1:]))
+	SendMessage(message.GetArg(0), " ".join(message.GetArg(1, endLine=True)))
 
 @command("raw", minArgs = 1, owner = True)
-def RawCmd(username, hostmask, channel, text):
+def RawCmd(message):
 	"""(raw <message>). Sends a raw IRC message."""
-	Send(" ".join(text) + "\n")
+	Send(message.commandLine + "\n")
 
 """
 @command("check", minArgs = 1)

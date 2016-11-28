@@ -460,108 +460,108 @@ def GetThreadPostIP(threadID):
 	return None
 
 @command("ban", minArgs = 4, owner = True)
-def Ban(username, hostmask, channel, text):
+def Ban(message):
 	"""(ban <user ID> <ban time> <ban time units> <reason>). bans someone in TPT. Owner only. Add = to ban usernames that look like IDs"""
-	if username != "jacob1":
-		SendNotice(username, "Error, only jacob1 should be able to use this command")
-	if not BanUser(text[0], text[1], text[2], " ".join(text[3:])):
-		SendMessage(channel, "An error occured while trying to ban user.")
+	if message.nick != "jacob1":
+		message.ReplyNotice("Error, only jacob1 should be able to use this command")
+	if not BanUser(message.GetArg(0), message.GetArg(1), message.GetArg(2), message.GetArg(3, endLine=True)):
+		message.Reply("An error occured while trying to ban user.")
 
 @command("unban", minArgs = 1, owner = True)
-def Unban(username, hostmask, channel, text):
+def Unban(message):
 	"""(unban <user ID>). unbans someone in TPT. Owner only."""
-	if username != "jacob1":
-		SendNotice(username, "Error, only jacob1 should be able to use this command")
-	if not UnbanUser(text[0]):
-		SendMessage(channel, "An error occured while trying to unban user.")
+	if message.nick != "jacob1":
+		message.ReplyNotice("Error, only jacob1 should be able to use this command")
+	if not UnbanUser(message.GetArg(0)):
+		message.Reply("An error occured while trying to unban user.")
 
 @command("hide", minArgs = 1, owner = True)
-def Hide(username, hostmask, channel, text):
+def Hide(message):
 	"""(hide <post ID> [<reason>]). Hides a post in TPT. Owner only."""
-	if HidePost(text[0], False, " ".join(text[1:])):
-		SendMessage(channel, "Done.")
+	if HidePost(message.GetArg(0), False, message.GetArg(1, endLine=True)):
+		message.Reply("Done.")
 	else:
-		SendMessage(channel, "Error hiding post.")
+		message.Reply("Error hiding post.")
 
 @command("remove", minArgs = 1, admin = True)
-def Remove(username, hostmask, channel, text):
+def Remove(message):
 	"""(remove <post ID> [<reason>]). Removes a post in TPT. Admin only."""
-	if HidePost(text[0], True, " ".join(text[1:])):
-		SendMessage(channel, "Done.")
+	if HidePost(message.GetArg(0), True, message.GetArg(1, endLine=True)):
+		message.Reply("Done.")
 	else:
-		SendMessage(channel, "Error hiding post.")
+		message.Reply("Error hiding post.")
 
 @command("unhide", minArgs = 1, admin = True)
-def Unhide(username, hostmask, channel, text):
+def Unhide(message):
 	"""(unhide <post ID>). Unhides a post in TPT. Admin only."""
-	if UnhidePost(text[0]):
-		SendMessage(channel, "Done.")
+	if UnhidePost(message.GetArg(0)):
+		message.Reply("Done.")
 	else:
-		SendMessage(channel, "Error hiding post.")
+		message.Reply("Error hiding post.")
 
 @command("lock", minArgs = 2, owner = True)
-def Lock(username, hostmask, channel, text):
+def Lock(message):
 	"""(lock <thread ID> <reason>). Locks a thread in TPT. Owner only."""
-	LockThread(text[0], " ".join(text[1:]))
-	SendMessage(channel, "No output.")
+	LockThread(message.GetArg(0), message.GetArg(1, endLine=True))
+	message.Reply("No output.")
 
 @command("unlock", minArgs = 1, owner = True)
-def Unlock(username, hostmask, channel, text):
+def Unlock(message):
 	"""(unlock <thread ID>). Unlocks a thread in TPT. Owner only."""
-	UnlockThread(text[0])
-	SendMessage(channel, "No output.")
+	UnlockThread(message.GetArg(0))
+	message.Reply("No output.")
 
 @command("move", minArgs = 2, admin = True)
-def Unlock(username, hostmask, channel, text):
+def Unlock(message):
 	"""(move <thread ID> <new section>). Moves a thread into a new section. Must use forum section IDs, not names. Admin only."""
-	MoveThread(text[0], text[1])
-	SendMessage(channel, "No output.")
+	MoveThread(message.GetArg(0), message.GetArg(1))
+	message.Reply("No output.")
 
 @command("promolevel", minArgs = 2, admin = True)
-def Unlock(username, hostmask, channel, text):
+def Unlock(message):
 	"""(promolevel <save ID> <level>). Sets the promotion level on a save. Admin only."""
-	if PromotionLevel(text[0], int(text[1])):
-		SendMessage(channel, "Done.")
+	if PromotionLevel(message.GetArg(0), int(message.GetArg(1))):
+		message.Reply("Done.")
 	else:
-		SendMessage(channel, "Invalid promotion level.")
+		message.Reply("Invalid promotion level.")
 
 @command("ipmap", minArgs = 1, admin = True)
-def IpMap(username, hostmask, channel, text):
+def IpMap(message):
 	"""(ipmap <username/ip>). Prints out linked accounts or IP addresses. Admin only."""
-	SendMessage(channel, GetLinkedAccounts(text[0]))
+	message.Reply(GetLinkedAccounts(message.GetArg(0)))
 
 @command("saveinfo", minArgs = 1, admin = True)
-def SaveInfo(username, hostmask, channel, text):
+def SaveInfo(message):
 	"""(saveinfo <saveid>). Prints out lots of useful information about TPT saves. Admin only."""
-	info = GetSaveInfoDetailed(text[0])
+	info = GetSaveInfoDetailed(message.GetArg(0))
 	if info:
 		formatted = FormatSaveInfo(info)
 		for line in formatted.split("\n"):
-			SendMessage(channel, line)
+			message.Reply(line)
 	else:
-		SendMessage(channel, "Save info not found")
+		message.Reply("Save info not found")
 
 @command("getreports", minArgs=1, admin = True)
-def GetReports(username, hostmask, channel, text):
+def GetReports(message):
 	"""(getreports <saveid> [numreports]). Prints out all (or numreports) reports from a save. Admin only."""
 	count = None
-	reportlist = SaveReports(text[0])
-	if len(text) > 1:
-		count = int(text[1])
-	PrintReports(channel, reportlist[:count])
+	reportlist = SaveReports(message.GetArg(0))
+	if message.GetArg(1):
+		count = int(message.GetArg(1))
+	PrintReports(message.channel, reportlist[:count])
 
 @command("markread", minArgs=1, admin = True)
-def MarkRead(username, hostmask, channel, text):
+def MarkRead(message):
 	"""(markread <saveid>). Marks a report on a save as read. Admin only."""
-	GetPage("http://powdertoy.co.uk/Reports.html?Read=%s" % text[0], GetTPTSessionInfo(0))
+	GetPage("http://powdertoy.co.uk/Reports.html?Read=%s" % message.GetArg(0), GetTPTSessionInfo(0))
 
 @command("markallread", admin = True)
-def MarkAllRead(username, hostmask, channel, text):
+def MarkAllRead(message):
 	"""(markallread). Marks all reports that have been printed to channel previously as read. Admin only."""
 	global seenReports
 	reportlist = ReportsList()
 	if reportlist == None:
-		SendMessage(channel, "Error fetching reports")
+		message.Reply("Error fetching reports")
 		return
 	markedread = []
 	unread = []
@@ -572,284 +572,285 @@ def MarkAllRead(username, hostmask, channel, text):
 		else:
 			unread.append(report[1])
 	if markedread:
-		SendMessage(channel, "These saves were marked as read: %s" % (" ".join(markedread)))
+		message.Reply("These saves were marked as read: %s" % (" ".join(markedread)))
 	if unread:
-		SendMessage(channel, "These saves still have unread reports: %s" % (" ".join(unread)))
+		message.Reply("These saves still have unread reports: %s" % (" ".join(unread)))
 
 @command("reports", admin = True)
-def Reports(username, hostmask, channel, text):
+def Reports(message):
 	"""(reports) No args. Prints out the reports list. Admin only."""
 	global seenReports
 	reportlist = ReportsList()
 	if reportlist == None:
-		SendMessage(channel, "Error fetching reports")
+		message.Reply("Error fetching reports")
 		return
 	elif len(reportlist) == 0:
-		SendMessage(channel, "No reports")
+		message.Reply("No reports")
 	else:
-		PrintReportList(channel, reportlist)
+		PrintReportList(message.channel, reportlist)
 
 	seenReports = {}
 	for report in reportlist:
 		seenReports[report[1]] = report[0]
 
 @command("comment", minArgs=2, admin = True)
-def Comment(username, hostmask, channel, text):
+def Comment(message):
 	"""(comment <saveID> <comment>). Comments on a save as jacobot. Admin only."""
-	if DoComment(text[0], " ".join(text[1:]), False):
-		SendMessage(channel, "Done.")
+	if DoComment(message.GetArg(0), message.GetArg(1, endLine=True), False):
+		message.Reply("Done.")
 	else:
-		SendMessage(channel, "Error, could not comment.")
+		message.Reply("Error, could not comment.")
 
 @command("commentj1", minArgs=2, owner = True)
-def Comment(username, hostmask, channel, text):
+def Comment(message):
 	"""(commentj1 <saveID> <comment>). Comments on a save as jacob1. Owner only."""
-	if DoComment(text[0], " ".join(text[1:]), True):
-		SendMessage(channel, "Done.")
+	if DoComment(message.GetArg(0), message.GetArg(1, endLine=True), True):
+		message.Reply("Done.")
 	else:
-		SendMessage(channel, "Error, could not comment.")
+		message.Reply("Error, could not comment.")
 
 @command("unpublish", minArgs=1, admin = True)
-def Unpublish(username, hostmask, channel, text):
+def Unpublish(message):
 	"""(unpublish <saveID>). Unpublishes a save. Admin only."""
-	DoUnpublish(text[0])
-	SendMessage(channel, "Done.")
+	DoUnpublish(message.GetArg(0))
+	message.Reply("Done.")
 
 @command("publish", minArgs=1, admin = True)
-def Publish(username, hostmask, channel, text):
+def Publish(message):
 	"""(publish <saveID>). Publishes a save. Admin only."""
-	DoPublish(text[0])
-	SendMessage(channel, "Done.")
+	DoPublish(message.GetArg(0))
+	message.Reply("Done.")
 
 @command("listtags", minArgs=1, admin=True)
-def ListTags(username, hostmask, channel, text):
+def ListTags(message):
 	"""(listtags <saveID>). Lists tags on a save. Admin only."""
-	PrintTags(channel, text[0])
+	PrintTags(message.channel, message.GetArg(0))
 
 @command("showtag", minArgs=1, admin=True)
-def ShowTag(username, hostmask, channel, text):
+def ShowTag(message):
 	"""(showtag <tag>). Shows where tags have been used. Admin only."""
-	data = GetTagUsages(text[0])
+	data = GetTagUsages(message.GetArg(0))
 	if data["count"] > 40:
 		usercounts = defaultdict(int)
 		for tag in data["usages"]:
 			usercounts[tag[1]] = usercounts[tag[1]] + 1
 		top = sorted(usercounts.items(), key=lambda a: a[1])[:-30:-1]
-		SendMessage(channel, "Tag used {0} times, by: {1}".format(data["count"], ", ".join(["{0} x{1}".format(usertag[0], usertag[1]) for usertag in top])))
+		message.Reply("Tag used {0} times, by: {1}".format(data["count"], ", ".join(["{0} x{1}".format(usertag[0], usertag[1]) for usertag in top])))
 	else:
 		prepend = "http://tpt.io/:" if data["count"] < 20 else ""
 		msg = []
 		for tag in data["usages"]:
 			msg.append("{0}{1} : {2}".format(prepend, tag[0], tag[1]))
-		SendMessage(channel, "Tag used {0} times. {1}".format(data["count"], ", ".join(msg)))
+		message.Reply("Tag used {0} times. {1}".format(data["count"], ", ".join(msg)))
 
 @command("removetag", minArgs=2, admin=True)
-def RemoveTagCmd(username, hostmask, channel, text):
+def RemoveTagCmd(message):
 	"""(removetag <tag> <saveID>). Removes a tag on a save. Admin only."""
-	if RemoveTag(text[0], text[1]):
-		SendMessage(channel, "Done.")
+	if RemoveTag(message.GetArg(0), message.GetArg(1)):
+		message.Reply("Done.")
 	else:
-		SendMessage(channel, "Error, could not remove tag.")
+		message.Reply("Error, could not remove tag.")
 
 @command("disabletag", minArgs=1, admin=True)
-def DisableTagCmd(username, hostmask, channel, text):
+def DisableTagCmd(message):
 	"""(disabletag <tag>). Disables a tag. Admin only."""
-	if len(text) > 1:
+	if message.GetArg(1):
 		fail = False
-		for tag in text:
+		for tag in message.commandLine.split():
 			if not DisableTag(tag):
 				fail = True
 				break
 	else:
-		fail = DisableTag(text[0])
+		fail = DisableTag(message.GetArg(0))
 	if not fail:
-		SendMessage(channel, "Done.")
+		message.Reply("Done.")
 	else:
-		SendMessage(channel, "Error, could not disable tag{0}.".format("" if len(text) == 1 else "s"))
+		message.Reply("Error, could not disable tag{0}.".format("" if message.GetArg(1) else "s"))
 
 @command("enabletag", minArgs=1, admin=True)
-def DisableTagCmd(username, hostmask, channel, text):
+def DisableTagCmd(message):
 	"""(enabetag <tag>). Enables a tag. Admin only."""
-	if DisableTag(text[0], True):
-		SendMessage(channel, "Done.")
+	if DisableTag(message.GetArg(0), True):
+		message.Reply("Done.")
 	else:
-		SendMessage(channel, "Error, could not disable tag.")
+		message.Reply("Error, could not disable tag.")
 
 @command("bannedtags", minArgs = 1, admin = True)
-def IPban(username, hostmask, channel, text):
+def IPban(message):
 	"""(bannedtags add <tagregex>|remove <tagregex>|list). Modifies the banned tag regex list. Admin only."""
-	if text[0].lower() == "list":
+	if message.GetArg(0).lower() == "list":
 		if not bannedtags:
-			SendMessage(channel, "No banned tag regexes")
+			message.Reply("No banned tag regexes")
 		else:
-			SendMessage(channel, "Banned tag regexes: " + ", ".join(bannedtags))
+			message.Reply("Banned tag regexes: " + ", ".join(bannedtags))
 		return
-	action = text[0].lower()
+	action = message.GetArg(0).lower()
 	if action == "remove":
-		bannedtags.discard(text[1])
-		SendMessage(channel, "Removed %s from the banned tag regex list" % text[1])
+		bannedtags.discard(message.GetArg(1))
+		message.Reply("Removed %s from the banned tag regex list" % message.GetArg(1))
 	elif action == "add":
-		bannedtags.add(text[1])
-		SendMessage(channel, "Added %s to the banned tag regex list" % text[1])
+		bannedtags.add(message.GetArg(1))
+		message.Reply("Added %s to the banned tag regex list" % message.GetArg(1))
 	else:
-		SendMessage(channel, "Unknown action")
+		message.Reply("Unknown action")
 
 @command("readreport", minArgs=2, admin = True)
-def Stolen(username, hostmask, channel, text):
+def Stolen(message):
 	"""(readreport <saveID> <comment>). Disables a save and comments with a message as jacobot. Admin only."""
-	saveID = text[0]
+	saveID = message.GetArg(0)
 	#DoUnpublish(saveID)
 	ret = PromotionLevel(saveID, -2)
 	if ret:
-		print("test", " ".join(text[1:]))
-		ret = DoComment(saveID, " ".join(text[1:]))
+		print("test", message.GetArg(1, endLine=True))
+		ret = DoComment(saveID, message.GetArg(1, endLine=True))
 		if ret:
-			SendMessage(channel, "Done.")
+			message.Reply("Done.")
 		else:
-			SendMessage(channel, "Error, could not comment.")
+			message.Reply("Error, could not comment.")
 	else:
-		SendMessage(channel, "Error, could not disable save.")
+		message.Reply("Error, could not disable save.")
 
 @command("copied", minArgs=2, admin = True)
-def Copied(username, hostmask, channel, text):
+def Copied(message):
 	"""(copied <copiedID> <originalID> [long/<reason>]). Unpublishes a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end. Admin only."""
-	stolenID = text[0]
-	saveID = text[1]
+	stolenID = message.GetArg(0)
+	saveID = message.GetArg(1)
 	try:
 		if int(stolenID) <= int(saveID):
-			SendMessage(channel, "Error: stolenID can't be less than originalID.")
+			message.Reply("Error: stolenID can't be less than originalID.")
 			return
 	except ValueError:
-		SendMessage(channel, "Error: saveIDs must be integers")
+		message.Reply("Error: saveIDs must be integers")
 		return
 	if not DoUnpublish(stolenID):
-		SendMessage(channel, "Error unpublishing save.")
+		message.Reply("Error unpublishing save.")
 		return
 	info = GetSaveInfo(saveID)
 	if info:
-		message = "Save unpublished: copied without credit from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
-		if len(text) > 2 and text[2] != "long":
-			message = "%s %s" % (message, " ".join(text[2:]))
+		msg = "Save unpublished: copied without credit from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
+		if message.GetArg(2) != "long":
+			msg = "%s %s" % (msg, message.GetArg(2, endLine=True))
 		else:
-			message = message +" Please give credit to the original owner when modifying saves."
-			if len(text) > 2 and text[2] == "long":
-				message = message + "Alternatively, you can \"Favorite\" the save or save it locally to your computer."
-		if DoComment(stolenID, message):
-			SendMessage(channel, "Done.")
+			msg = msg +" Please give credit to the original owner when modifying saves."
+			if message.GetArg(2) == "long":
+				msg = msg + "Alternatively, you can \"Favorite\" the save or save it locally to your computer."
+		if DoComment(stolenID, msg):
+			message.Reply("Done.")
 		else:
-			SendMessage(channel, "Error commenting.")
+			message.Reply("Error commenting.")
 	else:
-		SendMessage(channel, "Error getting original save info.")
+		message.Reply("Error getting original save info.")
 
 @command("stolen", minArgs=2, admin = True)
-def Stolen(username, hostmask, channel, text):
+def Stolen(message):
 	"""(stolen <stolenID> <originalID> [long/<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
-	stolenID = text[0]
-	saveID = text[1]
+	stolenID = message.GetArg(0)
+	saveID = message.GetArg(1)
 	try:
 		if int(stolenID) <= int(saveID):
-			SendMessage(channel, "Error: stolenID can't be less than originalID.")
+			message.Reply("Error: stolenID can't be less than originalID.")
 			return
 	except ValueError:
-		SendMessage(channel, "Error: saveIDs must be integers")
+		message.Reply("Error: saveIDs must be integers")
 		return
 	if not PromotionLevel(stolenID, -2):
-		SendMessage(channel, "Error unpublishing save.")
+		message.Reply("Error unpublishing save.")
 		return
 	info = GetSaveInfo(saveID)
 	if info:
-		message = "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
-		if len(text) > 2:
-			if text[2] == "long":
-				message += " Do not publish copies of other player's saves, instead you should \"Favorite\" the save or save it locally to your computer."
+		msg = "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
+		if message.GetArg(2):
+			if message.GetArg(2) == "long":
+				msg += " Do not publish copies of other player's saves, instead you should \"Favorite\" the save or save it locally to your computer."
 			else:
-				message += " " + " ".join(text[2:])
-		if DoComment(stolenID, message):
-			SendMessage(channel, "Done.")
+				msg += " " + message.GetArg(2, endLine=True)
+		if DoComment(stolenID, msg):
+			message.Reply("Done.")
 		else:
-			SendMessage(channel, "Error commenting.")
+			message.Reply("Error commenting.")
 	else:
-		SendMessage(channel, "Error getting original save info.")
+		message.Reply("Error getting original save info.")
 
 @command("updatetor", admin = True)
-def UpdateTor(username, hostmask, channel, text):
+def UpdateTor(message):
 	"""(no args). Update the list of TOR ip addresses. Admin only."""
 	torlist = GetPage("https://www.dan.me.uk/torlist/")
 	if not torlist:
-		SendMessage(channel, "Error fetching tor list")
+		message.Reply("Error fetching tor list")
 		return
 	torfile = open("torlist.txt", "w")
 	torfile.write(torlist)
 	torfile.close()
-	SendMessage(channel, "Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
+	message.Reply("Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
 
 @command("ipban", minArgs = 1, admin = True)
-def IPban(username, hostmask, channel, text):
+def IPban(message):
 	"""(ipban add <ip>|remove <ip>|list). Modifies the IP bans list. Admin only."""
-	if text[0].lower() == "list":
+	if message.GetArg(0).lower() == "list":
 		if not ipbans:
-			SendMessage(channel, "Nobody is currently IP banned")
+			message.Reply("Nobody is currently IP banned")
 		else:
-			SendMessage(channel, "List of currently banned IPs: " + ", ".join(ipbans))
-	elif len(text) > 1:
-		action = text[0].lower()
+			message.Reply("List of currently banned IPs: " + ", ".join(ipbans))
+	elif message.GetArg(1):
+		action = message.GetArg(0).lower()
 		if action == "remove":
-			ipbans.discard(text[1])
-			SendMessage(channel, "Removed %s from the IP ban list" % text[1])
+			ipbans.discard(message.GetArg(1))
+			message.Reply("Removed %s from the IP ban list" % message.GetArg(1))
 		elif action == "add":
-			ipbans.add(text[1])
-			SendMessage(channel, "Added %s to the IP ban list" % text[1])
+			ipbans.add(message.GetArg(1))
+			message.Reply("Added %s to the IP ban list" % message.GetArg(1))
 		else:
-			SendMessage(channel, "Unknown action")
+			message.Reply("Unknown action")
 	else:
-		SendMessage(channel, "Unknown action")
+		message.Reply("Unknown action")
 
 @command("getusercomments", minArgs=1, owner = True)
-def GetUserCommentsCmd(username, hostmask, channel, text):
+def GetUserCommentsCmd(message):
 	"""(getusercomments <userID/username> [<pagenumber>]). Debug command to print comments by a certain user. Owner only."""
-	SendMessage(channel, str(GetUserComments(text[0], text[1] if len(text) > 1 else 0)))
+	message.Reply(str(GetUserComments(message.GetArg(0), message.GetArg(1) if message.GetArg(1) else 0)))
 
 @command("getsavecomments", minArgs=1, owner = True)
-def GetSaveCommentsCmd(username, hostmask, channel, text):
+def GetSaveCommentsCmd(message):
 	"""(getsavecomments <saveID> [<pagenum>]). Debug command to print comments on a save. Owner only."""
-	SendMessage(channel, str(GetSaveComments(text[0], text[1] if len(text) > 1 else 0)))
+	message.Reply(str(GetSaveComments(message.GetArg(0), message.GetArg(1) if message.GetArg(1) else 0)))
 
 @command("deleteusercomments", minArgs=1, admin=True)
-def DeleteUserCommentsCmd(username, hostmask, channel, text):
+def DeleteUserCommentsCmd(message):
 	"""(deleteusercomments <userID/username> [<pagenumber>]). Deletes all comments by a user on a certain page (as long as the comments are the most recent comments on their respective saves). Admin only."""
-	pagenum = text[1] if len(text) > 1 else 0
+	pagenum = message.GetArg(1) if message.GetArg(1) else 0
 	try:
 		if int(pagenum) < 0:
-			SendMessage(channel, "Error: pagenum must be a positive integer")
+			message.Reply("Error: pagenum must be a positive integer")
 			return
 	except ValueError:
-		SendMessage(channel, "Error: pagenum must be a positive integer")
+		message.Reply("Error: pagenum must be a positive integer")
 		return
-	comments = GetUserComments(text[0], text[1] if len(text) > 1 else 0)
+	comments = GetUserComments(message.GetArg(0), message.GetArg(1) if message.GetArg(1) else 0)
 	for comment in comments:
 		if not DeleteComment(comment[0], comment[1]):
-			SendMessage(channel, "Error deleting comment #{0} on ID:{1}".format(comment[1], comment[0]))
+			message.Reply("Error deleting comment #{0} on ID:{1}".format(comment[1], comment[0]))
 			break
-	SendMessage(channel, "Done.")
+	message.Reply("Done.")
 
 @command("getpostip", minArgs=1, admin=True)
-def GetPostIPCmd(username, hostmask, channel, text):
+def GetPostIPCmd(message):
 	"""(getpostip <postID>). Returns the IP used to make a forum post. Admin only."""
-	postIP = GetPostIP(text[0])
+	postIP = GetPostIP(message.GetArg(0))
 	if postIP:
 		suspicious, reason = CheckIP(postIP)
 		if suspicious:
-			SendMessage(channel, "{0}: this IP is in the {1} blacklist".format(postIP, reason))
+			message.Reply("{0}: this IP is in the {1} blacklist".format(postIP, reason))
 		else:
-			SendMessage(channel, postIP)
+			message.Reply(postIP)
 	else:
-		SendMessage(channel, "Error: Could not get IP")
+		message.Reply("Error: Could not get IP")
 
 @command("getthreadpostip", minArgs=1, admin=True)
-def GetThreadPostIPCmd(username, hostmask, channel, text):
+def GetThreadPostIPCmd(message):
 	"""(getthreadpostip <postID>). Returns the IP used to make a forum thread. Admin only."""
-	threadIP = GetThreadPostIP(text[0])
+	threadIP = GetThreadPostIP(message.GetArg(0))
 	if threadIP:
-		SendMessage(channel, threadIP)
+		message.Reply(threadIP)
 	else:
-		SendMessage(channel, "Error: Could not get IP")
+		message.Reply("Error: Could not get IP")
+

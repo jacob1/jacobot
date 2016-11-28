@@ -215,10 +215,10 @@ class _calculator(object):
 calculator = _calculator()
 
 @command("calc", minArgs=1)
-def Calc(username, hostmask, channel, text):
+def Calc(message):
 	"""(calc <expression>). Does math."""
 	try:
-		SendMessage(channel, str(calculator.calc(" ".join(text).strip())))
+		message.Reply(str(calculator.calc(message.GetArg(0, endLine=True).strip())))
 	except (ValueError, ArithmeticError) as e:
-		SendMessage(channel, str(e))
+		message.Reply(str(e))
 

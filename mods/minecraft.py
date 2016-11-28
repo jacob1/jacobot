@@ -115,23 +115,23 @@ class CraftingList(object):
 recipes = CraftingList()
 
 @command("craft", minArgs = 1, rateLimit=True)
-def Craft(username, hostmask, channel, text):
+def Craft(message):
 	"""(craft <item>). Prints a minecraft crafting recipe"""
-	output = recipes.PrintRecipe(" ".join(text[0:]))
+	output = recipes.PrintRecipe(message.commandLine)
 	for line in output.splitlines():
-		SendMessage(channel, line)
+		message.Reply(line)
 
 @command("search", minArgs = 1)
-def Search(username, hostmask, channel, text):
+def Search(message):
 	"""(search <item>). Searches for minecraft recipes matching or containing an item"""
-	searchTerm = " ".join(text[0:])
+	searchTerm = message.commandLine
 	if len(searchTerm) < 3:
-		SendMessage(channel, "Search text too short")
+		message.Reply("Search text too short")
 		return
 
-	output = recipes.SearchRecipe(" ".join(text[0:]))
+	output = recipes.SearchRecipe(searchTerm)
 	for line in output.splitlines():
-		SendMessage(channel, line)
+		message.Reply(line)
 
 
 class Dynmap(object):
@@ -247,15 +247,15 @@ class Dynmap(object):
 dynmap = Dynmap()
 
 @command("getplayer")
-def GetPlayer(username, hostmask, channel, text):
+def GetPlayer(message):
 	"""(getplayer [<player>]). Returns information on a player (lists all visible players if no args given)"""
-	if len(text):
-		(player, duplicates) = dynmap.GetPlayer(text[0])
+	if message.GetArg(0):
+		(player, duplicates) = dynmap.GetPlayer(message.GetArg(0))
 		if duplicates:
-			SendMessage(channel, "There is more than one player matching {0}".format(text[0]))
+			message.Reply("There is more than one player matching {0}".format(message.GetArg(0)))
 			return
 		elif not player:
-			SendMessage(channel, "Player is hidden from dynmap or not online")
+			message.Reply("Player is hidden from dynmap or not online")
 			return
 		name = player['name']
 		pos = tuple(map(int, (player['x'], player['y'], player['z'])))
@@ -267,25 +267,32 @@ def GetPlayer(username, hostmask, channel, text):
 			dimension = "The Nether"
 		elif dimension == "world":
 			dimension = "The Overworld"
-		SendMessage(channel, "{0} is in {1} at ({2}, {3}, {4}), and has {5} health".format(name, dimension, pos[0], pos[1], pos[2], health))
+		message.Reply("{0} is in {1} at ({2}, {3}, {4}), and has {5} health".format(name, dimension, pos[0], pos[1], pos[2], health))
 	else:
 		players = dynmap.GetPlayerNames()
 		if not players:
-			SendMessage(channel, "Nobody is visible on dynmap right now")
+			message.Reply("Nobody is visible on dynmap right now")
 			return
-		SendMessage(channel, "Players currently visible on dynmap: " + ", ".join(players))
+		message.Reply("Players currently visible on dynmap: " + ", ".join(players))
 
-@command("getmap", minArgs=1)
-def GetMap(username, hostmask, channel, text):
+@command("getmap")
+def GetMap(message):
 	"""(getmap (<player> [3D|cave] | <coordinates> [world|nether|end] [3D|cave]). Returns a dynmap link for the player or coordintes given."""
-	(player, duplicates) = dynmap.GetPlayer(text[0])
+	arg = message.GetArg(0)
+	if not arg:
+		if message.isMinecraft:
+			arg = message.mcusername
+		else:
+			raise ShowHelpException()
+
+	(player, duplicates) = dynmap.GetPlayer(arg)
 	if duplicates:
-		SendMessage(channel, "There is more than one player matching {0}".format(text[0]))
+		message.Reply("There is more than one player matching {0}".format(arg))
 		return
 	elif not player:
-		match = re.match("([\d-]+)[, ]{1,}([\d-]+)(?:[, ]{1,}([\d-]+))?(.*)", " ".join(text))
+		match = re.match("([\d-]+)[, ]{1,}([\d-]+)(?:[, ]{1,}([\d-]+))?(.*)", message.commandLine)
 		if not match:
-			SendMessage(channel, "Player is hidden from dynmap or not online")
+			message.Reply("Player is hidden from dynmap or not online")
 			return
 		# This is a coordinates getmap
 		args = match.group(4).lower().split()
@@ -301,7 +308,7 @@ def GetMap(username, hostmask, channel, text):
 				maptype = "s"
 			elif args[1] == "cave" and dimension == "w":
 				maptype = "c"
-		SendMessage(channel, "http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension, maptype, 5, match.group(1), match.group(3) or match.group(2)))
+		message.Reply("http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension, maptype, 5, match.group(1), match.group(3) or match.group(2)))
 		return
 	# Normal player getmap
 	name = player['name']
@@ -309,30 +316,37 @@ def GetMap(username, hostmask, channel, text):
 	health = player['health']
 	dimension = player['world']
 	maptype = "f" #flat
-	if len(text) > 1:
-		if text[1].upper() == "3D" or text[1].lower() == "surface":
+	if message.GetArg(1):
+		if message.GetArg(1).upper() == "3D" or message.GetArg(1).lower() == "surface":
 			maptype = "s" #surface
-		elif text[1].lower() == "cave" and dimension == "world":
+		elif message.GetArg(1).lower() == "cave" and dimension == "world":
 			maptype = "c" #cave
-	#SendMessage(channel, "http://dynmap.starcatcher.us/?worldname={0}&mapname={1}&zoom=5&x={2}&y={3}&z={4}".format(dimension, maptype, pos[0], pos[1], pos[2]))
-	SendMessage(channel, "http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension.split("_")[-1][0], maptype, 5, pos[0], pos[2]))
+	#message.Reply("http://dynmap.starcatcher.us/?worldname={0}&mapname={1}&zoom=5&x={2}&y={3}&z={4}".format(dimension, maptype, pos[0], pos[1], pos[2]))
+	message.Reply("http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension.split("_")[-1][0], maptype, 5, pos[0], pos[2]))
 
-@command("getclaim", minArgs=1)
-def GetClaim(username, hostmask, channel, text):
+@command("getclaim")
+def GetClaim(message):
 	"""(getclaim <player>). Returns information on the claim <player> is standing in"""
-	(player, duplicates) = dynmap.GetPlayer(text[0])
+	arg = message.GetArg(0)
+	if not arg:
+		if message.isMinecraft:
+			arg = message.mcusername
+		else:
+			raise ShowHelpException()
+
+	(player, duplicates) = dynmap.GetPlayer(arg)
 	if duplicates:
-		SendMessage(channel, "There is more than one player matching {0}".format(text[0]))
+		message.Reply("There is more than one player matching {0}".format(arg))
 		return
 	elif not player:
-		SendMessage(channel, "Player is hidden from dynmap or not online")
+		message.Reply("Player is hidden from dynmap or not online")
 		return
 	(claim, error) = dynmap.GetClaimAtLocation(player['world'], (player['x'], player['y'], player['z']))
 	if error:
-		SendMessage(channel, "Error getting claim information for {0}".format(player['world']))
+		message.Reply("Error getting claim information for {0}".format(player['world']))
 		return
 	elif not claim:
-		SendMessage(channel, "{0} is not currently inside any claims".format(player['name']))
+		message.Reply("{0} is not currently inside any claims".format(player['name']))
 		return
 	(size, access, container, build, permission) = dynmap.ParseClaimData(claim['desc'])
 	endStr = []
@@ -344,10 +358,10 @@ def GetClaim(username, hostmask, channel, text):
 		endStr.append("\u000303Container:\u0003 {0}".format(container))
 	if access:
 		endStr.append("\u000303Access:\u0003 {0}".format(access))
-	SendMessage(channel, "{0} is standing in a {1} claim by {2}. {3}".format(player['name'], size, claim['label'], "; ".join(endStr)))
+	message.Reply("{0} is standing in a {1} claim by {2}. {3}".format(player['name'], size, claim['label'], "; ".join(endStr)))
 
 @command("gettime")
-def GetTime(username, hostmask, channel, text):
+def GetTime(message):
 	data = dynmap.GetTime()
 	time = data["time"]
 
@@ -362,35 +376,36 @@ def GetTime(username, hostmask, channel, text):
 		isDay = False
 		phasetime = math.floor((dynmap.DAY_START-serverTime)/20)
 
-	SendMessage(channel, "The current minecraft time is {0}. {1:02}:{2:02} minutes until {3}.{4}".format(time, math.floor(phasetime//60), phasetime%60, "night" if isDay else "day", " (you can sleep)" if data["canSleep"] else ""))
+	message.Reply("The current minecraft time is {0}. {1:02}:{2:02} minutes until {3}.{4}".format(time, math.floor(phasetime//60), phasetime%60, "night" if isDay else "day", " (you can sleep)" if data["canSleep"] else ""))
 
 @command("getweather")
-def GetTime(username, hostmask, channel, text):
+def GetTime(message):
 	data = dynmap.GetWeather()
 	if data["isThundering"]:
-		SendMessage(channel, "It is a thunderstorm")
+		message.Reply("It is a thunderstorm")
 	elif data["hasStorm"]:
-		SendMessage(channel, "It is raining")
+		message.Reply("It is raining")
 	else:
-		SendMessage(channel, "It is clear")
+		message.Reply("It is clear")
 
 @command("brewingchart")
-def BrewingChart(username, hostmask, channel, text):
-	SendMessage(channel, "https://hydra-media.cursecdn.com/minecraft.gamepedia.com/7/7b/Minecraft_brewing_en.png")
+def BrewingChart(message):
+	message.Reply("https://hydra-media.cursecdn.com/minecraft.gamepedia.com/7/7b/Minecraft_brewing_en.png")
 
 @command("registerusername", minArgs=1, admin=True)
-def RegisterUsername(username, hostmask, channel, text):
+def RegisterUsername(message):
 	"""(registerplayer <mcusername> <tptusername>). Sets the TPT username of a minecraft player."""
-	if len(text) > 1:
-		StoreData(__name__, "usernamemap.{0}".format(text[0]), text[1])
+	if message.GetArg(1):
+		StoreData(__name__, "usernamemap.{0}".format(message.GetArg(0)), message.GetArg(1))
 	else:
-		StoreData(__name__, "usernamemap.{0}".format(text[0]), False)
-	SendMessage(channel, "Done.")
+		StoreData(__name__, "usernamemap.{0}".format(message.GetArg(0)), False)
+	message.Reply("Done.")
 
 @command("getusername", minArgs=1)
-def GetUsername(username, hostmask, channel, text):
-	tptusername = GetData(__name__, "usernamemap.{0}".format(text[0]))
+def GetUsername(message):
+	tptusername = GetData(__name__, "usernamemap.{0}".format(message.GetArg(0)))
 	if tptusername:
-		SendMessage(channel, "{0}'s TPT username is {1}".format(text[0], tptusername))
+		message.Reply("{0}'s TPT username is {1}".format(message.GetArg(0), tptusername))
 	else:
-		SendMessage(channel, "Could not find player with that username")
+		message.Reply("Could not find player with that username")
+
