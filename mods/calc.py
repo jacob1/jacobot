@@ -8,17 +8,30 @@ class _calculator(object):
 	def __init__(self):
 		pass
 
+	def _expectargs(self, args, num, offset):
+		if len(args) < num:
+			raise ValueError("Expected at least {0} arguments, got {1} in function ar character {1}".format(num, len(args), offset))
+
 	# Functions go here, any function in this class not starting in _ can be called by the calculator
 	"""def pow(self, expression, offset):
 		pieces = expression.split(",")
 		num = self._parse(pieces[0], offset)
 		root = self._parse(pieces[1], offset+len(pieces[0])+1)
-		return math.pow(num, root)
+		return math.pow(num, root)"""
 
-	def sqrt(self, expression, offset):
-		pieces = expression.split(",")
-		num = self._parse(pieces[0], offset)
-		return math.sqrt(num)"""
+	"""def sqrt(self, expression, offset):
+		return 1.41421356237
+		#pieces = expression.split(",")
+		#num = self._parse(pieces[0], offset)
+		#return math.sqrt(num)"""
+
+	def pow(self, args, offset):
+		self._expectargs(args, 2, offset)
+		return math.pow(args[0], args[1])
+
+	def sqrt(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.sqrt(args[0])
 
 	# Convert a string to a number (string is assumed to actually be a number)
 	def _converttonumber(self, expression, isNegative):
@@ -193,15 +206,21 @@ class _calculator(object):
 						self._getcomplex(expression[start:], offset)
 						i = i + 1
 						continue
-					replace = self._calc(expression[start+1:i], start+1)
+					# Split function arguments on commas
+					pieces = expression[start+1:i].split(",")
+					args = []
+					argpos = start+1
+					for piece in pieces:
+						args.append(self._parse(piece, argpos))
+						argpos += len(piece)+1
+					funcret = ""
 					if funcname:
 						if funcname == "calc" or not hasattr(self, funcname):
 							raise ValueError("Not a function: {0}".format(funcname))
-						replace = getattr(self, funcname)(replace, i+offset)
+						funcret = str(getattr(self, funcname)(args, i+offset))
 						start = start - len(funcname)
-					replace = str(replace)
-					expression = expression[:start] + replace + expression[i+1:]
-					i = start + len(replace)
+					expression = expression[:start] + funcret + expression[i+1:]
+					i = start + len(funcret)
 					continue
 				else:
 					raise ValueError("Extra ')' at character {0} test: {1}".format(i+offset, expression))
@@ -220,5 +239,5 @@ def Calc(message):
 	try:
 		message.Reply(str(calculator.calc(message.GetArg(0, endLine=True).strip())))
 	except (ValueError, ArithmeticError) as e:
-		message.Reply(str(e))
-
+		#message.Reply(str(e))
+		pass
