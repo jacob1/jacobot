@@ -32,6 +32,8 @@ def CheckIP(IP):
 	for address in ipbans:
 		if IP.startswith(address):
 			return (True, "ipban")
+	if IP.startswith("83.8.") or IP.startswith("83.11.") or IP.startswith("83.25.") or IP.startswith("79.184.") or IP.startswith("79.186."):
+		return (True, "neostrada")
 	return (False, "")
 
 def Parse(raw, text):
@@ -108,13 +110,19 @@ def CheckPost(message):
 		postID = postMatch.group(3)
 		IP = GetPostIP(postID)
 		username = postMatch.group(1)
-		check = CheckIP(IP)
+		if username == "JanKaszanka":
+			return
+		if IP:
+			check = CheckIP(IP)
+		else:
+			check = (0,0)
+			SendMessage(logchan, "Error getting post IP.")
 		if check[0] and check[1] == "tor":
 			if HidePost(postID, True, "This post has been automatically removed due to potential abuse."):
 				SendMessage(logchan, "Warning: This post was made using TOR. Removed post.")
 			else:
 				SendMessage(logchan, "Warning: This post was made using TOR. Error removing post, please remove manually.")
-		elif check[0] and check[1] == "ipban":
+		elif check[0]:# and check[1] == "ipban":
 			if HidePost(postID, True, "This post has been automatically removed due to potential abuse."):
 				SendMessage(logchan, "Warning: This post was made from a suspicious IP address. Removed post.")
 			else:
@@ -124,11 +132,22 @@ def CheckPost(message):
 		#SendMessage("#powder-info", "Thread Match: {0}, {1}, {2}".format(threadMatch.group(1), threadMatch.group(2), threadMatch.group(3)))
 		threadID = threadMatch.group(3)
 		IP = GetThreadPostIP(threadMatch.group(3))
-		check = CheckIP(IP)
+		username = threadMatch.group(2)
+		if username == "JanKaszanka":
+			return
+		if IP:
+			check = CheckIP(IP)
+		else:
+			check = (0,0)
+			SendMessage(logchan, "Error getting thread IP.")
 		if check[0] and check[1] == "tor":
 			SendMessage(logchan, "Warning: This thread was made using TOR. Removing thread.")
 			MoveThread(threadID, 7)
 			LockThread(threadID, "Thread automatically moved and locked because it was posted with TOR")
+		elif check[0] and check[1] == "neostrada":
+			SendMessage(logchan, "Warning: This thread was made using Neostrada Plus. Removing thread.")
+			MoveThread(threadID, 7)
+			LockThread(threadID, "Thread automatically moved and locked because it was posted from a blacklisted ISP")
 		elif check[0]:
 			SendMessage(logchan, "Warning: This thread was made from a suspicious IP address.")
 
@@ -712,7 +731,7 @@ def Stolen(message):
 
 @command("copied", minArgs=2, admin = True)
 def Copied(message):
-	"""(copied <copiedID> <originalID> [long/<reason>]). Unpublishes a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end. Admin only."""
+	"""(copied <copiedID> <originalID> [<reason>]). Unpublishes a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end. Admin only."""
 	stolenID = message.GetArg(0)
 	saveID = message.GetArg(1)
 	try:
@@ -728,12 +747,10 @@ def Copied(message):
 	info = GetSaveInfo(saveID)
 	if info:
 		msg = "Save unpublished: copied without credit from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
-		if message.GetArg(2) != "long":
+		if message.GetArg(2):
 			msg = "%s %s" % (msg, message.GetArg(2, endLine=True))
 		else:
-			msg = msg +" Please give credit to the original owner when modifying saves."
-			if message.GetArg(2) == "long":
-				msg = msg + "Alternatively, you can \"Favorite\" the save or save it locally to your computer."
+			msg = msg + " Please give credit to the original owner when modifying saves."
 		if DoComment(stolenID, msg):
 			message.Reply("Done.")
 		else:
@@ -743,7 +760,7 @@ def Copied(message):
 
 @command("stolen", minArgs=2, admin = True)
 def Stolen(message):
-	"""(stolen <stolenID> <originalID> [long/<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
+	"""(stolen <stolenID> <originalID> [<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
 	stolenID = message.GetArg(0)
 	saveID = message.GetArg(1)
 	try:
@@ -760,9 +777,7 @@ def Stolen(message):
 	if info:
 		msg = "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
 		if message.GetArg(2):
-			if message.GetArg(2) == "long":
-				msg += " Do not publish copies of other player's saves, instead you should \"Favorite\" the save or save it locally to your computer."
-			else:
+			if message.GetArg(2):
 				msg += " " + message.GetArg(2, endLine=True)
 		if DoComment(stolenID, msg):
 			message.Reply("Done.")
