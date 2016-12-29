@@ -10,7 +10,7 @@ class _calculator(object):
 
 	def _expectargs(self, args, num, offset):
 		if len(args) < num:
-			raise ValueError("Expected at least {0} arguments, got {1} in function ar character {1}".format(num, len(args), offset))
+			raise ValueError("Expected at least {0} arguments, got {1} in function at character {2}".format(num, len(args), offset))
 
 	# Functions go here, any function in this class not starting in _ can be called by the calculator
 	"""def pow(self, expression, offset):
@@ -206,24 +206,29 @@ class _calculator(object):
 						self._getcomplex(expression[start:], offset)
 						i = i + 1
 						continue
-					# Split function arguments on commas
-					pieces = expression[start+1:i].split(",")
-					args = []
-					argpos = start+1
-					for piece in pieces:
-						args.append(self._parse(piece, argpos))
-						argpos += len(piece)+1
+
 					funcret = ""
 					if funcname:
+						# Split function arguments on commas
+						pieces = expression[start+1:i].split(",")
+						args = []
+						argpos = start+1
+						for piece in pieces:
+							args.append(self._parse(piece, argpos))
+							argpos += len(piece)+1
+
 						if funcname == "calc" or not hasattr(self, funcname):
 							raise ValueError("Not a function: {0}".format(funcname))
-						funcret = str(getattr(self, funcname)(args, i+offset))
+						funcret = str(getattr(self, funcname)(args, start+1+offset))
 						start = start - len(funcname)
+					else:
+						funcret = str(self._calc(expression[start+1:i]))
+
 					expression = expression[:start] + funcret + expression[i+1:]
 					i = start + len(funcret)
 					continue
 				else:
-					raise ValueError("Extra ')' at character {0} test: {1}".format(i+offset, expression))
+					raise ValueError("Extra ')' at character {0}".format(i+offset))
 			i = i + 1
 		if stack:
 			raise ValueError("Missing {0} closing ')'{1}".format(len(stack), "" if len(stack) == 1 else "s"))
@@ -239,5 +244,5 @@ def Calc(message):
 	try:
 		message.Reply(str(calculator.calc(message.GetArg(0, endLine=True).strip())))
 	except (ValueError, ArithmeticError) as e:
-		#message.Reply(str(e))
-		pass
+		message.Reply(str(e))
+
