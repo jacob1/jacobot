@@ -170,6 +170,24 @@ def StoreData(plugin, key, value):
 	
 	lastData[plugin] = time.time()
 
+def DelData(plugin, key):
+	if plugin not in initialized:
+		InitializeData(plugin)
+	if plugin not in data:
+		data[plugin] = {}
+	if plugin not in lastData:
+		lastData[plugin] = 0
+	node = data[plugin]
+	for k in key.split(".")[:-1]:
+		if not k in node:
+			node[k] = {}
+		node = node[k]
+	nodename = key.split(".")[-1]
+	if nodename in node:
+		del node[nodename]
+
+	lastData[plugin] = time.time()
+
 def WriteAllData(force = False):
 	for plugin in data:
 		if not force and plugin in lastData and time.time() - lastData[plugin] > 65:
@@ -177,7 +195,8 @@ def WriteAllData(force = False):
 		if not os.path.isdir("data"):
 			os.mkdir("data")
 		f = open(os.path.join("data", "{0}.json".format(plugin)), "w")
-		json.dump(data[plugin], f)
+		dat = json.dumps(data[plugin])
+		f.write(dat)
 		f.close()
 
 def InitializeData(plugin):
