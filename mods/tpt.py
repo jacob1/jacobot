@@ -37,47 +37,6 @@ def CheckIP(IP):
 	return (False, "")
 
 def Parse(raw, text):
-	match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-info :New registration: ([\w_-]+)\. https?:\/\/tpt\.io\/@([\w\_-]+) \[([0-9.]+)\] ?$", raw)
-	if match:
-		#SendMessage("#powder-info", "test: %s %s %s" % (match.group(1), match.group(2), match.group(3)))
-		ip = match.group(3)
-		for address in ipbans:
-			if ip.startswith(address):
-				BanUser(match.group(1), "1", "p", "Automatic ban: this IP address has been blacklisted")
-				SendMessage("#powder-info", "Automatic ban: this IP address has been blacklisted")
-		torfile = open("torlist.txt")
-		torips = torfile.readlines()
-		torfile.close()
-		torips = map(lambda ip: ip.strip(), torips)
-		if ip in torips:
-			SendMessage("#powder-info", "Warning: This account was registered using TOR")
-			BanUser(match.group(1), "1", "p", "Automatic ban: Registeration using TOR has been temporarily disabled due to abuse")
-	#match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :Warning: LCRY, Percentage: ([0-9.]+), https?:\/\/tpt.io\/~([0-9]+)$", raw)
-													#New: 'Deut compressor' by HugInfinity (0 comments, score 1, 1 bump); http://tpt.io/~1973995
-	"""match = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG #powder-saves :New: \u000302'(.+?)'\u000F by\u000305 ([\w_-]+)\u000314 \(.*?\)\u000F; https?:\/\/tpt.io\/~([0-9]+)$", raw)
-	if match:
-		saveID = match.group(3)
-		name = match.group(1)
-		if "cow" in name.lower():
-			if not PromotionLevel(saveID, -1):
-				SendMessage("+#powder-saves", "Error demoting save ID %s" % (saveID))
-			else:
-				SendMessage("+#powder-saves", "Demoted save ID %s" % (saveID))
-		info = GetSaveInfoDetailed(saveID)
-		if info:
-			sleep(1)
-			elementCount = {}
-			for element in info["ElementCount"]:
-				elementCount[element["Name"]] = int(element["Count"])
-			if "LCRY" in elementCount and elementCount["LCRY"] > 75000:
-				LCRYpercent = float(elementCount["LCRY"]) / (sum(elementCount.values()))
-				if LCRYpercent > .9:
-					#SendMessage("jacob1", "demoting save ID %s, %s" % (saveID, LCRYpercent))
-					if not PromotionLevel(saveID, -1):
-						SendMessage("+#powder-saves", "Error demoting save ID %s" % (saveID))
-					else:
-						SendMessage("+#powder-saves", "Demoted save ID %s" % (saveID))"""
-	# Nicer formated PowderBot parser, that doesn't duplicate the long regex (TODO: move stuff to this)
 	powderBotMatch = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG (#{1,}[\w-]+) :(.*)$", raw)
 	if powderBotMatch:
 		channel = powderBotMatch.group(1)
@@ -86,8 +45,26 @@ def Parse(raw, text):
 			CheckTag(message)
 		elif channel == "#powder-forum":
 			CheckPost(message)
-		#elif channel == "#powder-info":
-		#	CheckPost(message)
+		elif channel == "#powder-info":
+			CheckRegistration(message)
+			#CheckPost(message)
+
+def CheckRegistration(message):
+	registrationMatch = re.match(r"^Neww registration: ([\w_-]+)\. https?:\/\/tpt\.io\/@([\w\_-]+) \[([0-9.]+)\] ?$", message)
+	if registrationMatch:
+		username = registrationMatch.group(1)
+		IP = registrationMatch.group(3)
+		check = CheckIP(IP)
+		if not check[0]:
+			return
+		if check[1] == "tor":
+			SendMessage("#powder-info", "Warning: This account was registered using TOR")
+			BanUser(username, "1", "p", "Automatic ban: Registeration using TOR has been temporarily disabled due to abuse")
+		elif check[1] == "ipban":
+			BanUser(username, "1", "p", "Automatic ban: this IP address has been blacklisted")
+			SendMessage("#powder-info", "Automatic ban: this IP address has been blacklisted")
+		elif check[1] == "neostrada":
+			SendMessage("#powder-info", "Warning: this account was registered with Neostrada Plus")
 
 def CheckTag(message):
 	tagMatch = re.match("^New tag: \u000303(\w+)\u0003 \(http://tpt.io/~(\d+)\)$", message)
