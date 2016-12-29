@@ -2,13 +2,33 @@ import time
 import json
 import math
 import config
+import sys
+try:
+	if 'SourceRcon' in sys.modules:
+		del sys.modules['SourceRcon']
+	import SourceRcon
+	has_rcon = True
+except ImportError:
+	has_rcon = False
+	rcon_error = False
 
 from common import *
 RegisterMod(__name__)
 
 AddSetting(__name__, "craftinglist-filename", "mods/minecraft-craftinglist.txt")
 AddSetting(__name__, "dynmap-url", "http://dynmap.starcatcher.us")
+AddSetting(__name__, "rcon-address", "localhost")
+AddSetting(__name__, "rcon-port", "25575")
+AddSetting(__name__, "rcon-password", "")
 LoadSettings(__name__)
+
+if has_rcon:
+	try:
+		rcon = SourceRcon.SourceRcon(GetSetting(__name__, "rcon-address"), int(GetSetting(__name__, "rcon-port")), GetSetting(__name__, "rcon-password"))
+		rcon_error = False
+	except SourceRcon.SourceRconError:
+		has_rcon = False
+		rcon_error = True
 
 class CraftingList(object):
 	recipes = {}
@@ -409,3 +429,248 @@ def GetUsername(message):
 	else:
 		message.Reply("Could not find player with that username")
 
+def RunRconCommand(message, command):
+	if not has_rcon:
+		if rcon_error:
+			message.Reply("error while connecting to rcon server")
+		else:
+			message.Reply("https://raw.githubusercontent.com/frostschutz/SourceLib/master/SourceRcon.py needs to be installed to use rcon")
+		return False
+	try:
+		ret = rcon.rcon(command)
+	except SourceRcon.SourceRconError:
+		message.Reply("Error while running Rcon command")
+		return False
+	return ret
+
+def GetCurrentTeam(mcusername):
+	allteammembers = GetData(__name__, "teammembers")
+	if not allteammembers:
+		return None
+	for tname, teammembers in allteammembers.items():
+		if mcusername in teammembers:
+			return tname
+	return None
+
+@command("rcon", admin=True)
+def Rcon(message):
+	ret = RunRconCommand(message, message.commandLine)
+	if ret == "":
+		message.Reply("No output.")
+	elif ret:
+		message.Reply(ret)
+
+@command("addteam", admin=True, minArgs=3)
+def AddTeam(message):
+	"""(addteam <owner> <teamname> <team displayname>). Adds a minecraft team. Admin only."""
+	teamowner = message.GetArg(0)
+	teamname = message.GetArg(1)
+	teamdisplayname = message.GetArg(2, endLine=True)
+	if not RunRconCommand(message, "scoreboard teams add {0} {1}".format(teamname, message.GetArg(2, endLine=True))):
+		return
+	StoreData(__name__, "teamowners.{0}".format(teamowner), teamname)
+	StoreData(__name__, "teammembers.{0}".format(teamname), [teamowner])
+	message.Reply("Added team {0} ({1}) with owner {2}".format(teamname, teamdisplayname, teamowner))
+
+@command("addteamowner", minArgs=1)
+def AddTeamOwner(message):
+	"""(addteamowner [<teamname>] <user>). Adds a new owner to your team."""
+	if message.isMinecraft:
+		username = message.mcusername
+		teamname = GetData(__name__, "teamowners.{0}".format(username))
+		if not teamname:
+			message.Reply("You aren't the owner of any teams")
+			return
+		newowner = message.GetArg(0)
+	elif CheckAdmin(message.fullhost):
+		teamname = message.GetArg(0)
+		newowner = message.GetArg(1)
+	else:
+		message.Reply("This command must be run in game")
+		return
+	teammembers = GetData(__name__, "teammembers.{0}".format(teamname))
+	if not teammembers:
+		message.Reply("No such team: {0}".format(teamname))
+		return
+	if newowner not in teammembers:
+		message.Reply("{0} needs to be in team {1} to be an owner".format(newowner, teamname))
+		return
+	StoreData(__name__, "teamowners.{0}".format(newowner), teamname)
+	message.Reply("Added {0} as owner for team {1}".format(newowner, teamname))
+
+@command("removeteamowner", minArgs=1)
+def RemoveTeamOwner(message):
+	"""(removeteamowner [<teamname>] <user>). Removes an owner from your team."""
+	if message.isMinecraft:
+		username = message.mcusername
+		teamname = GetData(__name__, "teamowners.{0}".format(username))
+		if not teamname:
+			message.Reply("You aren't the owner of any teams")
+			return
+		remowner = message.GetArg(0)
+	elif CheckAdmin(message.fullhost):
+		teamname = message.GetArg(0)
+		remowner = message.GetArg(1)
+	else:
+		message.Reply("This command must be run in game")
+		return
+	remname = GetData(__name__, "teamowners.{0}".format(remowner))
+	if remname != teamname:
+		message.Reply("{0} isn't in team {1}".format(remowner, teamname))
+		return
+	DelData(__name__, "teamowners.{0}".format(remowner))
+	message.Reply("Removed {0} as owner for team {1}".format(remowner, teamname))
+
+@command("addmember", minArgs=1, admin=True)
+def AddMember(message):
+	"""(addmember <teamname> <user>). Adds a member to a team. Admin only."""
+	teamname = message.GetArg(0)
+	newmember = message.GetArg(1)
+	allteammembers = GetData(__name__, "teammembers")
+	if not allteammembers:
+		messages.Reply("No teams exist!")
+		return
+	curteam = GetCurrentTeam(newmember)
+	if curteam:
+		message.Reply("{0} is already in team {1}".format(newmember, curteam))
+		return
+	if not RunRconCommand(message, "scoreboard teams join {0} {1}".format(teamname, newmember)):
+		return
+	StoreData(__name__, "teammembers.{0}".format(teamname), allteammembers[teamname] + [newmember])
+	message.Reply("Added {0} to team {1}".format(newmember, teamname))
+
+@command("remmember", minArgs=1)
+def RemMember(message):
+	"""(remmember <teamname> <user>). Removes a member from a team."""
+	if message.isMinecraft:
+		username = message.mcusername
+		teamname = GetData(__name__, "teamowners.{0}".format(username))
+		if not teamname:
+			message.Reply("You aren't the owner of any teams")
+			return
+		remmember = message.GetArg(0)
+	elif CheckAdmin(message.fullhost):
+		teamname = message.GetArg(0)
+		remmember = message.GetArg(1)
+	else:
+		message.Reply("This command must be run in game")
+		return
+
+	teammembers = GetData(__name__, "teammembers.{0}".format(teamname))
+	if not teammembers:
+		message.Reply("No such team: {0}".format(teamname))
+		return
+	if remmember not in teammembers:
+		message.Reply("{0} isn't in team {1}".format(remmember, teamname))
+		return
+	if not RunRconCommand(message, "scoreboard teams leave {0}".format(remmember)):
+		return
+	teammembers.remove(remmember)
+	StoreData(__name__, "teammembers.{0}".format(teamname), teammembers)
+
+	#Also check if user was an owner
+	ownercheck = GetData(__name__, "teamowners.{0}".format(remmember))
+	if ownercheck == teamname:
+		DelData(__name__, "teamowners.{0}".format(remmember))
+
+	message.Reply("Removed {0} from team {1}".format(remmember, teamname))
+
+@command("invitemember", minArgs=1)
+def InviteMember(message):
+	"""(invitemember <mcusername>). Invites a member to your team, if you are a team owner."""
+	if not message.isMinecraft:
+		message.Reply("This command must be run in game")
+		return
+	username = message.mcusername
+	teamname = GetData(__name__, "teamowners.{0}".format(username))
+	if not teamname:
+		message.Reply("You aren't the owner of any teams")
+		return
+	invitee = message.GetArg(0)
+	curteam = GetCurrentTeam(invitee)
+	if curteam:
+		message.Reply("{0} is already in team {1}".format(invitee, curteam))
+		return
+	StoreData(__name__, "teaminvites.{0}.{1}".format(teamname, invitee), time.time()+1200)
+
+	message.Reply("Invited {0} to team {1}".format(invitee, teamname))
+
+@command("jointeam", minArgs=1)
+def JoinTeam(message):
+	"""(jointeam <teamname>). Join a team, you must be invited first."""
+	if not message.isMinecraft:
+		message.Reply("This command must be run in game")
+		return
+	username = message.mcusername
+	teamname = message.GetArg(0)
+	teammembers = GetData(__name__, "teammembers.{0}".format(teamname))
+	if not teammembers:
+		message.Reply("No such team exists")
+		return
+	invite = GetData(__name__, "teaminvites.{0}.{1}".format(teamname, username))
+	if not invite:
+		message.Reply("You need to be invisited to team {0} first".format(teamname))
+		return
+	curteam = GetCurrentTeam(username)
+	if curteam:
+		message.Reply("You are already in team {0}".format(username, curteam))
+		DelData(__name__, "teaminvites.{0}.{1}".format(teamname, username))
+		return
+	if invite < time.time():
+		message.Reply("Invite is already expired")
+		DelData(__name__, "teaminvites.{0}.{1}".format(teamname, username))
+		return
+
+	if not RunRconCommand(message, "scoreboard teams join {0} {1}".format(teamname, username)):
+		return
+	StoreData(__name__, "teammembers.{0}".format(teamname), teammembers + [username])
+	DelData(__name__, "teaminvites.{0}.{1}".format(teamname, username))
+	message.Reply("Added {0} to team {1}".format(username, teamname))
+
+@command("leaveteam", minArgs=1)
+def LeaveTeam(message):
+	"""(leaveteam <teamname>). Leave a team."""
+	if not message.isMinecraft:
+		message.Reply("This command must be run in game")
+		return
+	username = message.mcusername
+	teamname = message.GetArg(0)
+	teammembers = GetData(__name__, "teammembers.{0}".format(teamname))
+	if not teammembers:
+		message.Reply("No such team exists")
+		return
+	if username not in teammembers:
+		message.Reply("You aren't in team {0}".format(teamname))
+		return
+	if not RunRconCommand(message, "scoreboard teams leave {0}".format(username)):
+		return
+	teammembers.remove(username)
+	StoreData(__name__, "teammembers.{0}".format(teamname), teammembers)
+
+	#Also check if user was an owner
+	ownercheck = GetData(__name__, "teamowners.{0}".format(username))
+	if ownercheck == teamname:
+		DelData(__name__, "teamowners.{0}".format(username))
+
+	message.Reply("Removed yourself from team {0}".format(teamname))
+
+@command("friendlyfire", minArgs=1)
+def FriendlyFire(message):
+	"""(friendlyfire [<teamname>] true|false). Sets friendlyfire option for your team."""
+	if message.isMinecraft:
+		username = message.mcusername
+		teamname = GetData(__name__, "teamowners.{0}".format(username))
+		if not teamname:
+			message.Reply("You aren't the owner of any teams")
+			return
+		setting = message.GetArg(0)
+	elif CheckAdmin(message.fullhost):
+		teamname = message.GetArg(0)
+		setting = message.GetArg(1)
+	else:
+		message.Reply("This command must be run in game")
+		return
+	if not setting:
+		raise ShowHelpException()
+	if RunRconCommand(message, "scoreboard teams option {0} friendlyfire {1}".format(teamname, setting)):
+		message.Reply("Set friendlyfire for team {0} to {1}".format(teamname, setting))
