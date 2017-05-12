@@ -2,25 +2,15 @@ import html.parser
 import json
 import time
 import re
-import ast
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 from collections import defaultdict
 
 from common import *
 RegisterMod(__name__)
 
-# Load banned ips / tags from file
-try:
-	bannedfile = open("mods/BANNED.txt")
-	bannedstuff = bannedfile.readlines()
-	bannedfile.close()
-	ipbans = ast.literal_eval(bannedstuff[0])
-	bannedtags = ast.literal_eval(bannedstuff[1])
-except IOError:
-	ipbans = {}
-	bannedtags = {}
-	pass
+AddSetting(__name__, "email-url", "")
+LoadSettings(__name__)
 
 def CheckIP(IP):
 	torfile = open("torlist.txt")
@@ -29,15 +19,29 @@ def CheckIP(IP):
 	torips = map(lambda ip: ip.strip(), torips)
 	if IP in torips:
 		return (True, "tor")
-	for address in ipbans:
-		if IP.startswith(address):
-			return (True, "ipban")
+	ipbans = GetData(__name__, "ipbans")
+	if ipbans:
+		todel = []
+		ret = None
+		for address, info in ipbans.items():
+			expires = info["expires"]
+			if expires and time.time() > info["expires"]:
+				todel.append(address)
+			elif IP.startswith(address):
+				ret = (True, "ipban")
+		if todel:
+			for d in todel:
+				del ipbans[d]
+				SendMessage("#powder-info", "IP ban expired: {0}".format(d))
+			StoreData(__name__, "ipbans", ipbans)
+		if ret:
+			return ret
 	if IP.startswith("83.8.") or IP.startswith("83.11.") or IP.startswith("83.25.") or IP.startswith("79.184.") or IP.startswith("79.186."):
 		return (True, "neostrada")
 	return (False, "")
 
 def Parse(raw, text):
-	powderBotMatch = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels)@turing.jacksonmj.co.uk PRIVMSG (#{1,}[\w-]+) :(.*)$", raw)
+	powderBotMatch = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels|Shenanigan|jacob1)@turing.jacksonmj.co.uk PRIVMSG (#{1,}[\w-]+) :(.*)$", raw)
 	if powderBotMatch:
 		channel = powderBotMatch.group(1)
 		message = powderBotMatch.group(2)
@@ -50,7 +54,7 @@ def Parse(raw, text):
 			#CheckPost(message)
 
 def CheckRegistration(message):
-	registrationMatch = re.match(r"^Neww registration: ([\w_-]+)\. https?:\/\/tpt\.io\/@([\w\_-]+) \[([0-9.]+)\] ?$", message)
+	registrationMatch = re.match(r"^New registration: ([\w_-]+)\. https?:\/\/tpt\.io\/@([\w\_-]+) \[([0-9.]+)\] ?$", message)
 	if registrationMatch:
 		username = registrationMatch.group(1)
 		IP = registrationMatch.group(3)
@@ -71,7 +75,7 @@ def CheckTag(message):
 	if tagMatch:
 		tag = tagMatch.group(1)
 		saveID = tagMatch.group(2)
-		for banned in bannedtags:
+		for banned in GetData(__name__, "bannedtags"):
 			if re.fullmatch(banned, tag):
 				username = GetTagUsage(tag, saveID)
 				if DisableTag(tag):
@@ -107,9 +111,16 @@ def CheckPost(message):
 	threadMatch = re.match("^Thread '\u000302([^']+)\u000F' by \u000305(\w+)\u000F in (?:.*?); http://tpt.io/:(\d+)$", message)
 	if threadMatch:
 		#SendMessage("#powder-info", "Thread Match: {0}, {1}, {2}".format(threadMatch.group(1), threadMatch.group(2), threadMatch.group(3)))
+		threadTitle = threadMatch.group(1)
 		threadID = threadMatch.group(3)
 		IP = GetThreadPostIP(threadMatch.group(3))
 		username = threadMatch.group(2)
+
+		if "0800" in threadTitle or "number" in threadTitle.lower():
+			SendMessage(logchan, "Removing thread due to potential spam.")
+			MoveThread(threadID, 7)
+			LockThread(threadID, "Thread automatically moved and locked because it was detected as spam")
+
 		if username == "JanKaszanka":
 			return
 		if IP:
@@ -672,8 +683,11 @@ def DisableTagCmd(message):
 		message.Reply("Error, could not disable tag.")
 
 @command("bannedtags", minArgs = 1, admin = True)
-def IPban(message):
+def Bannedtags(message):
 	"""(bannedtags add <tagregex>|remove <tagregex>|list). Modifies the banned tag regex list. Admin only."""
+	bannedtags = GetData(__name__, "bannedtags")
+	if not bannedtags:
+		bannedtags = []
 	if message.GetArg(0).lower() == "list":
 		if not bannedtags:
 			message.Reply("No banned tag regexes")
@@ -682,11 +696,19 @@ def IPban(message):
 		return
 	action = message.GetArg(0).lower()
 	if action == "remove":
-		bannedtags.discard(message.GetArg(1))
-		message.Reply("Removed %s from the banned tag regex list" % message.GetArg(1))
+		if message.GetArg(1) not in bannedtags:
+			message.Reply("That tag regex isn't currently banned")
+		else:
+			bannedtags.remove(message.GetArg(1))
+			StoreData(__name__, "bannedtags", bannedtags)
+			message.Reply("Removed %s from the banned tag regex list" % message.GetArg(1))
 	elif action == "add":
-		bannedtags.add(message.GetArg(1))
-		message.Reply("Added %s to the banned tag regex list" % message.GetArg(1))
+		if message.GetArg(1) in bannedtags:
+			message.Reply("That tag regex is already banned")
+		else:
+			bannedtags.append(message.GetArg(1))
+			StoreData(__name__, "bannedtags", bannedtags)
+			message.Reply("Added %s to the banned tag regex list" % message.GetArg(1))
 	else:
 		message.Reply("Unknown action")
 
@@ -777,22 +799,45 @@ def UpdateTor(message):
 
 @command("ipban", minArgs = 1, admin = True)
 def IPban(message):
-	"""(ipban add <ip>|remove <ip>|list). Modifies the IP bans list. Admin only."""
+	"""(ipban add <ip>|remove <ip>|mark <ip> <reason>|makrperm <ip> list). Modifies the IP bans list. Admin only."""
+	ipbans = GetData(__name__, "ipbans")
+	if not ipbans:
+		ipbans = {}
 	if message.GetArg(0).lower() == "list":
 		if not ipbans:
 			message.Reply("Nobody is currently IP banned")
 		else:
-			message.Reply("List of currently banned IPs: " + ", ".join(ipbans))
+			output = "List of currently banned IPs: {0}"
+			infolist = []
+			for IP, info in ipbans.items():
+				expireStr = datetime.utcfromtimestamp(info["expires"]).strftime("%Y-%m-%dT%H:%M:%SZ") if info["expires"] else "never"
+				infolist.append("{0} ({1}, expires {2})".format(IP, info["reason"], expireStr))
+			message.Reply(output.format(", ".join(infolist)))
 	elif message.GetArg(1):
 		action = message.GetArg(0).lower()
-		if action == "remove":
-			ipbans.discard(message.GetArg(1))
-			message.Reply("Removed %s from the IP ban list" % message.GetArg(1))
-		elif action == "add":
-			ipbans.add(message.GetArg(1))
-			message.Reply("Added %s to the IP ban list" % message.GetArg(1))
+		IP = message.GetArg(1)
+		if action == "add":
+			if IP in ipbans:
+				message.Reply("{0} is already in the IP ban list".format(IP))
+			else:
+				expireTime = int(time.time()+timedelta(days=30).total_seconds())
+				info = {"reason":"no reason given", "expires":expireTime}
+				ipbans[IP] = info
+				message.Reply("Added {0} to the IP ban list".format(IP))
+		elif IP not in ipbans:
+			message.Reply("{0} isn't in the IP ban list".format(IP))
+		elif action == "remove":
+			del ipbans[IP]
+			message.Reply("Removed {0} from the IP ban list".format(IP))
+		elif action == "mark" and message.GetArg(2):
+			ipbans[IP]["reason"] = message.GetArg(2, endLine=True)
+			message.Reply("Done.")
+		elif action == "makeperm":
+			ipbans[IP]["expires"] = None
+			message.Reply("Done.")
 		else:
 			message.Reply("Unknown action")
+		StoreData(__name__, "ipbans", ipbans)
 	else:
 		message.Reply("Unknown action")
 
@@ -845,4 +890,50 @@ def GetThreadPostIPCmd(message):
 		message.Reply(threadIP)
 	else:
 		message.Reply("Error: Could not get IP")
+
+@command("getemail", owner=True)
+def GetEmail(message):
+	"""(getemail [Name=<name>] [Email=<email>] [<PageNum>]). Searches for an email by username or email."""
+
+	searchArgs = []
+	pageNum = 0
+	args = message.commandLine.split()
+	for arg in args:
+		try:
+			(name, value) = arg.split("=")
+			if name.lower() == "name":
+				searchArgs.append("&Name="+value)
+			elif name.lower() == "email":
+				searchArgs.append("&Email="+value)
+			else:
+				raise ShowHelpException()
+		except ValueError:
+			try:
+				int(arg)
+				searchArgs.append("&PageNum="+arg)
+			except ValueError:
+				raise ShowHelpException()
+
+	asdf = GetPage(GetSetting(__name__, "email-url") + "{0}".format("".join(searchArgs)), GetTPTSessionInfo(0))
+	parsed = json.loads(asdf)
+	userlist = parsed["Users"]
+	colorlist = ["", "04", "11", "13", "08"]
+	outputlist = []
+	for user in userlist:
+		matches = re.search("User-(\d)\.png.+Moderation\.html\?ID=(\d+)\\\">([^<]+)<.+\\\"Email\\\">([^<]+)<", user)
+		usertype = int(matches.group(1))
+		username = matches.group(3)
+		email = matches.group(4)
+		if colorlist[usertype]:
+			username = "\x03{0}{1}\x03".format(colorlist[usertype], username)
+		outputlist.append("{0}: {1}".format(username, email))
+	if not outputlist:
+		message.Reply("No results")
+	else:
+		output = ", ".join(outputlist)
+		if len(outputlist) > 12 and len(output) >= 480:
+			message.Reply(", ".join(outputlist[:12]))
+			message.Reply(", ".join(outputlist[13:]))
+		else:
+			message.Reply(output)
 
