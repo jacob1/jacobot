@@ -9,6 +9,9 @@ from collections import defaultdict
 from common import *
 RegisterMod(__name__)
 
+AddSetting(__name__, "info-chan", "#powder-info")
+AddSetting(__name__, "forum-chan", "#powder-forum")
+AddSetting(__name__, "saves-chan", "#powder-saves")
 AddSetting(__name__, "email-url", "")
 LoadSettings(__name__)
 
@@ -32,7 +35,7 @@ def CheckIP(IP):
 		if todel:
 			for d in todel:
 				del ipbans[d]
-				SendMessage("#powder-info", "IP ban expired: {0}".format(d))
+				SendMessage(GetSetting(__name__, "info-chan"), "IP ban expired: {0}".format(d))
 			StoreData(__name__, "ipbans", ipbans)
 		if ret:
 			return ret
@@ -45,11 +48,11 @@ def Parse(raw, text):
 	if powderBotMatch:
 		channel = powderBotMatch.group(1)
 		message = powderBotMatch.group(2)
-		if channel == "#powder-saves":
+		if channel == GetSetting(__name__, "saves-chan"):
 			CheckTag(message)
-		elif channel == "#powder-forum":
+		elif channel == GetSetting(__name__, "forum-chan"):
 			CheckPost(message)
-		elif channel == "#powder-info":
+		elif channel == GetSetting(__name__, "info-chan"):
 			CheckRegistration(message)
 			#CheckPost(message)
 
@@ -62,15 +65,16 @@ def CheckRegistration(message):
 		if not check[0]:
 			return
 		if check[1] == "tor":
-			SendMessage("#powder-info", "Warning: This account was registered using TOR")
+			SendMessage(GetSetting(__name__, "info-chan"), "Warning: This account was registered using TOR")
 			BanUser(username, "1", "p", "Automatic ban: Registeration using TOR has been temporarily disabled due to abuse")
 		elif check[1] == "ipban":
 			BanUser(username, "1", "p", "Automatic ban: this IP address has been blacklisted")
-			SendMessage("#powder-info", "Automatic ban: this IP address has been blacklisted")
+			SendMessage(GetSetting(__name__, "info-chan"), "Automatic ban: this IP address has been blacklisted")
 		elif check[1] == "neostrada":
-			SendMessage("#powder-info", "Warning: this account was registered with Neostrada Plus")
+			SendMessage(GetSetting(__name__, "info-chan"), "Warning: this account was registered with Neostrada Plus")
 
 def CheckTag(message):
+	logchan = "+"+GetSetting(__name__, "saves-chan")
 	tagMatch = re.match("^New tag: \u000303(\w+)\u0003 \(http://tpt.io/~(\d+)\)$", message)
 	if tagMatch:
 		tag = tagMatch.group(1)
@@ -79,15 +83,15 @@ def CheckTag(message):
 			if re.fullmatch(banned, tag):
 				username = GetTagUsage(tag, saveID)
 				if DisableTag(tag):
-					SendMessage("+#powder-saves", "Disabled tag {0} by {1}".format(tag, username if username else "UNKNOWN"))
+					SendMessage(logchan, "Disabled tag {0} by {1}".format(tag, username if username else "UNKNOWN"))
 				else:
-					SendMessage("+#powder-saves", "Error: couldn't disable tag {0}".format(tag))
+					SendMessage(logchan, "Error: couldn't disable tag {0}".format(tag))
 
 def CheckPost(message):
-	logchan = "+#powder-forum"
+	logchan = "+"+GetSetting(__name__, "forum-chan")
 	postMatch = re.match("^Post by \u000305(\w+)\u000F in '\u000302([^\u000F]+)\u000F'; http://tpt.io/.(\d+)$", message)
 	if postMatch:
-		#SendMessage("#powder-info", "Match: {0}, {1}, {2}".format(postMatch.group(1), postMatch.group(2), postMatch.group(3)))
+		#SendMessage(GetSetting(__name__, "info-chan"), "Match: {0}, {1}, {2}".format(postMatch.group(1), postMatch.group(2), postMatch.group(3)))
 		postID = postMatch.group(3)
 		IP = GetPostIP(postID)
 		username = postMatch.group(1)
@@ -110,7 +114,7 @@ def CheckPost(message):
 				SendMessage(logchan, "Warning: This post was made from a suspicious IP address. Error removing post, please remove manually.")
 	threadMatch = re.match("^Thread '\u000302([^']+)\u000F' by \u000305(\w+)\u000F in (?:.*?); http://tpt.io/:(\d+)$", message)
 	if threadMatch:
-		#SendMessage("#powder-info", "Thread Match: {0}, {1}, {2}".format(threadMatch.group(1), threadMatch.group(2), threadMatch.group(3)))
+		#SendMessage(GetSetting(__name__, "info-chan"), "Thread Match: {0}, {1}, {2}".format(threadMatch.group(1), threadMatch.group(2), threadMatch.group(3)))
 		threadTitle = threadMatch.group(1)
 		threadID = threadMatch.group(3)
 		IP = GetThreadPostIP(threadMatch.group(3))
@@ -146,23 +150,23 @@ def AlwaysRun(channel):
 	if now.minute == 30 and now.second ==  0:
 		reportlist = ReportsList()
 		if reportlist == None:
-			SendMessage("#powder-info", "Error fetching reports")
+			SendMessage(GetSetting(__name__, "info-chan"), "Error fetching reports")
 			return
 		reportlistunseen = [report for report in reportlist if seenReports.get(report[1]) != int(report[0])]
 		for report in reportlistunseen:
 			if seenReports.get(report[1]) and int(report[0]) > int(seenReports.get(report[1])):
 				report = (int(report[0]) - int(seenReports.get(report[1])), report[1], report[2])
 		if len(reportlist):
-			SendMessage("#powder-info", u"There are \u0002%s unread reports\u0002: " % (len(reportlist)) + ", ".join(["http://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
-			PrintReportList("#powder-info", reportlistunseen)
+			SendMessage(GetSetting(__name__, "info-chan"), u"There are \u0002%s unread reports\u0002: " % (len(reportlist)) + ", ".join(["http://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
+			PrintReportList(GetSetting(__name__, "info-chan"), reportlistunseen)
 		seenReports = {}
 		for report in reportlist:
 			seenReports[report[1]] = int(report[0])
 
 		#if len(reportlist):
-		#	SendMessage("#powder-info", "Report list: " + ", ".join(["http://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
+		#	SendMessage(GetSetting(__name__, "info-chan"), "Report list: " + ", ".join(["http://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
 		#else:
-		#	SendMessage("#powder-info", "Test: No reports")
+		#	SendMessage(GetSetting(__name__, "info-chan"), "Test: No reports")
 
 		convolist = GetConvoList()
 		for convo in convolist:
@@ -171,12 +175,12 @@ def AlwaysRun(channel):
 	if now.hour == 6 and now.minute == 1 and now.second == 4:
 		torlist = GetPage("https://www.dan.me.uk/torlist/")
 		if not torlist:
-			SendMessage("#powder-info", "Error fetching tor list")
+			SendMessage(GetSetting(__name__, "info-chan"), "Error fetching tor list")
 			return
 		torfile = open("torlist.txt", "w")
 		torfile.write(torlist)
 		torfile.close()
-		SendMessage("#powder-info", "Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
+		SendMessage(GetSetting(__name__, "info-chan"), "Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
 
 #Generic useful functions
 def GetTPTSessionInfo(line):
