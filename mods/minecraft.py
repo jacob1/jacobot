@@ -468,6 +468,8 @@ def AddTeam(message):
 	teamdisplayname = message.GetArg(2, endLine=True)
 	if not RunRconCommand(message, "scoreboard teams add {0} {1}".format(teamname, message.GetArg(2, endLine=True))):
 		return
+	if not RunRconCommand(message, "scoreboard teams join {0} {1}".format(teamname, teamowner)):
+		return
 	StoreData(__name__, "teamowners.{0}".format(teamowner), teamname)
 	StoreData(__name__, "teammembers.{0}".format(teamname), [teamowner])
 	message.Reply("Added team {0} ({1}) with owner {2}".format(teamname, teamdisplayname, teamowner))
@@ -609,7 +611,7 @@ def JoinTeam(message):
 		return
 	invite = GetData(__name__, "teaminvites.{0}.{1}".format(teamname, username))
 	if not invite:
-		message.Reply("You need to be invisited to team {0} first".format(teamname))
+		message.Reply("You need to be invited to team {0} first".format(teamname))
 		return
 	curteam = GetCurrentTeam(username)
 	if curteam:
@@ -653,6 +655,16 @@ def LeaveTeam(message):
 		DelData(__name__, "teamowners.{0}".format(username))
 
 	message.Reply("Removed yourself from team {0}".format(teamname))
+
+@command("listmembers", minArgs=1)
+def ListMembers(message):
+	teamname = message.GetArg(0)
+	teammembers = GetData(__name__, "teammembers.{0}".format(teamname))
+	if not teammembers:
+		message.Reply("No such team exists")
+		return
+	withowners = ["\u000303{0}\u0003".format(teammember) if GetData(__name__, "teamowners.{0}".format(teammember)) == teamname else teammember for teammember in teammembers]
+	message.Reply("Members in team {0}: {1}".format(teamname, ", ".join(withowners)))
 
 @command("friendlyfire", minArgs=1)
 def FriendlyFire(message):

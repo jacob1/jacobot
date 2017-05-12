@@ -3,6 +3,7 @@ import string
 from datetime import datetime
 
 from common import *
+from config import channels
 RegisterMod(__name__)
 
 def AlwaysRun(channel):
@@ -64,9 +65,9 @@ def PartCmd(message):
 
 #def Parse(raw, text):
 #	if text[1] == "324":
-#		SendMessage(config.channels[2], "Channel exists: "+text[3] + "; " + text[4])
+#		SendMessage(channels[2], "Channel exists: " + text[3] + "; " + text[4])
 #	elif text[1] == "403":
-#		SendMessage(config.channels[2], "No such channel: "+text[3])
+#		SendMessage(channels[2], "No such channel: " + text[3])
 
 @command("msg", minArgs = 2, owner = True)
 def MsgCmd(message):
@@ -78,14 +79,38 @@ def RawCmd(message):
 	"""(raw <message>). Sends a raw IRC message."""
 	Send(message.commandLine + "\n")
 
-"""
-@command("check", minArgs = 1)
-def CheckCmd(username, hostmask, channel, text):
-	""secret command.""
-	for i in text:
+
+"""@command("check", minArgs = 1)
+def CheckCmd(message):
+	" ""secret command." ""
+	msg = message.GetArg(0, endLine=True)
+	if not msg:
+		return
+	for i in msg.split():
 		Send("MODE ######%s\n" % i)
 
-@command("octal", minArgs = 1)
+import codecs
+@command("check13", minArgs = 1)
+def Check13Cmd(message):
+	"" "secret command."" "
+	msg = message.GetArg(0, endLine=True)
+	if not msg:
+		return
+	for i in msg.split():
+		Send("MODE ######%s\n" % i)
+	for i in msg.split():
+		Send("MODE ######%s\n" % codecs.encode(i, "rot13"))
+
+@command("checks", minArgs = 1)
+def ChecksCmd(message):
+	"" "secret command." ""
+	msg = message.GetArg(0, endLine=True)
+	if not msg:
+		return
+	for i in msg.split():
+		Send("MODE ######%sShakeIt\n" % i)"""
+
+"""@command("octal", minArgs = 1)
 def OctalCmd(username, hostmask, channel, text):
 	""secret command 2.""
 	for i in text:
