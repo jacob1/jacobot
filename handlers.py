@@ -77,8 +77,8 @@ def HandleLine(line, text):
 			HandlePrivmsg(line, text)
 
 	if len(text) >= 5:
-		if text[1] == "MODE" and text[2] == "##powder-bots" and text[3] == "+o" and text[4] == botNick:
-			Send("MODE ##powder-bots -o %s\n" % (botNick))
+		if text[1] == "MODE" and text[2] == "#powder-bots" and text[3] == "+o" and text[4] == botNick:
+			Send("MODE #powder-bots -o %s\n" % (botNick))
 
 	#allow modules to do their own text parsing if needed, outside of raw commands
 	for mod in mods:
