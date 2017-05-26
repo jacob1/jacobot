@@ -32,7 +32,7 @@ Replacements here (for easier searaches)
  Torch | 4 | Coal / Stick
 
 /////////////////////////
-//Manufactures recepies//
+//Manufactured recepies//
 /////////////////////////
 
  Glowstone | 1 | Glowstone Dust - Glowstone Dust / Glowstone Dust - Glowstone Dust
@@ -292,6 +292,7 @@ Replacements here (for easier searaches)
  Book and Quill | 1 | Feather - / Ink Sac - Book
  Leather | 1 | Rabbit Hide - Rabbit Hide / Rabbit Hide - Rabbit Hide
  Bed | 1 | Wool - Wool - Wool / Wood Plank - Wood Plank - Wood Plank
+ Bed (recolor) | 1 | Bed - Dye
  Gold | 1 | Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget
  Eye of Ender | 1 | Ender Pearl / Blaze Powder
  End Crystal | 1 | Glass - Glass - Glass / Glass - Eye of ender - Glass / Glass - Ghast Tear - Glass
@@ -366,6 +367,8 @@ Replacements here (for easier searaches)
  Firework Star (fade) | 1 | Firework Star - Any Dye
  Firework Rocket (plain) | 3 | Paper - / Gunpowder - Gunpowder
  Firework Rocket | 3 | - Up to 3 Gunpowder - / - Paper - / - Up to 7 Firework Stars -
+
+ Concrete Powder | 8 | Sand - Gravel - Sand / Gravel - Dye - Gravel / Sand - Gravel - Sand
 
 ///////////////////////////////////
 //Enchantment and brewing recipes//

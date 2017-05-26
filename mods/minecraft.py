@@ -441,6 +441,9 @@ def RunRconCommand(message, command):
 	except SourceRcon.SourceRconError:
 		message.Reply("Error while running Rcon command")
 		return False
+	except OSError:
+		message.Reply("Socket error while running Rcon command")
+		return False
 	return ret
 
 def GetCurrentTeam(mcusername):
