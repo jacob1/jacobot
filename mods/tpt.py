@@ -66,7 +66,7 @@ def CheckRegistration(message):
 			return
 		if check[1] == "tor":
 			SendMessage(GetSetting(__name__, "info-chan"), "Warning: This account was registered using TOR")
-			BanUser(username, "1", "p", "Automatic ban: Registeration using TOR has been temporarily disabled due to abuse")
+			#BanUser(username, "1", "p", "Automatic ban: Registeration using TOR has been temporarily disabled due to abuse")
 		elif check[1] == "ipban":
 			BanUser(username, "1", "p", "Automatic ban: this IP address has been blacklisted")
 			SendMessage(GetSetting(__name__, "info-chan"), "Automatic ban: this IP address has been blacklisted")
@@ -147,7 +147,7 @@ seenReports = {}
 def AlwaysRun(channel):
 	global seenReports
 	now = datetime.now()
-	if now.minute == 30 and now.second ==  0:
+	if now.minute == 30 and now.second == 0:
 		reportlist = ReportsList()
 		if reportlist == None:
 			SendMessage(GetSetting(__name__, "info-chan"), "Error fetching reports")
@@ -181,6 +181,36 @@ def AlwaysRun(channel):
 		torfile.write(torlist)
 		torfile.close()
 		SendMessage(GetSetting(__name__, "info-chan"), "Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
+	if now.second == 0:# and now.minute%2 == 1:
+		CheckCommentBans()
+
+scannedcomments = set()
+def CheckCommentBans():
+	global scannedcomments
+	#commentbans = GetData(__name__, "commentbans")
+	#if not commentbans:
+	#	return
+	commentbansorig = ["Frads_man", "JanKaszanka"]
+	commentbans = [149086, 156645]
+	for user in commentbans:
+		comments = GetUserComments(user, page=0)
+		if not comments:
+			return
+		for comment in comments:
+			if comment[2] in scannedcomments:
+				continue
+			scannedcomments.add(comment[2])
+			if True or re.match(r"^\d{1,2}:\d{1,2}:\d{1,2}$", comment[0]):
+				#SendMessage(GetSetting(__name__, "info-chan"), "Recent comment: "+comment[3])
+				saveinfo = GetSaveInfo(comment[1])
+				if not saveinfo:
+					SendMessage(GetSetting(__name__, "info-chan"), "Error getting save info for ID "+comment[1])
+					continue
+				#SendMessage(GetSetting(__name__, "info-chan"), "Comment is on save {0} by {1}".format(saveinfo["Name"], saveinfo["Username"]))
+				if (user == 149086 and saveinfo["Username"] == "JanKaszanka") or (user == 156645 and saveinfo["Username"] == "Frads_man"):
+					DeleteComment(comment[1], comment[2], safe=False)
+					SendMessage(GetSetting(__name__, "info-chan"), "Deleted {0}'s comment on {1} by {2}: {3}".format(user, saveinfo["Name"], saveinfo["Username"], comment[3]))
+	#SendMessage(GetSetting(__name__, "info-chan"), "comment scan complete")
 
 #Generic useful functions
 def GetTPTSessionInfo(line):
@@ -430,10 +460,12 @@ def DisableTag(tag, undelete=False):
 def GetUserComments(username, page=0):
 	try:
 		userID = int(username)
-	except:
+	except ValueError:
 		userID = int(GetUserID(username))
 	page = GetPage("http://powdertoy.co.uk/User/Moderation.html?ID={0}&PageNum={1}".format(userID, page), GetTPTSessionInfo(0))
-	comments = re.findall("\?ID=(\d+)&DeleteComment=(\d+)&.*\n.*\n.*Message\">(.*?)<", page)
+	if not page:
+		return None
+	comments = re.findall("<span class=\"Date\">([^<]+)</span>.*\n.*\n.*\?ID=(\d+)&DeleteComment=(\d+)&.*\n.*\n.*Message\">(.*?)<", page)
 	return comments
 
 def GetSaveComments(saveID, page=0):
@@ -443,12 +475,13 @@ def GetSaveComments(saveID, page=0):
 
 def DeleteComment(saveID, commentID, safe=True):
 	saveComments = GetSaveComments(saveID)
-	try:
-		if saveComments[0][2] != commentID:
+	if safe:
+		try:
+			if saveComments[0][2] != commentID:
+				return True
+		# Save doesn't exist
+		except IndexError:
 			return True
-	# Save doesn't exist
-	except IndexError:
-		return True
 	if GetPage("http://powdertoy.co.uk/Browse/View.html?ID={0}&DeleteComment={1}".format(saveID, commentID), GetTPTSessionInfo(0)):
 		return True
 	return False
@@ -565,6 +598,7 @@ def GetReports(message):
 def MarkRead(message):
 	"""(markread <saveid>). Marks a report on a save as read. Admin only."""
 	GetPage("http://powdertoy.co.uk/Reports.html?Read=%s" % message.GetArg(0), GetTPTSessionInfo(0))
+	message.Reply("No output.")
 
 @command("markallread", admin = True)
 def MarkAllRead(message):
@@ -867,9 +901,12 @@ def DeleteUserCommentsCmd(message):
 		message.Reply("Error: pagenum must be a positive integer")
 		return
 	comments = GetUserComments(message.GetArg(0), message.GetArg(1) if message.GetArg(1) else 0)
+	if not comments:
+		message.Reply("Error: user does not exist")
+		return
 	for comment in comments:
-		if not DeleteComment(comment[0], comment[1]):
-			message.Reply("Error deleting comment #{0} on ID:{1}".format(comment[1], comment[0]))
+		if not DeleteComment(comment[1], comment[2], safe=True):
+			message.Reply("Error deleting comment #{0} on ID:{1}".format(comment[2], comment[1]))
 			break
 	message.Reply("Done.")
 
