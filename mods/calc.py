@@ -43,29 +43,34 @@ class _calculator(object):
 
 	# Convert a string to a complex number (python built-in)
 	def _getcomplex(self, expression, offset):
-		if expression[0] != "(":
+		offset2 = 0
+		while expression[offset2] in string.whitespace:
+			offset2 = offset2 + 1
+		if expression[offset2] != "(":
 			raise ValueError("Expected complex number at character {0}".format(offset))
-		(real, length) = self._getnumber(expression[1:], offset+1)
-		(compl, length2) = self._getnumber(expression[1+length:], offset+1+length)
-		if expression[1+length+length2] != "j":
-			raise ValueError("Expected complex number 'j' at character {0}".format(offset+1+length+length2))
-		if expression[2+length+length2] != ")":
-			raise ValueError("Expected complex number closing ')' at character {0}".format(offset+2+length+length2))
-		return (complex(expression[:3+length+length2]), 3+length+length2)
+		(real, length) = self._getnumber(expression[offset2+1:], offset+offset2+1)
+		(compl, length2) = self._getnumber(expression[offset2+1+length:], offset+offset2+1+length)
+		if expression[offset2+1+length+length2] != "j":
+			raise ValueError("Expected complex number 'j' at character {0}".format(offset+offset2+1+length+length2))
+		if expression[offset2+2+length+length2] != ")":
+			raise ValueError("Expected complex number closing ')' at character {0}".format(offset+offset2+2+length+length2))
+		return (complex(expression[offset2:offset2+3+length+length2]), 3+length+length2+offset2)
 
 	# Parses something that is assumed to be a number, stops parsing when the next character would be an operator / invalid in a number
 	def _getnumber(self, expression, offset):
-		if expression[0] == "(":
-			return self._getcomplex(expression, offset)
-
 		start = 0
 		foundInt = False
 		foundDot = False
 		foundE = False
 		foundEExponent = False
+		checkedComplex = False
 		isNegative = False
 		for i in range(len(expression)):
 			char = expression[i]
+			if not checkedComplex and char not in string.whitespace:
+				if char == "(":
+					return self._getcomplex(expression, offset)
+				checkedComplex = True
 			# Allows unlimited -s and +s before the number starts. Once it starts, anything after is assumed to be an operator and number parsing stops
 			if char == "-" or char == "+":
 				if foundInt and (not foundE or foundEExponent):
@@ -103,7 +108,7 @@ class _calculator(object):
 					raise ValueError("Expected number at character {0}".format(i+offset))
 				return (self._converttonumber(expression[start:i], isNegative), i)
 		if not foundInt:
-			raise ValueError("Expected bagels at character {0}".format(i+offset))
+			raise ValueError("Expected bagels at character {0}".format(offset))
 		return (self._converttonumber(expression[start:], isNegative), len(expression))
 
 	# Parses looking for an operator
@@ -112,7 +117,7 @@ class _calculator(object):
 			char = expression[i]
 			if char in string.whitespace:
 				continue
-			elif char in "^*/+-":
+			elif char in "^*/+-%":
 				return (expression[:i+1], i+1)
 			else:
 				break
@@ -159,6 +164,9 @@ class _calculator(object):
 			elif operator == "/":
 				(prev, next) = parsed[i-1], parsed[i+1]
 				parsed = parsed[:i-1] + [prev/next] + parsed[i+2:]
+			elif operator == "%":
+				(prev, next) = parsed[i-1], parsed[i+1]
+				parsed = parsed[:i-1] + [prev%next] + parsed[i+2:]
 			else:
 				i += 2
 		i = 1
@@ -192,7 +200,7 @@ class _calculator(object):
 					stack.append((i, expression[funcNameStart:i]))
 					funcNameStart = -2
 				else:
-					raise ValueError("Expected '(' at character {0}".format(i+offset))
+					funcNameStart = -1
 			elif char == "(":
 				stack.append((i,None))
 			elif char in string.ascii_letters:
