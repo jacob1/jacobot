@@ -31,7 +31,7 @@ class _calculator(object):
 
 	def sqrt(self, args, offset):
 		self._expectargs(args, 1, offset)
-		return math.sqrt(args[0])
+		return args[0]**0.5
 
 	# Convert a string to a number (string is assumed to actually be a number)
 	def _converttonumber(self, expression, isNegative):
@@ -50,11 +50,13 @@ class _calculator(object):
 			raise ValueError("Expected complex number at character {0}".format(offset))
 		(real, length) = self._getnumber(expression[offset2+1:], offset+offset2+1)
 		(compl, length2) = self._getnumber(expression[offset2+1+length:], offset+offset2+1+length)
+		real = round(real, 10)
 		if expression[offset2+1+length+length2] != "j":
 			raise ValueError("Expected complex number 'j' at character {0}".format(offset+offset2+1+length+length2))
 		if expression[offset2+2+length+length2] != ")":
 			raise ValueError("Expected complex number closing ')' at character {0}".format(offset+offset2+2+length+length2))
-		return (complex(expression[offset2:offset2+3+length+length2]), 3+length+length2+offset2)
+		return (complex(real, compl), 3+length+length2+offset2)
+		#return (complex(expression[offset2:offset2+3+length+length2]), 3+length+length2+offset2)
 
 	# Parses something that is assumed to be a number, stops parsing when the next character would be an operator / invalid in a number
 	def _getnumber(self, expression, offset):
@@ -152,7 +154,10 @@ class _calculator(object):
 				if type(prev) == complex or type(next) == complex:
 					raise ValueError("Cannot do exponents on complex numbers")
 				# Convert to float to prevent DOS
-				parsed = parsed[:i-1] + [float(prev)**float(next)] + parsed[i+2:]
+				exp = float(prev)**float(next)
+				if type(exp) == complex:
+					exp = complex(round(exp.real, 10), exp.imag)
+				parsed = parsed[:i-1] + [exp] + parsed[i+2:]
 			else:
 				i += 2
 		i = 1
