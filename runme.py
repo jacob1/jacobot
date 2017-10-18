@@ -83,12 +83,12 @@ def PrintError():
 	currentChannel = common.GetCurrentChannel()
 	if currentChannel:
 		SocketSend(irc, "PRIVMSG {0} :Error printed to console\n".format(currentChannel))
-		if errorCode:
-			try:
-				exec(errorCode)
-			except Exception:
-				SocketSend(irc, "PRIVMSG {0} :We heard you like errors, so we put an error in your error handler so you can error while you catch errors\n".format(currentChannel))
-				Print("=======ERROR=======\n{0}========END========\n".format(traceback.format_exc()))
+	if errorCode:
+		try:
+			exec(errorCode)
+		except Exception:
+			SocketSend(irc, "PRIVMSG {0} :We heard you like errors, so we put an error in your error handler so you can error while you catch errors\n".format(errorChannel))
+			Print("=======ERROR=======\n{0}========END========\n".format(traceback.format_exc()))
 	common.SetCurrentChannel(None)
 	
 def Interrupt():
