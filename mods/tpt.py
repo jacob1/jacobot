@@ -107,7 +107,7 @@ def CheckPost(message):
 				SendMessage(logchan, "Warning: This post was made using TOR. Removed post.")
 			else:
 				SendMessage(logchan, "Warning: This post was made using TOR. Error removing post, please remove manually.")
-		elif check[0]:# and check[1] == "ipban":
+		elif check[0] and check[1] == "ipban":
 			if HidePost(postID, True, "This post has been automatically removed due to potential abuse."):
 				SendMessage(logchan, "Warning: This post was made from a suspicious IP address. Removed post.")
 			else:
@@ -137,9 +137,9 @@ def CheckPost(message):
 			MoveThread(threadID, 7)
 			LockThread(threadID, "Thread automatically moved and locked because it was posted with TOR")
 		elif check[0] and check[1] == "neostrada":
-			SendMessage(logchan, "Warning: This thread was made using Neostrada Plus. Removing thread.")
-			MoveThread(threadID, 7)
-			LockThread(threadID, "Thread automatically moved and locked because it was posted from a blacklisted ISP")
+			SendMessage(logchan, "Warning: This thread was made using Neostrada Plus.")
+			#MoveThread(threadID, 7)
+			#LockThread(threadID, "Thread automatically moved and locked because it was posted from a blacklisted ISP")
 		elif check[0]:
 			SendMessage(logchan, "Warning: This thread was made from a suspicious IP address.")
 
@@ -181,7 +181,7 @@ def AlwaysRun(channel):
 		torfile.write(torlist)
 		torfile.close()
 		SendMessage(GetSetting(__name__, "info-chan"), "Updated list of TOR IPs, there are now %s IPs" % (len(torlist.splitlines())))
-	if now.second == 0:# and now.minute%2 == 1:
+	if now.second == 0 and now.minute%10 == 1:
 		CheckCommentBans()
 
 scannedcomments = set()
@@ -190,12 +190,20 @@ def CheckCommentBans():
 	#commentbans = GetData(__name__, "commentbans")
 	#if not commentbans:
 	#	return
-	commentbansorig = ["Frads_man", "JanKaszanka"]
-	commentbans = [149086, 156645]
-	for user in commentbans:
-		comments = GetUserComments(user, page=0)
+	#commentbansorig = ["Frads_man", "JanKaszanka", "DrBreen"]
+	#commentbans = [149086, 156645, 168723]
+	usermap = {143701:"DrBrick", 156645:"JanKaszanka"}
+	commentbans = {"DrBrick":["JanKaszanka"], "JanKaszanka":["DrBrick"]}
+	for user, commentban in commentbans.items():
+		userid = -1
+		for useri, username in usermap.items():
+			if user == username:
+				userid = useri
+		if userid == -1:
+			continue
+		comments = GetUserComments(userid, page=0)
 		if not comments:
-			return
+			continue
 		for comment in comments:
 			if comment[2] in scannedcomments:
 				continue
@@ -207,7 +215,7 @@ def CheckCommentBans():
 					SendMessage(GetSetting(__name__, "info-chan"), "Error getting save info for ID "+comment[1])
 					continue
 				#SendMessage(GetSetting(__name__, "info-chan"), "Comment is on save {0} by {1}".format(saveinfo["Name"], saveinfo["Username"]))
-				if (user == 149086 and saveinfo["Username"] == "JanKaszanka") or (user == 156645 and saveinfo["Username"] == "Frads_man"):
+				if saveinfo["Username"] in commentban:
 					DeleteComment(comment[1], comment[2], safe=False)
 					SendMessage(GetSetting(__name__, "info-chan"), "Deleted {0}'s comment on {1} by {2}: {3}".format(user, saveinfo["Name"], saveinfo["Username"], comment[3]))
 	#SendMessage(GetSetting(__name__, "info-chan"), "comment scan complete")
