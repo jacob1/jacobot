@@ -15,6 +15,15 @@ AddSetting(__name__, "saves-chan", "#powder-saves")
 AddSetting(__name__, "email-url", "")
 LoadSettings(__name__)
 
+emailmap = {}
+
+def CheckUsername(username):
+	if username in emailmap:
+		provider = emailmap[username].split("@")[1]
+		if provider == "126.com":
+			return (True, "126.com")
+	return False
+
 def CheckIP(IP):
 	torfile = open("torlist.txt")
 	torips = torfile.readlines()
@@ -43,6 +52,14 @@ def CheckIP(IP):
 		return (True, "neostrada")
 	return (False, "")
 
+def CheckForumSpam(ip):
+	try:
+		page = GetPage("https://api.stopforumspam.org/api?ip={0}&json".format(ip))
+		data = json.loads(page)
+		return data
+	except Exception:
+		pass
+
 def Parse(raw, text):
 	powderBotMatch = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels|Shenanigan|jacob1)@turing.jacksonmj.co.uk PRIVMSG (#{1,}[\w-]+) :(.*)$", raw)
 	if powderBotMatch:
@@ -56,6 +73,43 @@ def Parse(raw, text):
 			CheckRegistration(message)
 			#CheckPost(message)
 
+def CheckRegistrationForumSpam(username, IP):
+	data = CheckForumSpam(IP)
+	if not data:
+		SendMessage(GetSetting(__name__, "info-chan"), "Error: Could not access checkforumspam.org")
+		return
+	if not "ip" in data:
+		return
+	if not "confidence" in data["ip"]:
+		return
+	confidence = data["ip"]["confidence"]
+	frequency = data["ip"].get("frequency", 0)
+	SendMessage(GetSetting(__name__, "info-chan"), "{0}% chance of being a spammer, seen {1} times".format(confidence, frequency))
+	if int(confidence) > 10 or int(frequency) > 10:
+		#BanUser(username, "1", "p", "Automatic ban: this IP address has been reported as spam")
+		return True
+	return False
+
+def CheckRegistrationEmail(username, IP):
+	email = GetEmail(username)
+	if not email:
+		return
+	provider = email.split("@")[1]
+	"""if "shitmail" in provider:
+		#SendMessage(GetSetting(__name__, "info-chan"), "bad email test")
+		BanUser(username, "1", "p", "Automatic ban: this IP address has been blacklisted")
+		expireTime = int(time.time()+timedelta(days=30).total_seconds())
+		info = {"reason":"automatically added due to email", "expires":expireTime}
+		ipbans = GetData(__name__, "ipbans")
+		ipbans[IP] = info
+		StoreData(__name__, "ipbans", ipbans)
+		SendMessage(GetSetting(__name__, "info-chan"), "Added {0} to the ipban list".format(IP))
+		return True"""
+	if provider == "126.com":
+		SendMessage(GetSetting(__name__, "info-chan"), "Warning: suspicious email: {0}".format(email))
+	emailmap[username] = email
+	return False
+
 def CheckRegistration(message):
 	registrationMatch = re.match(r"^New registration: ([\w_-]+)\. https?:\/\/tpt\.io\/@([\w\_-]+) \[([0-9.]+)\] ?$", message)
 	if registrationMatch:
@@ -63,6 +117,10 @@ def CheckRegistration(message):
 		IP = registrationMatch.group(3)
 		check = CheckIP(IP)
 		if not check[0]:
+			if CheckRegistrationForumSpam(username, IP):
+				return
+			if CheckRegistrationEmail(username, IP):
+				return
 			return
 		if check[1] == "tor":
 			SendMessage(GetSetting(__name__, "info-chan"), "Warning: This account was registered using TOR")
@@ -72,6 +130,13 @@ def CheckRegistration(message):
 			SendMessage(GetSetting(__name__, "info-chan"), "Automatic ban: this IP address has been blacklisted")
 		elif check[1] == "neostrada":
 			SendMessage(GetSetting(__name__, "info-chan"), "Warning: this account was registered with Neostrada Plus")
+	massRegistrationMatch = re.match(r"^Warning: MassRegistration, (\d) registrations from the same IP in 30 minutes, Username: '([\w_-]+)' http://tpt.io/@(?:[\w_-]+)", message)
+	if massRegistrationMatch:
+		num = int(massRegistrationMatch.group(1))
+		username = massRegistrationMatch.group(2)
+		if num > 3:
+			#SendMessage(GetSetting(__name__, "info-chan"), "Mass Registration detected from {0}".format(username))
+			BanUser(username, "2", "d", "Automatic ban: You are registering accounts too quickly")
 
 def CheckTag(message):
 	logchan = "+"+GetSetting(__name__, "saves-chan")
@@ -143,6 +208,12 @@ def CheckPost(message):
 		elif check[0]:
 			SendMessage(logchan, "Warning: This thread was made from a suspicious IP address.")
 
+		usercheck = CheckUsername(username)
+		if usercheck[0] and usercheck[1] == "126.com":
+			SendMessage(logchan, "Removing thread due to potential spambot.")
+			MoveThread(threadID, 7)
+			LockThread(threadID, "Thread automatically moved and locked because it might have come from a spambot")
+
 seenReports = {}
 def AlwaysRun(channel):
 	global seenReports
@@ -192,8 +263,9 @@ def CheckCommentBans():
 	#	return
 	#commentbansorig = ["Frads_man", "JanKaszanka", "DrBreen"]
 	#commentbans = [149086, 156645, 168723]
-	usermap = {143701:"DrBrick", 156645:"JanKaszanka"}
-	commentbans = {"DrBrick":["JanKaszanka"], "JanKaszanka":["DrBrick"]}
+	usermap = {143701:"DrBrick", 156645:"JanKaszanka", 164702:"troy7838"}
+	#commentbans = {"DrBrick":["JanKaszanka","troy7838"], "JanKaszanka":["DrBrick"], "troy7838":["DrBrick"]}
+	commentbans = {}
 	for user, commentban in commentbans.items():
 		userid = -1
 		for useri, username in usermap.items():
@@ -510,6 +582,18 @@ def GetThreadPostIP(threadID):
 		if IP:
 			return IP.group(1)
 	return None
+
+def GetEmail(username):
+	asdf = GetPage(GetSetting(__name__, "email-url") + "{0}".format("&Name="+username), GetTPTSessionInfo(0))
+	parsed = json.loads(asdf)
+	userlist = parsed["Users"]
+	for user in userlist:
+		matches = re.search("User-(\d)\.png.+Moderation\.html\?ID=(\d+)\\\">([^<]+)<.+\\\"Email\\\">([^<]+)<", user)
+		usertype = int(matches.group(1))
+		username_ = matches.group(3)
+		email = matches.group(4)
+		if username == username_:
+			return email
 
 @command("ban", minArgs = 4, owner = True)
 def Ban(message):
@@ -940,9 +1024,20 @@ def GetThreadPostIPCmd(message):
 	else:
 		message.Reply("Error: Could not get IP")
 
-@command("getemail", owner=True)
-def GetEmail(message):
-	"""(getemail [Name=<name>] [Email=<email>] [<PageNum>]). Searches for an email by username or email."""
+@command("checkforumspam", minArgs=1, admin=True)
+def CheckForumSpamCmd(message):
+	"""(checkforumspam <ip>). Checks stopforumspam.org for possible forum spam."""
+	data = CheckForumSpam(message.GetArg(0))
+	ip = data.get("ip", {})
+	confidence = ip.get("confidence", "[none]")
+	lastseen = ip.get("lastseen", "[none]")
+	frequency = ip.get("frequency", "[none]")
+	output = "{0} chance of being a spammer. Last seen {1}. Appears {2} times".format(confidence, lastseen, frequency)
+	message.Reply(output)
+
+@command("getemailraw", owner=True)
+def GetEmailRawCmd(message):
+	"""(getemailraw [Name=<name>] [Email=<email>] [<PageNum>]). Searches for an email by username or email."""
 
 	searchArgs = []
 	pageNum = 0
@@ -985,4 +1080,11 @@ def GetEmail(message):
 			message.Reply(", ".join(outputlist[13:]))
 		else:
 			message.Reply(output)
+
+@command("getemail", minArgs=1, admin=True)
+def GetEmailCmd(message):
+	"""(getemail <username>). Gets email by username."""
+	username = message.GetArg(0)
+	email = GetEmail(username)
+	message.Reply(email if email else "email not found")
 

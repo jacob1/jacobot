@@ -123,7 +123,7 @@ def main():
 			for line in linesSplit:
 				try:
 					line = line.decode("utf-8", errors="replace")
-					Print("<-- "+line+"\n")
+					Print("<-- "+line)
 					text = line.split()
 					
 					if text:
