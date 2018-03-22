@@ -134,16 +134,18 @@ def command(name, minArgs = 0, owner = False, admin = False, rateLimit = False):
 		return call_func
 	return real_command
 
-def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect=False):
+def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect=False, binary=False):
 	try:
 		if cookies:
 			req = urllib.request.Request(url, data=urllib.parse.urlencode(headers).encode("utf-8") if headers else None, headers={'Cookie':cookies.encode("utf-8")})
 		else:
 			req = urllib.request.Request(url, data=urllib.parse.urlencode(headers).encode("utf-8") if headers else None)
 		data = urllib.request.urlopen(req, timeout=10)
-		page = data.read().decode("utf-8", errors="replace")
+		page = data.read()
+		if not binary:
+			page = page.decode("utf-8", errors="replace")
 		url = data.geturl()
-		if removeTags:
+		if removeTags and not binary:
 			return re.sub("<.*?>", "", page)
 		return url if getredirect else page
 	except urllib.error.URLError:

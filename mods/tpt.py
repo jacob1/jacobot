@@ -1,10 +1,13 @@
+import bson
+import bz2
 import html.parser
 import json
-import time
+import os
 import re
+import time
+from collections import defaultdict
 from datetime import datetime, timedelta
 from time import sleep
-from collections import defaultdict
 
 from common import *
 RegisterMod(__name__)
@@ -13,6 +16,8 @@ AddSetting(__name__, "info-chan", "#powder-info")
 AddSetting(__name__, "forum-chan", "#powder-forum")
 AddSetting(__name__, "saves-chan", "#powder-saves")
 AddSetting(__name__, "email-url", "")
+AddSetting(__name__, "authors-url", "")
+AddSetting(__name__, "web-directory", "")
 LoadSettings(__name__)
 
 emailmap = {}
@@ -20,9 +25,13 @@ emailmap = {}
 def CheckUsername(username):
 	if username in emailmap:
 		provider = emailmap[username].split("@")[1]
-		if provider == "126.com":
+		if provider == "126.com" or provider == "163.com" or provider == "sina.com":
 			return (True, "126.com")
-	return False
+		if provider == "protonmail.com":
+			return (True, "protonmail.com")
+	if username == "Earthbright":
+		return (True, "annoying")
+	return (False, "")
 
 def CheckIP(IP):
 	torfile = open("torlist.txt")
@@ -292,6 +301,70 @@ def CheckCommentBans():
 					SendMessage(GetSetting(__name__, "info-chan"), "Deleted {0}'s comment on {1} by {2}: {3}".format(user, saveinfo["Name"], saveinfo["Username"], comment[3]))
 	#SendMessage(GetSetting(__name__, "info-chan"), "comment scan complete")
 
+def DownloadSave(ID, *, force=False):
+	savefilename = "saves/{0}.cps".format(ID)
+	if not force and os.path.exists(savefilename):
+		return
+	save = GetPage("http://static.powdertoy.co.uk/{0}.cps".format(ID), binary=True)
+	savefile = open(savefilename, "wb")
+	savefile.write(save)
+	savefile.close()
+
+def GetSaveData(ID):
+	compressedsave = open("saves/{0}.cps".format(ID), "rb")
+	compressedsave.seek(12)
+	save = bz2.decompress(compressedsave.read())
+	try:
+		data = bson.loads(save)
+	except ValueError:
+		return None
+	return data
+
+def GetSaveAuthorData(ID):
+	data = GetSaveData(ID)
+	if not data:
+		return None
+	if "authors" in data:
+		if data["authors"].get("id", 0) == 0:
+			data["authors"]["id"] = ID
+		return data["authors"]
+	else:
+		return None
+
+def MakeAuthorWebpage(ID, *, force=False):
+	pageName = "{0}.json".format(ID)
+	pageFileName = GetSetting(__name__, "web-directory").format(pageName)
+	if not force and os.path.exists(pageFileName):
+		return
+	authordata = GetSaveAuthorData(ID)
+	if not authordata:
+		return None
+	webpage = open(pageFileName, "w")
+	webpage.write(json.dumps(authordata))
+	webpage.close()
+	return authordata
+
+def SearchAuthors(data, linkchecks, foundlinks={}, depth=0):
+	if depth > 0 and type(data) == dict:
+		if data.get("id") in linkchecks and not data.get("id") in foundlinks:
+			foundlinks[data.get("id")] = (data.get("username", "???"), depth)
+	if depth > 4 or not "links" in data:
+		return
+	for link in data["links"]:
+		if type(link) == int:
+			if linklink in linkchecks and not linklink in foundlinks:
+				foundlinks[linklink] = ("???", depth)
+			continue
+		if link.get("id") in linkchecks and not link.get("id") in foundlinks:
+			foundlinks[link.get("id")] = (link.get("username", "???"), depth)
+		if "links" in link:
+			for linklink in link["links"]:
+				if type(linklink) == dict:
+					SearchAuthors(linklink, linkchecks, foundlinks, depth+1)
+				elif type(linklink) == int:
+					if linklink in linkchecks and not linklink in foundlinks:
+						foundlinks[linklink] = ("???", depth)
+
 #Generic useful functions
 def GetTPTSessionInfo(line):
 	with open("passwords.txt") as f:
@@ -414,19 +487,44 @@ def ReportsList():
 def PrintReports(channel, reportlist, saveID=None):
 	h = html.parser.HTMLParser()
 	showtags = False
+	showAuthors = False
+	checkAuthors = []
 	for report in reportlist:
 		reporter = report[0]
 		text = h.unescape(report[1])
 		def replace(match):
-			return " http://tpt.io/~" + match.group(1)
+			nonlocal showAuthors
+			foundID = match.group(1)
+			if foundID != saveID:
+				checkAuthors.append(int(foundID))
+				showAuthors = True
+			return " http://tpt.io/~{0}".format(foundID)
 		text = re.sub(" ?(?:(?:~|ID:?|id:?|save | |^)([0-9]{4,}))", replace, text)
 		SendMessage(channel, "\00314%s\003: %s" % (reporter, text.strip()))
 		if re.search("(?:tags| tag(?:$| |\.))", text.lower()):
 			showtags = True
+		if "stolen" in text.lower() or "copied" in text.lower() or "credit" in text.lower():
+			showAuthors = True
 	if not reportlist:
 		SendMessage(channel, "No reports on that save")
 	if showtags and saveID:
 		PrintTags(channel, saveID)
+	if showAuthors and saveID:
+		DownloadSave(saveID)
+		authordata = MakeAuthorWebpage(saveID, force=True)
+		if not authordata:
+			return
+		message = GetSetting(__name__, "authors-url").format(saveID)
+
+		try:
+			if checkAuthors and authordata:
+				found = {}
+				SearchAuthors(authordata, checkAuthors, found)
+				if found:
+					message = message + ", Save is probably stolen from {0}".format(", ".join(["{0} by {1} ({2})".format(saveID, saveInfo[0], saveInfo[1]) for (saveID, saveInfo) in found.items()]))
+		except Exception as e:
+			message = message + ", Exception while parsing authors data: {0}".format(e)
+		SendMessage(channel, message)
 
 #prints the report list (save title, save author, save ID link, report count)
 def PrintReportList(channel, reportlist):
@@ -585,6 +683,8 @@ def GetThreadPostIP(threadID):
 
 def GetEmail(username):
 	asdf = GetPage(GetSetting(__name__, "email-url") + "{0}".format("&Name="+username), GetTPTSessionInfo(0))
+	if not asdf:
+		return
 	parsed = json.loads(asdf)
 	userlist = parsed["Users"]
 	for user in userlist:
@@ -684,7 +784,7 @@ def GetReports(message):
 	reportlist = SaveReports(message.GetArg(0))
 	if message.GetArg(1):
 		count = int(message.GetArg(1))
-	PrintReports(message.channel, reportlist[:count])
+	PrintReports(message.channel, reportlist[:count], message.GetArg(0))
 
 @command("markread", minArgs=1, admin = True)
 def MarkRead(message):
@@ -1096,4 +1196,15 @@ def GetEmailCmd(message):
 	username = message.GetArg(0)
 	email = GetEmail(username)
 	message.Reply(email if email else "email not found")
+
+@command("getauthors", minArgs=1, admin=True)
+def GetAuthorsCmd(message):
+	"""(getauthors <ID>). Gets a link to a page where you can view the authors data from a page."""
+	ID = message.GetArg(0)
+	if not ID or not re.match(r"^\d+$", ID):
+		message.Reply("Not a valid save ID")
+		return
+	DownloadSave(ID, force=True)
+	MakeAuthorWebpage(ID, force=True)
+	message.Reply(GetSetting(__name__, "authors-url").format(ID))
 
