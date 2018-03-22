@@ -18,17 +18,17 @@ AddSetting(__name__, "saves-chan", "#powder-saves")
 AddSetting(__name__, "email-url", "")
 AddSetting(__name__, "authors-url", "")
 AddSetting(__name__, "web-directory", "")
+AddSetting(__name__, "suspicious-email-providers", "")
 LoadSettings(__name__)
 
 emailmap = {}
+suspiciousEmails = GetSetting(__name__, "suspicious-email-providers").split(";")
 
 def CheckUsername(username):
 	if username in emailmap:
 		provider = emailmap[username].split("@")[1]
-		if provider == "126.com" or provider == "163.com" or provider == "sina.com":
-			return (True, "126.com")
-		if provider == "protonmail.com":
-			return (True, "protonmail.com")
+		if provider in suspiciousEmails:
+			return (True, "bademail")
 	if username == "Earthbright":
 		return (True, "annoying")
 	return (False, "")
@@ -114,7 +114,7 @@ def CheckRegistrationEmail(username, IP):
 		StoreData(__name__, "ipbans", ipbans)
 		SendMessage(GetSetting(__name__, "info-chan"), "Added {0} to the ipban list".format(IP))
 		return True"""
-	if provider == "126.com":
+	if provider in suspiciousEmails:
 		SendMessage(GetSetting(__name__, "info-chan"), "Warning: suspicious email: {0}".format(email))
 	emailmap[username] = email
 	return False
@@ -126,10 +126,8 @@ def CheckRegistration(message):
 		IP = registrationMatch.group(3)
 		check = CheckIP(IP)
 		if not check[0]:
-			if CheckRegistrationForumSpam(username, IP):
-				return
-			if CheckRegistrationEmail(username, IP):
-				return
+			CheckRegistrationForumSpam(username, IP)
+			CheckRegistrationEmail(username, IP)
 			return
 		if check[1] == "tor":
 			SendMessage(GetSetting(__name__, "info-chan"), "Warning: This account was registered using TOR")
@@ -218,10 +216,14 @@ def CheckPost(message):
 			SendMessage(logchan, "Warning: This thread was made from a suspicious IP address.")
 
 		usercheck = CheckUsername(username)
-		if usercheck[0] and usercheck[1] == "126.com":
+		if usercheck[0] and usercheck[1] == "bademail":
 			SendMessage(logchan, "Removing thread due to potential spambot.")
 			MoveThread(threadID, 7)
 			LockThread(threadID, "Thread automatically moved and locked because it might have come from a spambot")
+		elif usercheck[0] and usercheck[1] == "annoying":
+			SendMessage(logchan, "Removing thread from annoying user.")
+			MoveThread(threadID, 7)
+			LockThread(threadID, "Thread automatically moved and locked because this user is not allowed to post forum threads")
 
 seenReports = {}
 def AlwaysRun(channel):
