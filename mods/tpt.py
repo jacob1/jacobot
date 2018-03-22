@@ -139,12 +139,12 @@ def CheckRegistration(message):
 			SendMessage(GetSetting(__name__, "info-chan"), "Automatic ban: this IP address has been blacklisted")
 		elif check[1] == "neostrada":
 			SendMessage(GetSetting(__name__, "info-chan"), "Warning: this account was registered with Neostrada Plus")
-	massRegistrationMatch = re.match(r"^Warning: MassRegistration, (\d) registrations from the same IP in 30 minutes, Username: '([\w_-]+)' http://tpt.io/@(?:[\w_-]+)", message)
+	massRegistrationMatch = re.match(r"^Warning: MassRegistration, (\d) registrations from the same IP in 30 minutes, Username: '\u000302([\w_-]+)\u000F' http://tpt.io/@(?:[\w_-]+)", message)
 	if massRegistrationMatch:
 		num = int(massRegistrationMatch.group(1))
 		username = massRegistrationMatch.group(2)
 		if num > 3:
-			#SendMessage(GetSetting(__name__, "info-chan"), "Mass Registration detected from {0}".format(username))
+			SendMessage(GetSetting(__name__, "info-chan"), "Mass Registration detected from {0}".format(username))
 			BanUser(username, "2", "d", "Automatic ban: You are registering accounts too quickly")
 
 def CheckTag(message):
