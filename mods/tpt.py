@@ -860,12 +860,17 @@ def Stolen(message):
 
 @command("copied", minArgs=2, admin = True)
 def Copied(message):
-	"""(copied <copiedID> <originalID> [<reason>]). Unpublishes a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end. Admin only."""
+	"""(copied <copiedID> <originalID> [--override] [<reason>]). Unpublishes a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end. Admin only."""
 	stolenID = message.GetArg(0)
 	saveID = message.GetArg(1)
+	argpos = 2
+	override = False
+	if message.GetArg(2) == "--override":
+		override = True
+		argpos = 3
 	try:
-		if int(stolenID) <= int(saveID):
-			message.Reply("Error: stolenID can't be less than originalID.")
+		if int(stolenID) <= int(saveID) and not override:
+			message.Reply("Error: stolenID can't be less than originalID. Use --override to force.")
 			return
 	except ValueError:
 		message.Reply("Error: saveIDs must be integers")
@@ -876,8 +881,8 @@ def Copied(message):
 	info = GetSaveInfo(saveID)
 	if info:
 		msg = "Save unpublished: copied without credit from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
-		if message.GetArg(2):
-			msg = "%s %s" % (msg, message.GetArg(2, endLine=True))
+		if message.GetArg(argpos):
+			msg = "%s %s" % (msg, message.GetArg(argpos, endLine=True))
 		else:
 			msg = msg + " Please give credit to the original owner when modifying saves."
 		if DoComment(stolenID, msg):
@@ -889,11 +894,16 @@ def Copied(message):
 
 @command("stolen", minArgs=2, admin = True)
 def Stolen(message):
-	"""(stolen <stolenID> <originalID> [<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
+	"""(stolen <stolenID> <originalID> [--override] [<reason>]). Disables a save and leaves a comment by jacobot with the original saveID, save name, and author. Optional message can be appended to the end, or 'long' for default optional message. Admin only."""
 	stolenID = message.GetArg(0)
 	saveID = message.GetArg(1)
+	argpos = 2
+	override = False
+	if message.GetArg(2) == "--override":
+		override = True
+		argpos = 3
 	try:
-		if int(stolenID) <= int(saveID):
+		if int(stolenID) <= int(saveID) and not override:
 			message.Reply("Error: stolenID can't be less than originalID.")
 			return
 	except ValueError:
@@ -905,9 +915,8 @@ def Stolen(message):
 	info = GetSaveInfo(saveID)
 	if info:
 		msg = "Save unpublished: stolen from id:%s (save \"%s\" by %s)." % (saveID, info["Name"], info["Username"])
-		if message.GetArg(2):
-			if message.GetArg(2):
-				msg += " " + message.GetArg(2, endLine=True)
+		if message.GetArg(argpos):
+			msg += " " + message.GetArg(argpos, endLine=True)
 		if DoComment(stolenID, msg):
 			message.Reply("Done.")
 		else:
