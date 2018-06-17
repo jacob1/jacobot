@@ -6,7 +6,7 @@ RegisterMod(__name__)
 @command("nowplaying")
 def NowPlaying(message):
 	"""(nowplaying). Returns the song currently playing on starcatcher radio."""
-	info = GetPage("https://new.starcatcher.us/music/getmeta")
+	info = GetPage("https://radio.starcatcher.us/getmeta")
 	if not info:
 		message.Reply("Error: Radio is down")
 		return
@@ -24,7 +24,7 @@ def NowPlaying(message):
 @command("skip", admin=True)
 def Skip(message):
 	"""(skip). Skips a song on starcatcher radio."""
-	message.Reply(GetPage("https://new.starcatcher.us/music/magicalsecret_skip"))
+	message.Reply(GetPage("https://radio.starcatcher.us/magicalsecret_skip"))
 
 @command("radio")
 def Radio(message):
