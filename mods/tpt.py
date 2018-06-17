@@ -29,7 +29,7 @@ def CheckUsername(username):
 		provider = emailmap[username].split("@")[1]
 		if provider in suspiciousEmails:
 			return (True, "bademail")
-	if username == "Earthbright":
+	if username == "EasyYT":
 		return (True, "annoying")
 	return (False, "")
 
@@ -70,10 +70,11 @@ def CheckForumSpam(ip):
 		pass
 
 def Parse(raw, text):
-	powderBotMatch = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels|Shenanigan|jacob1)@turing.jacksonmj.co.uk PRIVMSG (#{1,}[\w-]+) :(.*)$", raw)
+	powderBotMatch = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels|Shenanigan|jacob1)@turing.jacksonmj.co.uk PRIVMSG ([+@])?(#{1,}[\w-]+) :(.*)$", raw)
 	if powderBotMatch:
-		channel = powderBotMatch.group(1)
-		message = powderBotMatch.group(2)
+		prefix = powderBotMatch.group(1)
+		channel = powderBotMatch.group(2)
+		message = powderBotMatch.group(3)
 		if channel == GetSetting(__name__, "saves-chan"):
 			CheckTag(message)
 		elif channel == GetSetting(__name__, "forum-chan"):
@@ -137,7 +138,8 @@ def CheckRegistration(message):
 			SendMessage(GetSetting(__name__, "info-chan"), "Automatic ban: this IP address has been blacklisted")
 		elif check[1] == "neostrada":
 			SendMessage(GetSetting(__name__, "info-chan"), "Warning: this account was registered with Neostrada Plus")
-	massRegistrationMatch = re.match(r"^Warning: MassRegistration, (\d) registrations from the same IP in 30 minutes, Username: '\u000302([\w_-]+)\u000F' http://tpt.io/@(?:[\w_-]+)", message)
+			#BanUser(username, "1", "p", "Automatic ban: Registration from this location has been temporarily disabled due to abuse")
+	massRegistrationMatch = re.match(r"^Warning: MassRegistration, (\d) registrations from the same IP in 30 minutes, Username: '\u000302([\w_-]+)\u000F' https?://tpt.io/@(?:[\w_-]+)", message)
 	if massRegistrationMatch:
 		num = int(massRegistrationMatch.group(1))
 		username = massRegistrationMatch.group(2)
@@ -147,28 +149,27 @@ def CheckRegistration(message):
 
 def CheckTag(message):
 	logchan = "+"+GetSetting(__name__, "saves-chan")
-	tagMatch = re.match("^New tag: \u000303(\w+)\u0003 \(http://tpt.io/~(\d+)\)$", message)
+	tagMatch = re.match("^New tag: \u000303(\w+)\u0003 \(https?://tpt.io/~(\d+)\) by \u000305(\w+)\u0003$", message)
 	if tagMatch:
 		tag = tagMatch.group(1)
 		saveID = tagMatch.group(2)
+		username = tagMatch.group(3)
 		for banned in GetData(__name__, "bannedtags"):
 			if re.fullmatch(banned, tag):
-				username = GetTagUsage(tag, saveID)
+				#username = GetTagUsage(tag, saveID)
 				if DisableTag(tag):
-					SendMessage(logchan, "Disabled tag {0} by {1}".format(tag, username if username else "UNKNOWN"))
+					SendMessage(logchan, "Disabled tag {0}".format(tag))
 				else:
 					SendMessage(logchan, "Error: couldn't disable tag {0}".format(tag))
 
 def CheckPost(message):
 	logchan = "+"+GetSetting(__name__, "forum-chan")
-	postMatch = re.match("^Post by \u000305(\w+)\u000F in '\u000302([^\u000F]+)\u000F'; http://tpt.io/.(\d+)$", message)
+	postMatch = re.match("^Post by \u000305(\w+)\u000F in '\u000302([^\u000F]+)\u000F'(?: \(previous post at [^\)]+\))?; https?://tpt.io/.(\d+)$", message)
 	if postMatch:
 		#SendMessage(GetSetting(__name__, "info-chan"), "Match: {0}, {1}, {2}".format(postMatch.group(1), postMatch.group(2), postMatch.group(3)))
 		postID = postMatch.group(3)
 		IP = GetPostIP(postID)
 		username = postMatch.group(1)
-		if username == "JanKaszanka":
-			return
 		if IP:
 			check = CheckIP(IP)
 		else:
@@ -184,7 +185,14 @@ def CheckPost(message):
 				SendMessage(logchan, "Warning: This post was made from a suspicious IP address. Removed post.")
 			else:
 				SendMessage(logchan, "Warning: This post was made from a suspicious IP address. Error removing post, please remove manually.")
-	threadMatch = re.match("^Thread '\u000302([^']+)\u000F' by \u000305(\w+)\u000F in (?:.*?); http://tpt.io/:(\d+)$", message)
+
+		usercheck = CheckUsername(username)
+		if usercheck[0] and usercheck[1] == "annoying":
+			if HidePost(postID, True, "This post has been automatically removed because {0} is not allowed to post on the forums".format(username)):
+				SendMessage(logchan, "Warning: This post has been removed because {0} is not allowed to post on the forums".format(username))
+			else:
+				SendMessage(logchan, "Warning: Tried removing post by {0} but an error occured".format(username))
+	threadMatch = re.match("^Thread '\u000302([^']+)\u000F' by \u000305(\w+)\u000F in (?:.*?); https?://tpt.io/:(\d+)$", message)
 	if threadMatch:
 		#SendMessage(GetSetting(__name__, "info-chan"), "Thread Match: {0}, {1}, {2}".format(threadMatch.group(1), threadMatch.group(2), threadMatch.group(3)))
 		threadTitle = threadMatch.group(1)
@@ -197,8 +205,6 @@ def CheckPost(message):
 			MoveThread(threadID, 7)
 			LockThread(threadID, "Thread automatically moved and locked because it was detected as spam")
 
-		if username == "JanKaszanka":
-			return
 		if IP:
 			check = CheckIP(IP)
 		else:
@@ -239,14 +245,14 @@ def AlwaysRun(channel):
 			if seenReports.get(report[1]) and int(report[0]) > int(seenReports.get(report[1])):
 				report = (int(report[0]) - int(seenReports.get(report[1])), report[1], report[2])
 		if len(reportlist):
-			SendMessage(GetSetting(__name__, "info-chan"), u"There are \u0002%s unread reports\u0002: " % (len(reportlist)) + ", ".join(["http://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
+			SendMessage(GetSetting(__name__, "info-chan"), u"There are \u0002%s unread reports\u0002: " % (len(reportlist)) + ", ".join(["https?://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
 			PrintReportList(GetSetting(__name__, "info-chan"), reportlistunseen)
 		seenReports = {}
 		for report in reportlist:
 			seenReports[report[1]] = int(report[0])
 
 		#if len(reportlist):
-		#	SendMessage(GetSetting(__name__, "info-chan"), "Report list: " + ", ".join(["http://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
+		#	SendMessage(GetSetting(__name__, "info-chan"), "Report list: " + ", ".join(["https?://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
 		#else:
 		#	SendMessage(GetSetting(__name__, "info-chan"), "Test: No reports")
 
@@ -274,9 +280,10 @@ def CheckCommentBans():
 	#	return
 	#commentbansorig = ["Frads_man", "JanKaszanka", "DrBreen"]
 	#commentbans = [149086, 156645, 168723]
-	usermap = {143701:"DrBrick", 156645:"JanKaszanka", 164702:"troy7838"}
+	usermap = {143701:"DrBrick", 156645:"JanKaszanka", 164702:"troy7838", 167755:"NoNStopWarrior", 175563: "Aamths", 172360: "Earthbright",
+	           172964:"TheCARNUFEX", 118259:"VIP84", 63378:"PinkLeopard", 161794:"Coffee"}
 	#commentbans = {"DrBrick":["JanKaszanka","troy7838"], "JanKaszanka":["DrBrick"], "troy7838":["DrBrick"]}
-	commentbans = {}
+	commentbans = {"Earthbright":["Aamths", "NoNStopWarrior"], "NoNStopWarrior":["Earthbright"], "Aamths":["Earthbright"], "TheCARNUFEX":["VIP84", "Coffee", "PinkLeopard"]}
 	for user, commentban in commentbans.items():
 		userid = -1
 		for useri, username in usermap.items():
@@ -307,7 +314,7 @@ def DownloadSave(ID, *, force=False):
 	savefilename = "saves/{0}.cps".format(ID)
 	if not force and os.path.exists(savefilename):
 		return
-	save = GetPage("http://static.powdertoy.co.uk/{0}.cps".format(ID), binary=True)
+	save = GetPage("https://static.powdertoy.co.uk/{0}.cps".format(ID), binary=True)
 	savefile = open(savefilename, "wb")
 	savefile.write(save)
 	savefile.close()
@@ -373,7 +380,7 @@ def GetTPTSessionInfo(line):
 		return f.readlines()[line].strip()
 
 def GetUserID(username):
-	page = GetPage("http://powdertoy.co.uk/User.json?Name={}".format(username))
+	page = GetPage("https://powdertoy.co.uk/User.json?Name={}".format(username))
 	if not page:
 		return -1
 	thing = page.find("\"ID\":")
@@ -388,7 +395,7 @@ def BanUser(username, time, timeunits, reason):
 	if userID < 0 or userID == 1 or userID == 38642:
 		return False
 	data = {"BanUser":str(userID).strip("="), "BanReason":reason, "BanTime":time, "BanTimeSpan":timeunits}
-	if not GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data):
+	if not GetPage("https://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data):
 		return False
 	return True
 
@@ -400,14 +407,14 @@ def UnbanUser(username):
 	if userID < 0:
 		return False
 	data = {"UnbanUser":str(userID).strip("=")}
-	if not GetPage("http://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data):
+	if not GetPage("https://powdertoy.co.uk/User/Moderation.html?ID=%s&Key=%s" % (userID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data):
 		return True
 	return True
 
 #Functions to get info from TPT
 def GetSaveInfoDetailed(saveID):
 	try:
-		page = GetPage("http://powdertoythings.co.uk/Powder/Saves/ViewDetailed.json?ID=%s" % saveID)
+		page = GetPage("https://powdertoythings.co.uk/Powder/Saves/ViewDetailed.json?ID=%s" % saveID)
 		info = json.loads(page)
 		return info
 	except Exception:
@@ -415,7 +422,7 @@ def GetSaveInfoDetailed(saveID):
 
 def GetSaveInfo(saveID):
 	try:
-		page = GetPage("http://powdertoy.co.uk/Browse/View.json?ID=%s" % saveID)
+		page = GetPage("https://powdertoy.co.uk/Browse/View.json?ID=%s" % saveID)
 		info = json.loads(page)
 		return info
 	except Exception:
@@ -445,38 +452,45 @@ def HidePost(postID, remove, reason):
 	data = {"Hide_Reason":reason,"Hide_Hide":"Hide Post"}
 	if remove:
 		data["Hide_Remove"] = "1"
-	page = GetPage("http://powdertoy.co.uk/Discussions/Thread/HidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data)
+	page = GetPage("https://powdertoy.co.uk/Discussions/Thread/HidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), data)
 	if page and page.find("The post you are trying to edit could not be found.") == -1:
 		return True
 	return False
 
 def UnhidePost(postID):
-	return GetPage("http://powdertoy.co.uk/Discussions/Thread/UnhidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0))
+	return GetPage("https://powdertoy.co.uk/Discussions/Thread/UnhidePost.html?Post=%s&Key=%s" % (postID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0))
 
 def LockThread(threadID, reason):
-	GetPage("http://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Lock":"Lock Thread", "Moderation_LockReason":reason})
+	GetPage("https://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Lock":"Lock Thread", "Moderation_LockReason":reason})
 
 def UnlockThread(threadID):
-	GetPage("http://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Unlock":"Unlock"})
+	GetPage("https://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Unlock":"Unlock"})
 
 def MoveThread(threadID, newSection):
-	GetPage("http://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Move":"Move Thread", "Moderation_MoveCategory":newSection})
+	GetPage("https://powdertoy.co.uk/Discussions/Thread/Moderation.html?Thread=%s" % (threadID), GetTPTSessionInfo(0), {"Moderation_Move":"Move Thread", "Moderation_MoveCategory":newSection})
+
+def CheckPromotionLevel(saveID):
+	page = GetPage("https://powdertoy.co.uk/Browse/View.html?ID=%s" % (saveID), GetTPTSessionInfo(0))
+	promo = re.search("selected=\"yes\" value=\"..?\">([^<]+)</option>", page)
+	if promo:
+		return promo.group(1)
+	return "Unknown"
 
 def PromotionLevel(saveID, level):
 	if level >= -2 and level <= 2:
-		if not GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"PromoState":str(level)}):
+		if not GetPage("https://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"PromoState":str(level)}):
 			return False
 		return True
 	return False
 
 def SaveReports(ID):
-	page = GetPage("http://powdertoy.co.uk/Reports/View.html?ID=%s" % ID, GetTPTSessionInfo(0))
+	page = GetPage("https://powdertoy.co.uk/Reports/View.html?ID=%s" % ID, GetTPTSessionInfo(0))
 	reports = re.findall('<div class="Message">([^<]+)<div class="Clear">', page)
 	usernames = re.findall('<a href="/User.html\?Name=[a-zA-Z0-9_-]+">([^<]+)</a>', page)[1:] #ignore "My Profile"
 	return list(zip(usernames, reports))
 
 def ReportsList():
-	page = GetPage("http://powdertoy.co.uk/Reports.html", GetTPTSessionInfo(0))
+	page = GetPage("https://powdertoy.co.uk/Reports.html", GetTPTSessionInfo(0))
 	if page:
 		matches = re.findall('ReportsCount">([0-9]+)</span>\t\t<span class="SaveName">\t\t\t<a href="/Reports/View.html\?ID=([0-9]+)" target="_blank">\t\t\t\t([^\t]+)\t\t\t</a>\t\t</span> by\t\t<span class="SaveAuthor">([^<]+)<', page)
 	else:
@@ -500,7 +514,7 @@ def PrintReports(channel, reportlist, saveID=None):
 			if foundID != saveID:
 				checkAuthors.append(int(foundID))
 				showAuthors = True
-			return " http://tpt.io/~{0}".format(foundID)
+			return " https://tpt.io/~{0}".format(foundID)
 		text = re.sub(" ?(?:(?:~|ID:?|id:?|save | |^)([0-9]{4,}))", replace, text)
 		SendMessage(channel, "\00314%s\003: %s" % (reporter, text.strip()))
 		if re.search("(?:tags| tag(?:$| |\.))", text.lower()):
@@ -536,12 +550,12 @@ def PrintReportList(channel, reportlist):
 		count = int(report[0])
 		title = h.unescape(report[2])
 		author = report[3]
-		SendMessage(channel, "\00302%s\003 by \00305%s\003:\00314 http://tpt.io/~%s#Reports, %s report%s" % (title, author, ID, count, "" if count == 1 else "s"))
+		SendMessage(channel, "\00302%s\003 by \00305%s\003:\00314 https://tpt.io/~%s#Reports, %s report%s" % (title, author, ID, count, "" if count == 1 else "s"))
 		reportlist = SaveReports(ID)
 		PrintReports(channel, reportlist[:count], ID)
 
 def GetConvoList():
-	page = GetPage("http://powdertoy.co.uk/Conversations.html", GetTPTSessionInfo(0))
+	page = GetPage("https://powdertoy.co.uk/Conversations.html", GetTPTSessionInfo(0))
 	if not page:
 		return []
 	match = re.search(".*conversationsUnread = (.+);</script>.*", page)
@@ -552,9 +566,9 @@ def GetConvoList():
 
 def GetLinkedAccounts(account):
 	if account.find(".") >= 0:
-		page = GetPage("http://powdertoy.co.uk/IPTools/GetInfo.json?IP=%s" % account, GetTPTSessionInfo(0))
+		page = GetPage("https://powdertoy.co.uk/IPTools/GetInfo.json?IP=%s" % account, GetTPTSessionInfo(0))
 	else:
-		page = GetPage("http://powdertoy.co.uk/IPTools/GetInfo.json?Username=%s" % account, GetTPTSessionInfo(0))
+		page = GetPage("https://powdertoy.co.uk/IPTools/GetInfo.json?Username=%s" % account, GetTPTSessionInfo(0))
 	if not page:
 		return "There was an error fetching the page (probably a timeout)"
 
@@ -594,17 +608,17 @@ def GetLinkedAccounts(account):
 	return " ".join(output)
 
 def DoComment(saveID, message, jacob1 = False):
-	if not GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s" % (saveID), GetTPTSessionInfo(0) if jacob1 else GetTPTSessionInfo(3), {"Comment":message}):
+	if not GetPage("https://powdertoy.co.uk/Browse/View.html?ID=%s" % (saveID), GetTPTSessionInfo(0) if jacob1 else GetTPTSessionInfo(3), {"Comment":message}):
 		return False
 	return True
 
 def DoUnpublish(saveID):
-	if not GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"ActionUnpublish":"&nbsp;"}):
+	if not GetPage("https://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"ActionUnpublish":"&nbsp;"}):
 		return False
 	return True
 
 def DoPublish(saveID):
-	if not GetPage("http://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"ActionPublish":"&nbsp;"}):
+	if not GetPage("https://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"ActionPublish":"&nbsp;"}):
 		return False
 	return True
 
@@ -618,22 +632,22 @@ def PrintTags(channel, saveID):
 		SendMessage(channel, "No tags on that save")
 
 def GetTagUsage(tag, saveID):
-	usages = GetPage("http://powdertoy.co.uk/Browse/Tag.xhtml?Tag={0}&SaveID={1}".format(tag, saveID), GetTPTSessionInfo(0))
+	usages = GetPage("https://powdertoy.co.uk/Browse/Tag.xhtml?Tag={0}&SaveID={1}".format(tag, saveID), GetTPTSessionInfo(0))
 	username = re.search("<a href=\"\/User\.html\?Name=([\w_]+)\">[\w_]+<\/a>", usages)
 	return username.group(1) if username else None
 
 def GetTagUsages(tag):
-	usages = GetPage("http://powdertoy.co.uk/Browse/Tag.xhtml?Tag={0}".format(tag), GetTPTSessionInfo(0))
+	usages = GetPage("https://powdertoy.co.uk/Browse/Tag.xhtml?Tag={0}".format(tag), GetTPTSessionInfo(0))
 	tags = re.findall("<a href=\"\/Browse\/View.html\?ID=(\d+)\">\d+<\/a> by <a href=\"\/User.html\?Name=([\w-]+)\">[\w-]+<\/a>", usages)
 	return {"count":len(tags), "usages":tags}
 
 def RemoveTag(tag, saveID):
-	if GetPage("http://powdertoy.co.uk/Browse/EditTag.json?Op=delete&ID={0}&Tag={1}&Key={2}".format(saveID, tag, GetTPTSessionInfo(1)), GetTPTSessionInfo(0)):
+	if GetPage("https://powdertoy.co.uk/Browse/EditTag.json?Op=delete&ID={0}&Tag={1}&Key={2}".format(saveID, tag, GetTPTSessionInfo(1)), GetTPTSessionInfo(0)):
 		return True
 	return False
 
 def DisableTag(tag, undelete=False):
-	if GetPage("http://powdertoy.co.uk/Browse/Tags.json?{0}={1}&Key={2}".format("UnDelete" if undelete else "Delete", tag, GetTPTSessionInfo(1)), GetTPTSessionInfo(0)):
+	if GetPage("https://powdertoy.co.uk/Browse/Tags.json?{0}={1}&Key={2}".format("UnDelete" if undelete else "Delete", tag, GetTPTSessionInfo(1)), GetTPTSessionInfo(0)):
 		return True
 	return False
 
@@ -642,14 +656,14 @@ def GetUserComments(username, page=0):
 		userID = int(username)
 	except ValueError:
 		userID = int(GetUserID(username))
-	page = GetPage("http://powdertoy.co.uk/User/Moderation.html?ID={0}&PageNum={1}".format(userID, page), GetTPTSessionInfo(0))
+	page = GetPage("https://powdertoy.co.uk/User/Moderation.html?ID={0}&PageNum={1}".format(userID, page), GetTPTSessionInfo(0))
 	if not page:
 		return None
 	comments = re.findall("<span class=\"Date\">([^<]+)</span>.*\n.*\n.*\?ID=(\d+)&DeleteComment=(\d+)&.*\n.*\n.*Message\">(.*?)<", page)
 	return comments
 
 def GetSaveComments(saveID, page=0):
-	page = GetPage("http://powdertoy.co.uk/Browse/View.html?ID={0}&PageNum={1}".format(saveID, page), GetTPTSessionInfo(0))
+	page = GetPage("https://powdertoy.co.uk/Browse/View.html?ID={0}&PageNum={1}".format(saveID, page), GetTPTSessionInfo(0))
 	comments = re.findall("\/User\.html\?Name=([\w_-]+)\">.*\n.*\n.*\n.*\/Browse\/View\.html\?ID=(\d+)&amp;DeleteComment=(\d+)\".*\n.*\n.*Message\">(.*?)<", page)
 	return comments
 
@@ -662,12 +676,12 @@ def DeleteComment(saveID, commentID, safe=True):
 		# Save doesn't exist
 		except IndexError:
 			return True
-	if GetPage("http://powdertoy.co.uk/Browse/View.html?ID={0}&DeleteComment={1}".format(saveID, commentID), GetTPTSessionInfo(0)):
+	if GetPage("https://powdertoy.co.uk/Browse/View.html?ID={0}&DeleteComment={1}".format(saveID, commentID), GetTPTSessionInfo(0)):
 		return True
 	return False
 
 def GetPostIP(postID):
-	redirect = GetPage("http://powdertoy.co.uk/Discussions/Thread/View.html?Post={0}".format(postID), getredirect=True)
+	redirect = GetPage("https://powdertoy.co.uk/Discussions/Thread/View.html?Post={0}".format(postID), getredirect=True)
 	if redirect:
 		page = GetPage(redirect, GetTPTSessionInfo(0))
 		IP = re.search("\/IPTools\.html[^>]+>(\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}})<\/a>\s+<a[^>]+EditPost.html\?Post={0}\"".format(postID), page)
@@ -676,7 +690,7 @@ def GetPostIP(postID):
 	return None
 
 def GetThreadPostIP(threadID):
-	page = GetPage("http://powdertoy.co.uk/Discussions/Thread/View.html?Thread={0}".format(threadID), GetTPTSessionInfo(0))
+	page = GetPage("https://powdertoy.co.uk/Discussions/Thread/View.html?Thread={0}".format(threadID), GetTPTSessionInfo(0))
 	if page:
 		IP = re.search("\/IPTools\.html[^>]+>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})<\/a>", page)
 		if IP:
@@ -755,8 +769,13 @@ def Unlock(message):
 	MoveThread(message.GetArg(0), message.GetArg(1))
 	message.Reply("No output.")
 
+@command("checkpromo", minArgs = 1, admin = True)
+def CheckPromoLevel(message):
+	"""(checkpromo <saveID>). Checks the promotion level of a save. Admin only."""
+	message.Reply(CheckPromotionLevel(message.GetArg(0)))
+
 @command("promolevel", minArgs = 2, admin = True)
-def Unlock(message):
+def PromoLevel(message):
 	"""(promolevel <save ID> <level>). Sets the promotion level on a save. Admin only."""
 	if PromotionLevel(message.GetArg(0), int(message.GetArg(1))):
 		message.Reply("Done.")
@@ -791,7 +810,7 @@ def GetReports(message):
 @command("markread", minArgs=1, admin = True)
 def MarkRead(message):
 	"""(markread <saveid>). Marks a report on a save as read. Admin only."""
-	GetPage("http://powdertoy.co.uk/Reports.html?Read=%s" % message.GetArg(0), GetTPTSessionInfo(0))
+	GetPage("https://powdertoy.co.uk/Reports.html?Read=%s" % message.GetArg(0), GetTPTSessionInfo(0))
 	message.Reply("No output.")
 
 @command("markallread", admin = True)
@@ -806,7 +825,7 @@ def MarkAllRead(message):
 	unread = []
 	for report in reportlist:
 		if report[1] in seenReports:
-			GetPage("http://powdertoy.co.uk/Reports.html?Read=%s" % report[1], GetTPTSessionInfo(0))
+			GetPage("https://powdertoy.co.uk/Reports.html?Read=%s" % report[1], GetTPTSessionInfo(0))
 			markedread.append(report[1])
 		else:
 			unread.append(report[1])
@@ -876,7 +895,7 @@ def ShowTag(message):
 		top = sorted(usercounts.items(), key=lambda a: a[1])[:-30:-1]
 		message.Reply("Tag used {0} times, by: {1}".format(data["count"], ", ".join(["{0} x{1}".format(usertag[0], usertag[1]) for usertag in top])))
 	else:
-		prepend = "http://tpt.io/:" if data["count"] < 20 else ""
+		prepend = "https://tpt.io/:" if data["count"] < 20 else ""
 		msg = []
 		for tag in data["usages"]:
 			msg.append("{0}{1} : {2}".format(prepend, tag[0], tag[1]))
