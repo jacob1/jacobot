@@ -117,6 +117,35 @@ def HandlePrivmsg(line, text):
 
 			message.Reply("Reloaded {0}.py".format(modname))
 			return
+		elif message.command == "load":
+			if len(text) <= 4:
+				SendNotice(username, "No module given")
+				return
+			modname = text[4]
+			if modname in mods:
+				message.Reply("Module already loaded")
+				return
+			try:
+				mods[modname] = importlib.import_module("mods.{0}".format(modname))
+			except ModuleNotFoundError:
+				message.Reply("Module not found: {0}.py".format(modname))
+				return
+			message.Reply("Loaded {0}.py".format(modname))
+			return
+		elif message.command == "unload":
+			if len(text) <= 4:
+				SendNotice(username, "No module given")
+				return
+			modname = text[4]
+			if modname not in mods:
+				message.Reply("Module not loaded")
+				return
+			if modname in commands:
+				del commands[modname]
+			del mods[modname]
+			del sys.modules["mods.{0}".format(modname)]
+			message.Reply("Unloaded {0}.py".format(modname))
+			return
 		elif message.command == "eval":
 			try:
 				command = " ".join(text[4:]).replace("\\n", "\n").replace("\\t", "\t")
