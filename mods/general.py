@@ -72,7 +72,7 @@ def PartCmd(message):
 @command("msg", minArgs = 2, owner = True)
 def MsgCmd(message):
 	"""(msg <channel> <message>). Sends a message to a channel."""
-	SendMessage(message.GetArg(0), " ".join(message.GetArg(1, endLine=True)))
+	SendMessage(message.GetArg(0), message.GetArg(1, endLine=True))
 
 @command("raw", minArgs = 1, owner = True)
 def RawCmd(message):
