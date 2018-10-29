@@ -168,28 +168,41 @@ async def on_message_runner(event):
 			for module_name in copy.copy(sys.modules):
 				if module_name[:11] == "connection.":
 					del sys.modules[module_name]
-			old_client = main_server.client
-			server = importlib.import_module("connection.server")
-			main_server = server.DiscordServer(None, on_message)
-			main_server.client = old_client
+			for i in range(len(clients)):
+				old_client = clients[i].client
+				server = importlib.import_module("connection.server")
+				print(type(clients[i]), type(clients[i]) == server.IrcServer)
+				if type(clients[i]) == server.DiscordServer:
+					clients[i] = server.DiscordServer(None, on_message)
+					clients[i].client = old_client
+				elif type(clients[i]) == server.IrcServer:
+					print("reloading irc")
+					clients[i].client = None
+					clients[i] = server.IrcServer(on_message, host="irc.freenode.net", port=6697, ssl=True, nick="potatobot", ident="jacobot")
+					clients[i].client = old_client
+					new_task = loop.create_task(clients[i].main_loop())
+					loop.run_until_complete(new_task)
 
 			await context.reply("Reloaded connection classes")
 
 #Multiple bots in one asyncio:
 #https://github.com/Rapptz/discord.py/issues/516
 
-main_server = server.DiscordServer(botToken, on_message)
+#main_server = server.DiscordServer(botToken, on_message)
+
+#host, port, ssl, nick, ident, account_name, account_password
+irc_server = server.IrcServer(on_message, host="irc.freenode.net", port=6697, ssl=True, nick="potatobot", ident="jacobot")
+
+clients = [irc_server]
 
 loop = asyncio.get_event_loop()
 try:
-	task1 = loop.create_task(main_server.connect())
+	#task1 = loop.create_task(main_server.connect())
+	await irc_server.connect()
+	task1 = loop.create_task(irc_server.main_loop())
 	#gathered = asyncio.gather(task1, loop=loop)
-	asyncio.run_until_complete(task1)
+	loop.run_until_complete(task1)
 except KeyboardInterrupt:
-	loop.run_until_complete(logout())
+	#loop.run_until_complete(main_server.client.logout())
 	loop.stop()
-	loop.close()
-except RuntimeError:
-	pass
-
 

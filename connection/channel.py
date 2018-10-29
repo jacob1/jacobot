@@ -12,6 +12,14 @@ class DiscordChannel(Channel):
 	def rawchannel(self):
 		return self.channel
 
+	@property
+	def name(self):
+		return self.channel.name
+
+	@property
+	def users(self):
+		return None
+
 	# Some test functions
 	@property
 	def topic(self):
@@ -20,3 +28,16 @@ class DiscordChannel(Channel):
 	@topic.setter
 	def topic(self, topic):
 		raise Exception("no topic setting support right now")
+
+class IrcChannel(Channel):
+
+	def __init__(self, name):
+		self._name = name
+
+	@property
+	def name(self):
+		return self._name
+
+	@property
+	def users(self):
+		return None
