@@ -35,6 +35,9 @@ Replacements here (for easier searaches)
  Wool | 1 | String - String / String - String
  TNT | 1 | Gunpowder - Sand - Gunpowder / Sand - Gunpowder - Sand / Gunpowder - Sand - Gunpowder
  Bookshelf | 1 | Wood Plank - Wood Plank - Wood Plank / Book - Book - Book / Wood Plank - Wood Plank - Wood Plank
+ Beehive | 1 | Wood Plank - Wood Plank - Wood Plank / Honeycomb - Honeycomb - Honeycomb / Wood Plank - Wood Plank - Wood Plank
+ Honeycomb Block | 1 | Honeycomb - Honeycomb / Honeycomb - Honeycomb
+ Honey Block | 1 | Honey Bottle - Honey Bottle / Honey Bottle - Honey Bottle
 
  Wood Slab | 6 | Wood Plank - Wood Plank - Wood Plank
  Cobblestone Slab | 6 | Cobblestone - Cobblestone - Cobblestone
