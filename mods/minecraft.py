@@ -30,6 +30,28 @@ if has_rcon:
 		has_rcon = False
 		rcon_error = True
 
+def Parse(raw, text):
+	minecraftRelayMatch = re.match("^:potatorelay!~?mcrelay@unaffiliated/jacob1/bot/jacobot PRIVMSG #powder-mc :(.*)$", raw)
+	if minecraftRelayMatch:
+		message = minecraftRelayMatch.group(1)
+		messageMatch = re.match("\u000314\[(\S+) connected\]", message)
+		if messageMatch:
+			username = messageMatch.group(1)
+			motd = None
+			#motd = "[MOTD] This server will be reset and upgraded to 1.13 this weekend (21st/22nd), a download of the old map will be made available"
+			#motd = "[MOTD] The planned reset this weekend (21st/22nd) may be delayed if spigot does not update"
+			#motd = "[MOTD] This server has been reset and updated to 1.13. Have fun, and watch out for bugs"
+			#motd = "[MOTD] Dynmap is now working again, you can view an online map at dynmap.starcatcher.us"
+			#motd = "[MOTD] This server will be updated to 1.13.1 when spigot and bungeecord both update"
+			#motd = "[MOTD] Server upgraded to 1.13.1. Dynmap will be re-enabled shortly"
+			#motd = "[MOTD] The dynmap database has been migrated to a new server and is currently in the process of re-rendering the entire world"
+			motd = "[MOTD] We will be updating to 1.15 by the weekend, after testing plugins to make sure they don't break. A server reset is not planned"
+			if motd:
+				try:
+					RunRconCommand(None, 'tellraw {0} {{"text":"{1}", "color":"green"}}'.format(username, motd))
+				except:
+					pass
+
 class CraftingList(object):
 	recipes = {}
 	replacements = {}
@@ -412,6 +434,10 @@ def GetTime(message):
 def BrewingChart(message):
 	message.Reply("https://hydra-media.cursecdn.com/minecraft.gamepedia.com/7/7b/Minecraft_brewing_en.png")
 
+@command("tradingchart")
+def TradingChart(message):
+	message.Reply("https://i.imgur.com/cmXw3Lv.png")
+
 @command("registerusername", minArgs=1, admin=True)
 def RegisterUsername(message):
 	"""(registerplayer <mcusername> <tptusername>). Sets the TPT username of a minecraft player."""
@@ -463,19 +489,19 @@ def Rcon(message):
 	elif ret:
 		message.Reply(ret)
 
-@command("addteam", admin=True, minArgs=3)
+@command("addteam", admin=True, minArgs=2)
 def AddTeam(message):
-	"""(addteam <owner> <teamname> <team displayname>). Adds a minecraft team. Admin only."""
+	"""(addteam <owner> <teamname>). Adds a minecraft team. Admin only."""
 	teamowner = message.GetArg(0)
 	teamname = message.GetArg(1)
-	teamdisplayname = message.GetArg(2, endLine=True)
-	if not RunRconCommand(message, "scoreboard teams add {0} {1}".format(teamname, message.GetArg(2, endLine=True))):
+	#teamdisplayname = message.GetArg(2, endLine=True)
+	if not RunRconCommand(message, "team add {0}".format(teamname)):
 		return
-	if not RunRconCommand(message, "scoreboard teams join {0} {1}".format(teamname, teamowner)):
+	if not RunRconCommand(message, "team join {0} {1}".format(teamname, teamowner)):
 		return
 	StoreData(__name__, "teamowners.{0}".format(teamowner), teamname)
 	StoreData(__name__, "teammembers.{0}".format(teamname), [teamowner])
-	message.Reply("Added team {0} ({1}) with owner {2}".format(teamname, teamdisplayname, teamowner))
+	message.Reply("Added team {0} with owner {1}".format(teamname, teamowner))
 
 @command("addteamowner", minArgs=1)
 def AddTeamOwner(message):
@@ -539,7 +565,7 @@ def AddMember(message):
 	if curteam:
 		message.Reply("{0} is already in team {1}".format(newmember, curteam))
 		return
-	if not RunRconCommand(message, "scoreboard teams join {0} {1}".format(teamname, newmember)):
+	if not RunRconCommand(message, "team join {0} {1}".format(teamname, newmember)):
 		return
 	StoreData(__name__, "teammembers.{0}".format(teamname), allteammembers[teamname] + [newmember])
 	message.Reply("Added {0} to team {1}".format(newmember, teamname))
@@ -568,7 +594,7 @@ def RemMember(message):
 	if remmember not in teammembers:
 		message.Reply("{0} isn't in team {1}".format(remmember, teamname))
 		return
-	if not RunRconCommand(message, "scoreboard teams leave {0}".format(remmember)):
+	if not RunRconCommand(message, "team leave {0}".format(remmember)):
 		return
 	teammembers.remove(remmember)
 	StoreData(__name__, "teammembers.{0}".format(teamname), teammembers)
@@ -591,6 +617,13 @@ def InviteMember(message):
 	if not teamname:
 		message.Reply("You aren't the owner of any teams")
 		return
+
+	# Max of 8 members
+	teammembers = GetData(__name__, "teammembers.{0}".format(teamname))
+	if len(teammembers) > 7:
+		message.Reply("You have too many members on your team and cannot invite any more")
+		return
+
 	invitee = message.GetArg(0)
 	curteam = GetCurrentTeam(invitee)
 	if curteam:
@@ -626,7 +659,12 @@ def JoinTeam(message):
 		DelData(__name__, "teaminvites.{0}.{1}".format(teamname, username))
 		return
 
-	if not RunRconCommand(message, "scoreboard teams join {0} {1}".format(teamname, username)):
+	# Max of 8 members
+	if len(teammembers) > 7:
+		message.Reply("This team has too many members and cannot hold any more")
+		return
+
+	if not RunRconCommand(message, "team join {0} {1}".format(teamname, username)):
 		return
 	StoreData(__name__, "teammembers.{0}".format(teamname), teammembers + [username])
 	DelData(__name__, "teaminvites.{0}.{1}".format(teamname, username))
@@ -647,7 +685,7 @@ def LeaveTeam(message):
 	if username not in teammembers:
 		message.Reply("You aren't in team {0}".format(teamname))
 		return
-	if not RunRconCommand(message, "scoreboard teams leave {0}".format(username)):
+	if not RunRconCommand(message, "team leave {0}".format(username)):
 		return
 	teammembers.remove(username)
 	StoreData(__name__, "teammembers.{0}".format(teamname), teammembers)
@@ -679,13 +717,16 @@ def FriendlyFire(message):
 			message.Reply("You aren't the owner of any teams")
 			return
 		setting = message.GetArg(0)
+		# Teamname is supposed to be admin-only, but people will put it anyway, so ignore it
+		if setting == teamname:
+			setting = message.GetArg(1)
 	elif CheckAdmin(message.fullhost):
 		teamname = message.GetArg(0)
 		setting = message.GetArg(1)
 	else:
 		message.Reply("This command must be run in game")
 		return
-	if not setting:
+	if not setting or (setting.lower() != "false" and setting.lower() != "true"):
 		raise ShowHelpException()
-	if RunRconCommand(message, "scoreboard teams option {0} friendlyfire {1}".format(teamname, setting)):
-		message.Reply("Set friendlyfire for team {0} to {1}".format(teamname, setting))
+	if RunRconCommand(message, "team modify {0} friendlyFire {1}".format(teamname, setting.lower())):
+		message.Reply("Set friendlyfire for team {0} to {1}".format(teamname, setting.lower()))

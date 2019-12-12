@@ -11,12 +11,7 @@ Replacements here (for easier searaches)
 =Lapis Lazuli | Lapis
 =Panes | Pane
 =Glistening | Glistering
-=Red Dye | Rose Red
-=Blue Dye | Lapis Lazuli
-=Yellow Dye | Dandelion Yellow
-=Green Dye | Cactus Green
-=Brown Dye | Cocoa Beans
-=Black Dye | Ink Sac
+=Fence | Wood Fence
 
 
 /////////////////
@@ -30,6 +25,7 @@ Replacements here (for easier searaches)
  Chest | 1 | Wood Plank - Wood Plank - Wood Plank / Wood Plank - - Wood Plank / Wood Plank - Wood Plank - Wood Plank
  Trapped Chest | 1 | Tripwire Hook - Chest
  Torch | 4 | Coal / Stick
+ Lantern | 1 | Iron Nugget - Iron Nugget - Iron Nugget / Iron Nugget - Torch - Iron Nugget / Iron Nugget - Iron Nugget - Iron Nugget
 
 /////////////////////////
 //Manufactured recepies//
@@ -41,26 +37,69 @@ Replacements here (for easier searaches)
  Bookshelf | 1 | Wood Plank - Wood Plank - Wood Plank / Book - Book - Book / Wood Plank - Wood Plank - Wood Plank
 
  Wood Slab | 6 | Wood Plank - Wood Plank - Wood Plank
- Stone Slab | 6 | Stone - Stone - Stone
- Sandstone Slab | 6 | Sandstone - Sandstone - Sandstone
- Red Sandstone Slab | 6 | Red Sandstone - Red Sandstone - Red Sandstone
  Cobblestone Slab | 6 | Cobblestone - Cobblestone - Cobblestone
- Brick Slab | 6 | Brick - Brick - Brick
- Stone Brick Slab | 6 | Stone Brick - Stone Brick - Stone Brick
- Nether Brick Slab | 6 | Nether Brick - Nether Brick - Nether Brick
+ Mossy Cobblestone Slab | 6 | Mossy Cobblestone - Mossy Cobblestone - Mossy Cobblestone
+ Stone Slab | 6 | Stone - Stone - Stone
+ Smooth Stone Slab | 6 | Smooth Stone - Smooth Stone - Smooth Stone
+ Andesite Slab | 6 | Andesite - Andesite - Andesite
+ Polished Andesite Slab | 6 | Polished Andesite - Polished Andesite - Polished Andesite
+ Diorite Slab | 6 | Diorite - Diorite - Diorite
+ Polished Diorite Slab | 6 | Polished Diorite - Polished Diorite - Polished Diorite
+ Granite Slab | 6 | Granite - Granite - Granite
+ Polished Granite Slab | 6 | Polished Granite - Polished Granite - Polished Granite
+ Brick Slab | 6 | Bricks - Bricks - Bricks
+ Stone Brick Slab | 6 | Stone Bricks - Stone Bricks - Stone Bricks
+ Mossy Stone Brick Slab | 6 | Mossy Stone Bricks - Mossy Stone Bricks - Mossy Stone Bricks
+ Sandstone Slab | 6 | Sandstone - Sandstone - Sandstone
+ Smooth Sandstone Slab | 6 | Smooth Sandstone - Smooth Sandstone - Smooth Sandstone
+ Cut Sandstone Slab | 6 | Cut Sandstone - Cut Sandstone - Cut Sandstone
+ Red Sandstone Slab | 6 | Red Sandstone - Red Sandstone - Red Sandstone
+ Smooth Red Sandstone Slab | 6 | Smooth Red Sandstone - Smooth Red Sandstone - Smooth Red Sandstone
+ Cut Red Sandstone Slab | 6 | Cut Red Sandstone - Cut Red Sandstone - Cut Red Sandstone
+ Nether Brick Slab | 6 | Nether Bricks - Nether Bricks - Nether Bricks
+ Red Nether Brick Slab | 6 | Red Nether Bricks - Red Nether Bricks - Red Nether Bricks
  Quartz Slab | 6 | Block of Quartz - Block of Quartz - Block of Quartz
+ Smooth Quartz Slab | 6 | Smooth Quartz - Smooth Quartz - Smooth Quartz
  Purpur Slab | 6 | Purpur Block - Purpur Block - Purpur Block
+ End Stone Brick Slab | 6 | End Stone Bricks - End Stone Bricks - End Stone Bricks
 
  Wood Stairs | 4 | Wood Plank - - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank - Wood Plank
- Stone Stairs | 4 | Stone - - / Stone - Stone - / Stone - Stone  - Stone
- Sandstone Stairs | 4 | Sandstone - - / Sandstone - Sandstone - / Sandstone - Sandstone - Sandstone
- Red Sandstone Stairs | 4 | Red Sandstone - - / Red Sandstone - Red Sandstone - / Red Sandstone - Red Sandstone - Red Sandstone
  Cobblestone Stairs | 4 | Cobblestone - - / Cobblestone - Cobblestone - / Cobblestone - Cobblestone - Cobblestone
- Brick Stairs | 4 | Brick - - / Brick - Brick - / Brick - Brick - Brick
- Stone Brick Stairs | 4 | Stone Brick - - / Stone Brick - Stone Brick - / Stone Brick - Stone Brick - Stone Brick
- Nether Brick Stairs | 4 | Nether Brick - - / Nether Brick - Nether Brick - / Nether Brick - Nether Brick - Nether Brick
+ Stone Stairs | 4 | Stone - - / Stone - Stone - / Stone - Stone  - Stone
+ Andesite Stairs | 4 | Andesite - - / Andesite - Andesite - / Andesite - Andesite - Andesite
+ Polished Andesite Stairs | 4 | Polished Andesite - - / Polished Andesite - Polished Andesite - / Polished Andesite - Polished Andesite - Polished Andesite
+ Diorite Stairs | 4 | Diorite - - / Diorite - Diorite - / Diorite - Diorite - Diorite
+ Polished Diorite Stairs | 4 | Polished Diorite - - / Polished Diorite - Polished Diorite - / Polished Diorite - Polished Diorite - Polished Diorite
+ Granite Stairs | 4 | Granite - - / Granite - Granite - / Granite - Granite - Granite
+ Polished Granite Stairs | 4 | Polished Granite - - / Polished Granite - Polished Granite - / Polished Granite - Polished Granite - Polished Granite
+ Sandstone Stairs | 4 | Sandstone - - / Sandstone - Sandstone - / Sandstone - Sandstone - Sandstone
+ Smooth Sandstone Stairs | 4 | Smooth Sandstone - - / Smooth Sandstone - Smooth Sandstone - / Smooth Sandstone - Smooth Sandstone - Smooth Sandstone
+ Red Sandstone Stairs | 4 | Red Sandstone - - / Red Sandstone - Red Sandstone - / Red Sandstone - Red Sandstone - Red Sandstone
+ Smooth Red Sandstone Stairs | 4 | Smooth Red Sandstone - - / Smooth Red Sandstone - Smooth Red Sandstone - / Smooth Red Sandstone - Smooth Red Sandstone - Smooth Red Sandstone
+ Brick Stairs | 4 | Bricks - - / Bricks - Bricks - / Bricks - Bricks - Bricks
+ Stone Brick Stairs | 4 | Stone Bricks - - / Stone Bricks - Stone Bricks - / Stone Bricks - Stone Bricks - Stone Bricks
+ Mossy Stone Brick Stairs | 4 | Mossy Stone Bricks - - / Mossy Stone Bricks - Mossy Stone Bricks - / Mossy Stone Bricks - Mossy Stone Bricks - Mossy Stone Bricks
+ Nether Brick Stairs | 4 | Nether Bricks - - / Nether Bricks - Nether Bricks - / Nether Bricks - Nether Bricks - Nether Bricks
+ Red Nether Brick Stairs | 4 | Red Nether Bricks - - / Red Nether Bricks - Red Nether Bricks - / Red Nether Bricks - Red Nether Bricks- Red Nether Bricks
  Quartz Stairs | 4 | Block of Quartz - - / Block of Quartz - Block of Quartz - / Block of Quartz - Block of Quartz - Block of Quartz
+ Smooth Quartz Stairs | 4 | Smooth Quartz - - / Smooth Quartz - Smooth Quartz - / Smooth Quartz - Smooth Quartz - Smooth Quartz
  Purpur Stairs | 4 | Purpur Block - - / Purpur Block - Purpur Block - / Purpur Block - Purpur Block - Purpur Block
+ End Stone Brick Stairs | 4 | End Stone Bricks - - / End Stone Bricks - End Stone Bricks - / End Stone Bricks - End Stone Bricks - End Stone Bricks
+
+ Cobblestone Wall | 6 | - - / Cobblestone - Cobblestone - Cobblestone / Cobblestone - Cobblestone - Cobblestone
+ Mossy Cobblestone Wall | 6 | - - / Moss Stone - Moss Stone - Moss Stone / Moss Stone - Moss Stone - Moss Stone
+ Andesite Wall | 6 | - - / Andesite - Andesite - Andesite / Andesite - Andesite - Andesite
+ Granite Wall | 6 | - - / Granite - Granite - Granite / Granite - Granite - Granite
+ Diorite Wall | 6 | - - / Diorite - Diorite - Diorite / Diorite - Diorite - Diorite
+ Stone Brick Wall | 6 | - - / Stone Brick - Stone Brick - Stone Brick / Stone Brick - Stone Brick - Stone Brick
+ Mossy Stone Brick Wall | 6 | - - / Mossy Stone Brick - Mossy Stone Brick - Mossy Stone Brick / Mossy Stone Brick - Mossy Stone Brick - Mossy Stone Brick
+ Sandstone Wall | 6 | - - / Sandstone - Sandstone - Sandstone / Sandstone - Sandstone - Sandstone
+ Red Sandstone Wall | 6 | - - / Red Sandstone - Red Sandstone - Red Sandstone / Red Sandstone - Red Sandstone - Red Sandstone
+ Brick Wall | 6 | - - / Bricks - Bricks - Bricks / Bricks - Bricks - Bricks
+ Nether Brick Wall | 6 | - - / Nether Bricks - Nether Bricks - Nether Bricks / Nether Bricks - Nether Bricks - Nether Bricks
+ Red Nether Brick Wall | 6 | - - / Red Nether Bricks - Red Nether Bricks - Red Nether Bricks / Red Nether Bricks - Red Nether Bricks - Red Nether Bricks
+ End Stone Brick Wall | 6 | - - / End Stone Bricks - End Stone Bricks - End Stone Bricks / End Stone Bricks - End Stone Bricks - End Stone Bricks
+ Prismarine Wall | 6 | - - / Prismarine - Prismarine - Prismarine / Prismarine - Prismarine - Prismarine
 
  Snow Block,Snow | 1 | Snowball - Snowball / Snowball - Snowball
  Snow Layer | 6 | Snow - Snow - Snow
@@ -102,6 +141,20 @@ Replacements here (for easier searaches)
  Anvil | 1 | Block of Iron - Block of Iron - Block of Iron / - Iron - / Iron - Iron - Iron
  Beacon | 1 | Glass - Glass - Glass / Glass - Nether Star - Glass / Obsidian - Obsidian - Obsidian
  Shulker Box | 1 | Shulker Shell / Chest / Shulker Shell
+
+ Barrel | 1 | Wood Plank - Wood Slab - Wood Plank / Wood Plank - - Wood Plank / Wood Plank - Wood Slab - Wood Plank
+ Blast Furnace | 1 | Iron - Iron - Iron / Iron - Furnace - Iron / Smooth Stone - Smooth Stone - Smooth Stone
+ Campfire | 1 | - Stick - / Stick - Coal - Stick / Wood Plank - Wood Plank - Wood Plank
+ Cartography Table | 1 | Paper - Paper - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
+ Composter | 1 | Wood Fence - - Wood Fence / Wood Fence - - Wood Fence / Wood Plank - Wood Plank - Wood Plank
+ Fletching Table | 1 | Flint - Flint - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
+ Grindstone | 1 | Stick - Stone Slab - Stick / Wood Plank - - Wood Plank
+ Lectern | 1 | Wood Slab - Wood Slab - Wood Slab / - Bookshelf - / - Wood Slab -
+ Loom | 1 | String - String / Wood Plank - Wood Plank
+ Scaffolding | 1 | Bamboo - String - Bamboo / Bamboo - - Bamboo / Bamboo - - Bamboo
+ Smithing Table | 1 | Iron - Iron - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
+ Smoker | 1 | - Wood - / Wood - Furnace - Wood / - Wood -
+ Stonecutter | 1 | - Iron - / Stone - Stone - Stone
 
 //////////////////////////
 //Transportation recipes//
@@ -166,6 +219,7 @@ Replacements here (for easier searaches)
  Fire Charge | 3 | Blaze Powder - Coal / - Gunpowder
 
  Bow | 1 | - Stick - String / Stick - - String / - Stick - String
+ Crossbow | 1 | Stick - Iron - Stick / Sting - Tripwire Hook - String / - Stick -
  Arrow | 4 | Flint / Stick / Feather
  Spectral Arrow | 2 | - Glowstone Dust - / Glowstone Dust - Arrow - Glowstone Dust / - Glowstone Dust - 
  Tipped Arrow | 8 | Arrow - Arrow - Arrow / Arrow - Lingering Potion - Arrow / Arrow - Arrow - Arrow
@@ -191,6 +245,8 @@ Replacements here (for easier searaches)
  Gold Boots | 1 | Gold - - Gold / Gold - - Gold
  Iron Boots | 1 | Iron - - Iron / Iron - - Iron
  Diamond Boots | 1 | Diamond - - Diamond / Diamond - - Diamond
+
+ Leather Horse Armor | 1 | Leather - - Leather / Leather - Leather - Leather / Leather - - Leather
 
 /////////////////////
 //Mechanism recipes//
@@ -233,6 +289,7 @@ Replacements here (for easier searaches)
  Mushroom Stew | 1 | Red Mushroom - Brown Mushroom / - Bowl
  Rabbit Stew | 1 | - Cooked Rabbit - / Carrot - Baked Potato - Mushroom / - Bowl -
  Beetroot Soup | 1 | Beetroot - Beetroot - Beetroot / Beetroot - Beetroot - Beetroot / - Bowl -
+ Suspicious Stew | 1 | Red Mushroom - Brown Mushroom / Bowl - Flower
 
  Bread | 1 | Wheat - Wheat - Wheat
  Sugar | 1 | Sugar Cane
@@ -269,8 +326,6 @@ Replacements here (for easier searaches)
  Wood Fence,Fence | 3 | - - / Wood Plank - Stick - Wood Plank / Wood Plank - Stick - Wood Plank
  Nether Brick Fence | 6 | - - / Nether Brick - Nether Brick - Nether Brick / Nether Brick - Nether Brick - Nether Brick
  Fence Gate,Gate | 1 | - - / Stick - Wood Plank - Stick / Stick - Wood Plank - Stick
- Cobblestone Wall | 6 | - - / Cobblestone - Cobblestone - Cobblestone / Cobblestone - Cobblestone - Cobblestone
- Mossy Cobblestone Wall | 6 | - - / Moss Stone - Moss Stone - Moss Stone / Moss Stone - Moss Stone - Moss Stone
  Moss Stone | 1 | Cobblestone - Vines
 
  Iron | 9 | Iron Block
@@ -309,31 +364,38 @@ Replacements here (for easier searaches)
 ///////////////
 
  Bone Meal | 3 | Bone
- Light Gray Dye | 3 | Bone Meal / Ink Sac - Bone Meal
- Light Gray Dye 2 | 2 | Gray Dye - Bone Meal
- Gray Dye | 2 | Ink Sac - Bone Meal
- Rose Red | 1 | Red Tulip
- Rose Red (var.) | 1 | Poppy
- Rose Red (var. 2) | 1 | Rose Bush
- Rose Red (var. 3) | 1 | Beetroot
- Orange Dye | 2 | Rose Red - Dandelion Yellow
+ White Dye | 1 | Bone Meal
+ White Dye (var.) | 1 | Lily of the Valley
+ Light Gray Dye | 3 | White Dye / Black Dye - White Dye
+ Light Gray Dye 2 | 2 | Gray Dye - White Dye
+ Gray Dye | 2 | Black Dye - White Dye
+ Red Dye | 1 | Red Tulip
+ Red Dye (var.) | 1 | Poppy
+ Red Dye (var. 2) | 1 | Rose Bush
+ Red Dye (var. 3) | 1 | Beetroot
+ Orange Dye | 2 | Red Dye - Yellow Dye
  Orange Dye (var.) | 1 | Orange Tulip
- Dandelion Yellow | 1 | Dandelion
- Dandelion Yellow (var.) | 2 | Sunflower
- Lime Dye | 2 | Green Dye - Bone Meal
- Light Blue Dye | 2 | Lapis Lazuli - Bone Meal
+ Yellow Dye | 1 | Dandelion
+ Yellow Dye (var.) | 2 | Sunflower
+ Lime Dye | 2 | Green Dye - White Dye
+ Light Blue Dye | 2 | Blue Dye - White Dye
  Light Blue Dye | 1 | Blue Orchid
- Cyan Dye | 2 | Lapis Lazuli - Green Dye
- Purple Dye | 1 | Lapis Lazuli - Rose Red
+ Cyan Dye | 2 | Blue Dye - Green Dye
+ Purple Dye | 1 | Blye Dye - Red Dye
  Magenta Dye | 2 | Pink Dye / Purple Dye
  Magenta Dye (var.) | 2 | Lilac
  Magenta Dye (var. 2) | 1 | Allium
- Magenta Dye (var. 3) | 4 | Lapis Lazuli - Bone Meal / Rose Red - Rose Red
- Magenta Dye (var. 4) | 3 | Lapis Lazuli - / Pink Dye - Rose Red
+ Magenta Dye (var. 3) | 4 | Blue Dye - White Dye / Red Dye - Red Dye
+ Magenta Dye (var. 4) | 3 | Blue Dye - / Pink Dye - Red Dye
  Pink Dye | 1 | Pink Tulip
  Pink Dye (var.) | 2 | Peony
- Pink Dye (var. 2) | 2 | Rose Red - Bone Meal
- Cactus Green | 1 | Cactus - / Furnace - Coal
+ Pink Dye (var. 2) | 2 | Red Dye - White Dye
+ Green Dye | 1 | Cactus - / Furnace - Coal
+ Blue Dye | 1 | Lapis Lazuli
+ Blue Dye (var.) | 1 | Cornflower
+ Black Dye | 1 | Ink Sac
+ Black Dye (var.) | 1 | Wither Rose
+ Brown Dye | 1 | Cocoa Beans
 
 ////////////////
 //Wool recipes//
@@ -342,19 +404,20 @@ Replacements here (for easier searaches)
  Orange Wool | 1 | White Wool - Orange Dye
  Magenta Wool | 1 | White Wool - Magenta Dye
  Light Blue Wool | 1 | White Wool - Light Blue Dye
- Yellow Wool | 1 | White Wool - Dandelion Yellow
+ Yellow Wool | 1 | White Wool - Yellow Dye
  Lime Wool | 1 | White Wool - Lime Dye
  Pink Wool | 1 | White Wool - Pink Dye
  Gray Wool | 1 | White Wool - Gray Dye
  Light Gray Wool | 1 | White Wool - Light Gray Dye
  Cyan Wool | 1 | White Wool - Cyan Dye
- Purple Wool | 1 | White Wool - Pueple Dye
- Blue Wool | 1 | White Wool - Lapis Lazuli
- Brown Wool | 1 | White Wool - Cocoa Beans
- Green Wool | 1 | White Wool - Cactus Green
- Red Wool | 1 | White Wool - Rose Red
- Black Wool | 1 | White Wool - Ink Sac
+ Purple Wool | 1 | White Wool - Purple Dye
+ Blue Wool | 1 | White Wool - Blue Dye
+ Brown Wool | 1 | White Wool - Brown Dye
+ Green Wool | 1 | White Wool - Green Dye
+ Red Wool | 1 | White Wool - Red Dye
+ Black Wool | 1 | White Wool - Black Dye
  Carpet | 3 | Wool - Wool
+ Carpet (dyed) | 8 | Carpet - Carpet - Carpet / Carpet - Dye - Carpet / Carpet - Carpet - Carpet
 
 //////////////////////
 //Dyed Block Recipes//
@@ -362,6 +425,7 @@ Replacements here (for easier searaches)
  Stained Clay | 8 | Hardened Clay - Hardened Clay - Hardened Clay / Hardened Clay - Dye - Hardened Clay / Hardened Clay - Hardened Clay - Hardened Clay
  Stained Glass | 8 | Glass - Glass - Glass / Glass - Dye - Glass / Glass - Glass - Glass
  Stained Glass Panes | 16 | Stained Glass - Stained Glass - Stained Glass / Stained Glass - Stained Glass - Stained Glass
+ Stained Glass Panes (alt) | 8 | Glass Pane - Glass Pane - Glass Pane / Glass Pane - Dye - Glass Pane / Glass Pane - Glass Pane - Glass Pane
 
  Firework Star | 1 | Gunpowder - Any Dye / - Extra Ingredients
  Firework Star (fade) | 1 | Firework Star - Any Dye
