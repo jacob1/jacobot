@@ -12,6 +12,7 @@ Replacements here (for easier searaches)
 =Panes | Pane
 =Glistening | Glistering
 =Fence | Wood Fence
+=Netherrite | Netherite
 
 
 /////////////////
@@ -26,6 +27,8 @@ Replacements here (for easier searaches)
  Trapped Chest | 1 | Tripwire Hook - Chest
  Torch | 4 | Coal / Stick
  Lantern | 1 | Iron Nugget - Iron Nugget - Iron Nugget / Iron Nugget - Torch - Iron Nugget / Iron Nugget - Iron Nugget - Iron Nugget
+ Soul Torch | 4 | Coal / Stick / Soul Sand
+ Soul Lantern | 1 | Iron Nugget - Iron Nugget - Iron Nugget / Iron Nugget - Soul Torch - Iron Nugget / Iron Nugget - Iron Nugget - Iron Nugget
 
 /////////////////////////
 //Manufactured recepies//
@@ -38,6 +41,9 @@ Replacements here (for easier searaches)
  Beehive | 1 | Wood Plank - Wood Plank - Wood Plank / Honeycomb - Honeycomb - Honeycomb / Wood Plank - Wood Plank - Wood Plank
  Honeycomb Block | 1 | Honeycomb - Honeycomb / Honeycomb - Honeycomb
  Honey Block | 1 | Honey Bottle - Honey Bottle / Honey Bottle - Honey Bottle
+ Nether Wart Block | 1 | Nether Wart - Nether Wart - Nether wart / Nether Wart - Nether Wart - Nether wart / Nether Wart - Nether Wart - Nether wart
+ Netherite Ingot | 1 | Gold - Gold - Gold / Gold - Netherite Scrap - Netherite Scrap / Netherite Scrap - Netherite Scrap -
+ Chain | 1 | - Iron Nugget - / - Iron - / - Iron Nugget -
 
  Wood Slab | 6 | Wood Plank - Wood Plank - Wood Plank
  Cobblestone Slab | 6 | Cobblestone - Cobblestone - Cobblestone
@@ -63,6 +69,7 @@ Replacements here (for easier searaches)
  Red Nether Brick Slab | 6 | Red Nether Bricks - Red Nether Bricks - Red Nether Bricks
  Quartz Slab | 6 | Block of Quartz - Block of Quartz - Block of Quartz
  Smooth Quartz Slab | 6 | Smooth Quartz - Smooth Quartz - Smooth Quartz
+ Quartz Brick | 4 | Block of Quartz - Block of Quartz / Block of Quartz - Block of Quartz
  Purpur Slab | 6 | Purpur Block - Purpur Block - Purpur Block
  End Stone Brick Slab | 6 | End Stone Bricks - End Stone Bricks - End Stone Bricks
 
@@ -113,6 +120,7 @@ Replacements here (for easier searaches)
  Mossy Stone Brick,Mossy Stone Bricks | 1 | Stone Brick - Vines
  Nether Brick,Nether Bricks | 1 | Nether Brick (item) - Nether Brick (item) / Nether Brick (item) - Nether Brick (item)
  Red Nether Brick,Red Nether Bricks | 1 | Nether Wart - Nether Brick (item) / Nether Brick (item) - Nether Wart
+ Chiseled Nether Brick,Chiseled Nether Bricks | 1 | Nether Brick Slab / Nether Brick Slab
  End Stone Bricks | 4 | End Stone - End Stone / End Stone - End Stone
  Purpur Block | 4 | Popped Chorus Fruit - Popped Chorus Fruit / Popped Chorus Fruit - Popped Chorus Fruit
  Bone Block | 1 | Bone Meal - Bone Meal - Bone Meal / Bone Meal - Bone Meal - Bone Meal / Bone Meal - Bone Meal - Bone Meal
@@ -139,6 +147,7 @@ Replacements here (for easier searaches)
  Polished Andesite | 4 | Andesite - Andesite / Andesite - Andesite
  Coarse Dirt | 4 | Dirt - Gravel / Gravel - Dirt
  Bone Meal | 9 | Bone Block
+ Polished Basalt | 4 | Basalt - Basalt / Basalt - Basalt
 
  Ender Chest | 1 | Obsidian - Obsidian - Obsidian / Obsidian - Eye of Ender - Obsidian / Obsidian - Obsidian - Obsidian
  Anvil | 1 | Block of Iron - Block of Iron - Block of Iron / - Iron - / Iron - Iron - Iron
@@ -147,17 +156,21 @@ Replacements here (for easier searaches)
 
  Barrel | 1 | Wood Plank - Wood Slab - Wood Plank / Wood Plank - - Wood Plank / Wood Plank - Wood Slab - Wood Plank
  Blast Furnace | 1 | Iron - Iron - Iron / Iron - Furnace - Iron / Smooth Stone - Smooth Stone - Smooth Stone
- Campfire | 1 | - Stick - / Stick - Coal - Stick / Wood Plank - Wood Plank - Wood Plank
+ Campfire | 1 | - Stick - / Stick - Coal - Stick / Wood Log - Wood Log - Wood Log
+ Soul Campfire | 1 | - Stick - / Stick - Soul Sand - Stick / Wood Log - Wood Log - Wood Log
  Cartography Table | 1 | Paper - Paper - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
  Composter | 1 | Wood Fence - - Wood Fence / Wood Fence - - Wood Fence / Wood Plank - Wood Plank - Wood Plank
  Fletching Table | 1 | Flint - Flint - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
  Grindstone | 1 | Stick - Stone Slab - Stick / Wood Plank - - Wood Plank
  Lectern | 1 | Wood Slab - Wood Slab - Wood Slab / - Bookshelf - / - Wood Slab -
  Loom | 1 | String - String / Wood Plank - Wood Plank
- Scaffolding | 1 | Bamboo - String - Bamboo / Bamboo - - Bamboo / Bamboo - - Bamboo
+ Scaffolding | 6 | Bamboo - String - Bamboo / Bamboo - - Bamboo / Bamboo - - Bamboo
  Smithing Table | 1 | Iron - Iron - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
  Smoker | 1 | - Wood - / Wood - Furnace - Wood / - Wood -
  Stonecutter | 1 | - Iron - / Stone - Stone - Stone
+ Lodestone | 1 | Chiseled Stone Bricks - Chiseled Stone Bricks - Chiseled Stone Bricks / Chiseled Stone Bricks - Netherite - Chiseled Stone Bricks / Chiseled Stone Bricks - Chiseled Stone Bricks - Chiseled Stone Bricks
+ Respawn Anchor | 1 | Crying Obsidian - Crying Obsidian - Crying Obsidian / Glowstone Block - Glowstone Block - Glowstone Block / Crying Obsidian - Crying Obsidian - Crying Obsidian 
+ Target | 1 | - Redstone - / Redstone - Hay Bale - Redstone / - Redstone -
 
 //////////////////////////
 //Transportation recipes//
@@ -173,8 +186,8 @@ Replacements here (for easier searaches)
  Minecart with Hopper,Hopper Minecraft | 1 | Hopper / Minecart
  Minecart with TNT,TNT Minecart | 1 | TNT / Minecart
  Carrot on a Stick | 1 | Fishing Rod / - Carrot
+ Warped Fungus on a Stick | 1 | Fishing Rod - / - Warped Fungus
  Boat | 1 | - - / Wood Plank - - Wood Plank / Wood Plank - Wood Plank - Wood Plank
- Boat (pocket edition) | 1 | Wood Plank - Wooden Shovel - Wood Plank / Wood Plank - Wood Plank - Wood Plank
 
 ////////////////
 //Tool recipes//
@@ -319,6 +332,7 @@ Replacements here (for easier searaches)
  Block of Emerald,Emerald Block | 1 | Emerald - Emerald - Emerald / Emerald - Emerald - Emerald / Emerald - Emerald - Emerald
  Block of Redstone,Redstone Block | 1 | Redstone - Redstone - Redstone / Redstone - Redstone - Redstone / Redstone - Redstone - Redstone
  Block of Coal,Coal Block | 1 | Coal - Coal - Coal / Coal - Coal - Coal / Coal - Coal - Coal
+ Block of Netherite,Netherite block | 1 | Netherite - Netherite - Netherite / Netherite - Netherite - Netherite / Netherite - Netherite - Netherite
  Slime Block | 1 | Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball
  Melon Block,Melon | 1 | Melon - Melon - Melon /  Melon - Melon - Melon /  Melon - Melon - Melon
 
