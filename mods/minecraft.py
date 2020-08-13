@@ -4,6 +4,8 @@ import math
 import config
 import subprocess
 import sys
+import itertools
+
 try:
 	if 'SourceRcon' in sys.modules:
 		del sys.modules['SourceRcon']
@@ -96,6 +98,45 @@ class CraftingList(object):
 				self._ParseItem(line)
 			elif len(line) and line[0] == "=":
 				self._ParseReplacement(line[1:])
+				
+	def CalcRecipe(self, name, amount):
+		try:
+			amount = int(amount)
+			if amount <= 0:
+				raise ValueError()
+		except ValueError:
+			return "Amount must be a valid positive integer"
+	
+		name = self._Replace(name.lower())
+		if not name in self.recipes:
+			return "Couldn't find recipe, try using {0}search".format(config.commandChar)
+		recipe = self.recipes[name]["recipe"]
+		r_amount = self.recipes[name]["amount"]
+		
+		craft_amount = math.ceil(amount / r_amount) # Amount <item> needs to be crafted
+		item_amount = {} # Dict of item required : amount
+		
+		for required_item in itertools.chain.from_iterable(recipe):
+			if not required_item.strip():
+				continue
+			item_amount[required_item] = item_amount.get(required_item, 0) + 1
+			
+		output = []
+		for item in item_amount:
+			required_amount = craft_amount * item_amount[item]
+			print(item, required_amount)
+			if required_amount > 1e9:
+				formatted_number = "{:.2e}".format(required_amount)
+			elif required_amount >= 1e6:
+				formatted_number = "{:0.2f}M".format(required_amount / 1e6)
+			elif required_amount >= 1e3:
+				formatted_number = "{:0.2f}k".format(required_amount / 1e3)
+			else:
+				formatted_number = "{}".format(required_amount)
+			output.append("{} {}".format(formatted_number, item))
+			
+		return ", ".join(output)
+		
 
 	def PrintRecipe(self, name):
 		name = name.lower()
@@ -166,6 +207,11 @@ def Craft(message):
 	output = recipes.PrintRecipe(message.commandLine)
 	for line in output.splitlines():
 		message.Reply(line)
+		
+@command("craftcalc", minArgs = 2, rateLimit=True)
+def Craftcalc(message):
+	"""(craftcalc <item> <amount>). Lists materials required to craft <amount> of <item>"""
+	message.Reply(recipes.CalcRecipe(*message.commandLine.rsplit(" ", 1)))
 
 @command("search", minArgs = 1)
 def Search(message):
@@ -178,6 +224,150 @@ def Search(message):
 	output = recipes.SearchRecipe(searchTerm)
 	for line in output.splitlines():
 		message.Reply(line)
+		
+
+# Location conversion commands
+
+def location_conversion(message, nether_to_overworld):
+	coords = message.commandLine.split(",")
+	if len(coords) == 2:
+		coords = [coords[0], 65, coords[1]]
+	elif len(coords) == 1:
+		if message.GetArg(0):
+			(player, duplicates) = dynmap.GetPlayer(message.GetArg(0))
+			if duplicates:
+				message.Reply("There is more than one player matching {0}".format(message.GetArg(0)))
+				return
+			elif not player:
+				message.Reply("Player is hidden from dynmap or not online")
+				return
+
+			coords = tuple(map(int, (player['x'], player['y'], player['z'])))
+			dimension = player['world']
+			if dimension == "world_the_end":
+				message.Reply("Cannot convert end coordinates to nether")
+				return
+			elif dimension == "world_nether" and not nether_to_overworld:
+				message.Reply("That player is already in the nether (Did you mean to use !!overworldloc?)")
+				return
+			elif dimension == "world" and nether_to_overworld:
+				message.Reply("That player is already in the overworld (Did you mean to use !!netherloc?)")
+				return
+	
+	try:
+		coords = tuple(map(int, coords))
+	except ValueError:
+		message.Reply("Coordinates must be valid integers")
+		return
+	if len(coords) != 3:
+		message.Reply("Missing coordinate, coordinates must be (x,z), (x,y,z) or (player name)")
+		return
+	
+	multi = 1 / 8
+	if nether_to_overworld :
+		multi = 8
+		
+	message.Reply("({}, {}, {})    ({}, {}, {} to {})".format(
+		coords[0] * multi, coords[1], coords[2] * multi,
+		coords[0], coords[1], coords[2],
+		"overworld" if nether_to_overworld else "nether"
+	))
+		
+@command("netherloc", minArgs = 1)
+def Netherloc(message):
+	"""(netherloc <coordinates | player>). Converts overworld location to nether"""
+	location_conversion(message, False)
+
+@command("overworldloc", minArgs = 1)
+def Overworldloc(message):
+	"""(overworldloc <coordinates | player>). Converts nether location to overworld"""
+	location_conversion(message, True)		
+	
+@command("brew", minArgs = 1)
+def Brew(message):
+	"""(brew <potion>). Give potion recipe for <potion>"""
+	name = message.commandLine.lower()
+	pot_type = ""
+	extension = "none" # none | time | potency
+	throw = "none" # none | splash | lingering
+	
+	pot_name_map = [
+		["weak", "weakness"],
+		["slow fall", "slow falling"],
+		["turtle", "turtle master"],
+		["invis", "invisibility"],
+		["night vision", "night vision"],
+		["breath", "water breathing"],
+		["fire res", "fire resistance"],
+		["regen", "regeneration"],
+		["poison", "poison"],
+		["harm", "harming"],
+		["heal", "healing"],
+		["strength", "strength"],
+		["leap", "leaping"],
+		["slow", "slowness"],
+		["swift", "swiftness"],
+		["speed", "swiftness"]
+	]
+	
+	pot_ingredient_map = {
+		"": [],
+		"weakness": ["fermented spider eye"],
+		"slow falling": ["phantom membrane"],
+		"turtle master": ["turtle shell"],
+		"invisibility": ["golden carrot", "fermented spider eye"],
+		"night vision": ["golden carrot"],
+		"water breathing": ["pufferfish"],
+		"fire resistance": ["magma cream"],
+		"regeneration": ["ghast tear"],
+		"poison": ["spider eye"],
+		"harming": ["glistering melon", "fermented spider eye"],
+		"healing": ["glistering melon"],
+		"strength": ["blaze powder"],
+		"leaping": ["rabbit's foot"],
+		"slowness": ["sugar", "fermented spider eye"],
+		"swiftness": ["sugar"]
+	}
+	
+	for pot in pot_name_map:
+		if pot[0] in name:
+			if pot_type != "":
+				message.Reply("Ambigious potion type")
+				return
+			pot_type = pot[1]
+	
+	if any(x in name for x in ["extended", "time", "+"]):
+		extension = "time"
+	if any(x in name for x in ["2", "ii", "4", "iv"]):
+		if extension != "none":
+			message.Reply("Conflicting potion extension (time and potency)")
+			return
+		extension = "potency"
+		
+	if "splash" in name:
+		throw = "splash"
+	if "linger" in name:
+		if throw != "none":
+			message.Reply("Conflicting potion type (lingering and splash)")
+			return
+		throw = "lingering"
+	
+	steps = ["water bottle"]
+	if pot_type != "weakness" and pot_type:
+		steps.append("nether wart")
+	steps += pot_ingredient_map[pot_type]
+	
+	if extension == "time":
+		steps.append("redstone")
+	elif extension == "potency":
+		steps.append("glowstone")
+		
+	if throw != "none":
+		steps.append("gunpowder")
+	if throw == "lingering":
+		steps.append("dragon's breath")
+		
+	message.Reply(" -> ".join(steps))
 
 
 class Dynmap(object):
