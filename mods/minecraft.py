@@ -2,6 +2,7 @@ import time
 import json
 import math
 import config
+import subprocess
 import sys
 try:
 	if 'SourceRcon' in sys.modules:
@@ -45,7 +46,10 @@ def Parse(raw, text):
 			#motd = "[MOTD] This server will be updated to 1.13.1 when spigot and bungeecord both update"
 			#motd = "[MOTD] Server upgraded to 1.13.1. Dynmap will be re-enabled shortly"
 			#motd = "[MOTD] The dynmap database has been migrated to a new server and is currently in the process of re-rendering the entire world"
-			motd = "[MOTD] We will be updating to 1.15 by the weekend, after testing plugins to make sure they don't break. A server reset is not planned"
+			#motd = "[MOTD] We will be updating to 1.15 by the weekend, after testing plugins to make sure they don't break. A server reset is not planned"
+			#motd = "[MOTD] Server is upgraded to 1.15. Dynmap will be re-added when that plugin is updated to 1.15"
+			#motd = "[MOTD] This server will be upgraded to 1.16 and reset the weekend of June 26th/27st. Details: https://tpt.io/.312730"
+			#motd = "[MOTD] The map has been reset. Have fun on the new world :)"
 			if motd:
 				try:
 					RunRconCommand(None, 'tellraw {0} {{"text":"{1}", "color":"green"}}'.format(username, motd))
@@ -730,3 +734,4 @@ def FriendlyFire(message):
 		raise ShowHelpException()
 	if RunRconCommand(message, "team modify {0} friendlyFire {1}".format(teamname, setting.lower())):
 		message.Reply("Set friendlyfire for team {0} to {1}".format(teamname, setting.lower()))
+

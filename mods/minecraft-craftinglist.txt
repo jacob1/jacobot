@@ -20,6 +20,7 @@ Replacements here (for easier searaches)
 /////////////////
 
  Wood Plank | 4 | Wood
+ Stripped Wood | 3 | Stripped Log - Stipped Log / Stripped Log - Stripped Log
  Stick | 4 | Wood Plank / Wood Plank
  Crafting Table | 1 | Wood Plank - Wood Plank / Wood Plank - Wood Plank
  Furnace | 1 | Cobblestone - Cobblestone - Cobblestone / Cobblestone - - Cobblestone  / Cobblestone - Cobblestone - Cobblestone
@@ -153,11 +154,12 @@ Replacements here (for easier searaches)
  Anvil | 1 | Block of Iron - Block of Iron - Block of Iron / - Iron - / Iron - Iron - Iron
  Beacon | 1 | Glass - Glass - Glass / Glass - Nether Star - Glass / Obsidian - Obsidian - Obsidian
  Shulker Box | 1 | Shulker Shell / Chest / Shulker Shell
+ Conduit | 1 | Nautilus Shell - Nautilus Shell - Nautilus Shell / Nautilus Shell - Heart of the Sea - Nautilus Shell / Nautilus Shell - Nautilus Shell - Nautilus Shell
 
  Barrel | 1 | Wood Plank - Wood Slab - Wood Plank / Wood Plank - - Wood Plank / Wood Plank - Wood Slab - Wood Plank
  Blast Furnace | 1 | Iron - Iron - Iron / Iron - Furnace - Iron / Smooth Stone - Smooth Stone - Smooth Stone
- Campfire | 1 | - Stick - / Stick - Coal - Stick / Wood Log - Wood Log - Wood Log
- Soul Campfire | 1 | - Stick - / Stick - Soul Sand - Stick / Wood Log - Wood Log - Wood Log
+ Campfire | 1 | - Stick - / Stick - Coal - Stick / Wood - Wood - Wood
+ Soul Campfire | 1 | - Stick - / Stick - Soul Sand - Stick / Wood - Wood - Wood
  Cartography Table | 1 | Paper - Paper - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
  Composter | 1 | Wood Fence - - Wood Fence / Wood Fence - - Wood Fence / Wood Plank - Wood Plank - Wood Plank
  Fletching Table | 1 | Flint - Flint - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
@@ -312,7 +314,7 @@ Replacements here (for easier searaches)
  Cake | 1 | Milk - Milk - Milk / Sugar - Egg - Sugar / Wheat - Wheat - Wheat
  Cookie | 8 | Wheat - Cocoa Beans - Wheat
  Golden Apple | 1 | Gold - Gold - Gold / Gold - Apple - Gold / Gold - Gold - Gold
- Enchanted Golden Apple | 1 | Gold Block - Gold Block - Gold Block / Gold Block - Apple - Gold Block / Gold Block - Gold Block - Gold Block
+#Enchanted Golden Apple | 1 | Gold Block - Gold Block - Gold Block / Gold Block - Apple - Gold Block / Gold Block - Gold Block - Gold Block
  Melon Seeds | 1 | Melon
  Pumpkin Seeds | 4 | Pumpkin
  Pumpkin Pie | 1 | Egg - / Sugar - Pumpkin
@@ -341,7 +343,7 @@ Replacements here (for easier searaches)
  Glass Pane | 16 | Glass - Glass - Glass / Glass - Glass - Glass
  Iron Bars | 16 | - - / Iron - Iron - Iron / Iron - Iron - Iron 
  Wood Fence,Fence | 3 | - - / Wood Plank - Stick - Wood Plank / Wood Plank - Stick - Wood Plank
- Nether Brick Fence | 6 | - - / Nether Brick - Nether Brick - Nether Brick / Nether Brick - Nether Brick - Nether Brick
+ Nether Brick Fence | 6 | - - / Nether Brick - Nether Brick (item) - Nether Brick / Nether Brick - Nether Brick (item) - Nether Brick
  Fence Gate,Gate | 1 | - - / Stick - Wood Plank - Stick / Stick - Wood Plank - Stick
  Moss Stone | 1 | Cobblestone - Vines
 
@@ -357,7 +359,7 @@ Replacements here (for easier searaches)
  Painting | 1 | Stick - Stick - Stick / Stick - Wool - Stick / Stick - Stick - Stick
  Item Frame | 1 | Stick - Stick - Stick / Stick - Leather - Stick / Stick - Stick - Stick
  Sign | 3 | Wood Plank - Wood Plank - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Stick -
- Armor Stand | 1 | Stick - Stick - Stick / - Stick - / Stick - Stone Slab - Stick
+ Armor Stand | 1 | Stick - Stick - Stick / - Stick - / Stick - Smooth Stone Slab - Stick
 
  Paper | 3 | Sugar Cane - Sugar Cane - Sugar Cane
  Book | 1 | Paper - Paper / Paper - Leather

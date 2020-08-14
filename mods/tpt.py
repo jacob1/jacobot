@@ -105,18 +105,6 @@ def CheckRegistrationEmail(username, IP):
 	if not email:
 		return
 	provider = email.split("@")[1]
-	"""if "shitmail" in provider:
-		#SendMessage(GetSetting(__name__, "info-chan"), "bad email test")
-		BanUser(username, "1", "p", "Automatic ban: this IP address has been blacklisted")
-		expireTime = int(time.time()+timedelta(days=30).total_seconds())
-		info = {"reason":"automatically added due to email", "expires":expireTime}
-		ipbans = GetData(__name__, "ipbans")
-		ipbans[IP] = info
-		StoreData(__name__, "ipbans", ipbans)
-		SendMessage(GetSetting(__name__, "info-chan"), "Added {0} to the ipban list".format(IP))
-		return True"""
-	if provider in suspiciousEmails:
-		SendMessage(GetSetting(__name__, "info-chan"), "Warning: suspicious email: {0}".format(email))
 	emailmap[username] = email
 	return False
 
@@ -200,10 +188,10 @@ def CheckPost(message):
 		IP = GetThreadPostIP(threadMatch.group(3))
 		username = threadMatch.group(2)
 
-		if "0800" in threadTitle or "number" in threadTitle.lower():
-			SendMessage(logchan, "Removing thread due to potential spam.")
-			MoveThread(threadID, 7)
-			LockThread(threadID, "Thread automatically moved and locked because it was detected as spam")
+		#if "0800" in threadTitle or "number" in threadTitle.lower():
+		#	SendMessage(logchan, "Removing thread due to potential spam.")
+		#	MoveThread(threadID, 7)
+		#	LockThread(threadID, "Thread automatically moved and locked because it was detected as spam")
 
 		if IP:
 			check = CheckIP(IP)
@@ -232,10 +220,14 @@ def CheckPost(message):
 			LockThread(threadID, "Thread automatically moved and locked because this user is not allowed to post forum threads")
 
 seenReports = {}
+lastRun = 0
 def AlwaysRun(channel):
 	global seenReports
+	global lastRun
+
 	now = datetime.now()
-	if now.minute == 30 and now.second == 0:
+	if now.minute == 30 and lastRun + 60 * 59 < time.time():
+		lastRun = time.time()
 		reportlist = ReportsList()
 		if reportlist == None:
 			SendMessage(GetSetting(__name__, "info-chan"), "Error fetching reports")
@@ -245,14 +237,14 @@ def AlwaysRun(channel):
 			if seenReports.get(report[1]) and int(report[0]) > int(seenReports.get(report[1])):
 				report = (int(report[0]) - int(seenReports.get(report[1])), report[1], report[2])
 		if len(reportlist):
-			SendMessage(GetSetting(__name__, "info-chan"), u"There are \u0002%s unread reports\u0002: " % (len(reportlist)) + ", ".join(["https?://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
+			SendMessage(GetSetting(__name__, "info-chan"), u"There are \u0002%s unread reports\u0002: " % (len(reportlist)) + ", ".join(["https://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
 			PrintReportList(GetSetting(__name__, "info-chan"), reportlistunseen)
 		seenReports = {}
 		for report in reportlist:
 			seenReports[report[1]] = int(report[0])
 
 		#if len(reportlist):
-		#	SendMessage(GetSetting(__name__, "info-chan"), "Report list: " + ", ".join(["https?://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
+		#	SendMessage(GetSetting(__name__, "info-chan"), "Report list: " + ", ".join(["https://tpt.io/~%s#Reports %s" % (report[1], report[0]) for report in reportlist]))
 		#else:
 		#	SendMessage(GetSetting(__name__, "info-chan"), "Test: No reports")
 
@@ -281,9 +273,13 @@ def CheckCommentBans():
 	#commentbansorig = ["Frads_man", "JanKaszanka", "DrBreen"]
 	#commentbans = [149086, 156645, 168723]
 	usermap = {143701:"DrBrick", 156645:"JanKaszanka", 164702:"troy7838", 167755:"NoNStopWarrior", 175563: "Aamths", 172360: "Earthbright",
-	           172964:"TheCARNUFEX", 118259:"VIP84", 63378:"PinkLeopard", 161794:"Coffee"}
+	           172964:"TheCARNUFEX", 118259:"VIP84", 63378:"PinkLeopard", 161794:"Coffee", 169436:"ludapecurka123", 147798:"Wasteland",
+	           189416:"Velociraptor", 184385:"The_Admiral", 163114:"REALkittyAndCats", 193090:"JellyfishGiant", 173754:"potatoman6778",
+	           194818:"Supercrafter", 190563:"BokkaB", 40317:"Vampireax", 149086:"Frads_man", 168401:"SuperJohn", 149196:"CatArmour",
+	           150099:"Umm"}
 	#commentbans = {"DrBrick":["JanKaszanka","troy7838"], "JanKaszanka":["DrBrick"], "troy7838":["DrBrick"]}
-	commentbans = {"Earthbright":["Aamths", "NoNStopWarrior"], "NoNStopWarrior":["Earthbright"], "Aamths":["Earthbright"], "TheCARNUFEX":["VIP84", "Coffee", "PinkLeopard"]}
+	commentbans = {"TheCARNUFEX":["VIP84", "Coffee", "PinkLeopard"], "Supercrafter":["BokkaB", "CatArmour"], "BokkaB":["SuperCrafter"], "Vampireax":["Frads_man","Umm"], "Frads_man":["Vampireax"],
+			"Umm":["Vampireax"]}
 	for user, commentban in commentbans.items():
 		userid = -1
 		for useri, username in usermap.items():
@@ -325,7 +321,7 @@ def GetSaveData(ID):
 	save = bz2.decompress(compressedsave.read())
 	try:
 		data = bson.loads(save)
-	except ValueError:
+	except (ValueError, IndexError):
 		return None
 	return data
 
@@ -1226,6 +1222,8 @@ def GetAuthorsCmd(message):
 		message.Reply("Not a valid save ID")
 		return
 	DownloadSave(ID, force=True)
-	MakeAuthorWebpage(ID, force=True)
-	message.Reply(GetSetting(__name__, "authors-url").format(ID))
+	if not MakeAuthorWebpage(ID, force=True):
+		message.Reply("This save has no authors data")
+	else:
+		message.Reply(GetSetting(__name__, "authors-url").format(ID))
 
