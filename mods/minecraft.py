@@ -230,13 +230,24 @@ def Search(message):
 
 def location_conversion(message, nether_to_overworld):
 	coords = message.commandLine.split(",")
+
 	if len(coords) == 2:
 		coords = [coords[0], 65, coords[1]]
 	elif len(coords) == 1:
+		player_name = None
+
 		if message.GetArg(0):
-			(player, duplicates) = dynmap.GetPlayer(message.GetArg(0))
+			player_name = message.GetArg(0)
+		if not player_name and message.isMinecraft:
+			player_name = message.mcusername
+		if not player_name:
+			message.Reply("No player name or coordinate specified.")
+			return
+
+		if player_name:
+			(player, duplicates) = dynmap.GetPlayer(player_name)
 			if duplicates:
-				message.Reply("There is more than one player matching {0}".format(message.GetArg(0)))
+				message.Reply("There is more than one player matching {0}".format(player_name))
 				return
 			elif not player:
 				message.Reply("Player is hidden from dynmap or not online")
@@ -273,101 +284,108 @@ def location_conversion(message, nether_to_overworld):
 		"overworld" if nether_to_overworld else "nether"
 	))
 		
-@command("netherloc", minArgs = 1)
+@command("netherloc")
 def Netherloc(message):
 	"""(netherloc <coordinates | player>). Converts overworld location to nether"""
 	location_conversion(message, False)
 
-@command("overworldloc", minArgs = 1)
+@command("overworldloc")
 def Overworldloc(message):
 	"""(overworldloc <coordinates | player>). Converts nether location to overworld"""
 	location_conversion(message, True)		
-	
+
+
+class PotionBrewer(object):
+	# Format of potion_data:
+	# comma seperated keyword list | name of potion | comma seperated ingredient list
+	potion_data = \
+"""
+weak         | weakness         | fermented spider eye
+slow fall    | slow falling     | phantom membrane
+turtle       | turtle master    | turtle shell
+invis        | invisibility     | golden carrot, fermented spider eye
+night vision | night vision     | golden carrot
+breath       | water breathing  | pufferfish
+fire res     | fire resistance  | magma cream
+regen        | regeneration     | ghast tear
+poison       | poison           | spider eye
+harm         | harming          | glistering melon, fermented spider eye
+heal         | healing          | glistering melon
+strength     | strength         | blaze powder
+leap         | leaping          | rabbit's foot
+slow         | slowness         | sugar, fermented spider eye
+swift, speed | swiftness        | sugar
+"""
+
+	# In order:
+	# 1. Remove empty lines
+	# 2. Seperate | and strip whitespaces
+	# 3. Seperate commas and strip whitespaces
+	potion_data = list(filter(lambda x : x, potion_data.split("\n")))
+	potion_data = [[section.strip() for section in line.split("|")] for line in potion_data]
+	for i, line in enumerate(potion_data):
+		for j, section in enumerate(line):
+			if j != 1: # Don't make full name of potion into an array
+				potion_data[i][j] = [subsection.strip() for subsection in section.split(",")]
+
+
+	def GetPotionRecipe(self, potion_name):
+		potion_index = -1
+		ingredients = ["water bottle"]
+		extension = "none"  # none | time | potency
+		throw = "none"      # none | splash | lingering
+
+		# Find potion name
+		for i, potion in enumerate(self.potion_data):
+			if any(potion_keyword in potion_name for potion_keyword in potion[0]):
+				if potion_index > -1:
+					return "Ambigious potion type detected"
+				potion_index = i
+		
+		if potion_index < 0:
+			return "Could not find potion with that name"
+
+		# Potion extensions
+		if any(keyword in potion_name for keyword in ["extended", "time", "+"]):
+			extension = "time"
+		if any(keyword in potion_name for keyword in ["2", "ii", "4", "iv"]):
+			if extension != "none":
+				return "Conflicting potion extension (time and potency)"
+			extension = "potency"
+		
+		# Potion modifiers
+		if "splash" in potion_name:
+			throw = "splash"
+		if "linger" in potion_name:
+			if throw != "none":
+				return "Conflicting potion type (lingering and splash)"
+			throw = "lingering"
+		
+		if self.potion_data[potion_index][1] != "weakness":  # Weakness is brewed directly without nether wart
+			ingredients.append("nether wart")
+		ingredients += self.potion_data[potion_index][2]
+
+		if extension != "none":
+			ingredients.append({
+				"time": "redstone",
+				"potency": "glowstone"
+			}[extension])
+		
+		if throw != "none":
+			ingredients.append("gunpowder")
+		if throw == "lingering":
+			ingredients.append("dragon's breath")
+			
+		return " -> ".join(ingredients)
+
+potion_brewer = PotionBrewer()
+
+
 @command("brew", minArgs = 1)
 def Brew(message):
 	"""(brew <potion>). Give potion recipe for <potion>"""
 	name = message.commandLine.lower()
-	pot_type = ""
-	extension = "none" # none | time | potency
-	throw = "none" # none | splash | lingering
-	
-	pot_name_map = [
-		["weak", "weakness"],
-		["slow fall", "slow falling"],
-		["turtle", "turtle master"],
-		["invis", "invisibility"],
-		["night vision", "night vision"],
-		["breath", "water breathing"],
-		["fire res", "fire resistance"],
-		["regen", "regeneration"],
-		["poison", "poison"],
-		["harm", "harming"],
-		["heal", "healing"],
-		["strength", "strength"],
-		["leap", "leaping"],
-		["slow", "slowness"],
-		["swift", "swiftness"],
-		["speed", "swiftness"]
-	]
-	
-	pot_ingredient_map = {
-		"": [],
-		"weakness": ["fermented spider eye"],
-		"slow falling": ["phantom membrane"],
-		"turtle master": ["turtle shell"],
-		"invisibility": ["golden carrot", "fermented spider eye"],
-		"night vision": ["golden carrot"],
-		"water breathing": ["pufferfish"],
-		"fire resistance": ["magma cream"],
-		"regeneration": ["ghast tear"],
-		"poison": ["spider eye"],
-		"harming": ["glistering melon", "fermented spider eye"],
-		"healing": ["glistering melon"],
-		"strength": ["blaze powder"],
-		"leaping": ["rabbit's foot"],
-		"slowness": ["sugar", "fermented spider eye"],
-		"swiftness": ["sugar"]
-	}
-	
-	for pot in pot_name_map:
-		if pot[0] in name:
-			if pot_type != "":
-				message.Reply("Ambigious potion type")
-				return
-			pot_type = pot[1]
-	
-	if any(x in name for x in ["extended", "time", "+"]):
-		extension = "time"
-	if any(x in name for x in ["2", "ii", "4", "iv"]):
-		if extension != "none":
-			message.Reply("Conflicting potion extension (time and potency)")
-			return
-		extension = "potency"
-		
-	if "splash" in name:
-		throw = "splash"
-	if "linger" in name:
-		if throw != "none":
-			message.Reply("Conflicting potion type (lingering and splash)")
-			return
-		throw = "lingering"
-	
-	steps = ["water bottle"]
-	if pot_type != "weakness" and pot_type:
-		steps.append("nether wart")
-	steps += pot_ingredient_map[pot_type]
-	
-	if extension == "time":
-		steps.append("redstone")
-	elif extension == "potency":
-		steps.append("glowstone")
-		
-	if throw != "none":
-		steps.append("gunpowder")
-	if throw == "lingering":
-		steps.append("dragon's breath")
-		
-	message.Reply(" -> ".join(steps))
+	message.Reply(potion_brewer.GetPotionRecipe(name))
 
 
 class Dynmap(object):
