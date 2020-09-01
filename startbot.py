@@ -188,7 +188,7 @@ async def on_message_runner(event):
 #Multiple bots in one asyncio:
 #https://github.com/Rapptz/discord.py/issues/516
 
-#main_server = server.DiscordServer(botToken, on_message)
+main_server = server.DiscordServer(botToken, on_message)
 
 #host, port, ssl, nick, ident, account_name, account_password
 irc_server = server.IrcServer(on_message, host="irc.freenode.net", port=6697, ssl=True, nick="potatobot", ident="jacobot")
@@ -197,11 +197,11 @@ clients = [irc_server]
 
 loop = asyncio.get_event_loop()
 try:
-	#task1 = loop.create_task(main_server.connect())
-	await irc_server.connect()
-	task1 = loop.create_task(irc_server.main_loop())
-	#gathered = asyncio.gather(task1, loop=loop)
-	loop.run_until_complete(task1)
+	task1 = loop.create_task(main_server.connect())
+	loop.run_until_complete(irc_server.connect())
+	task2 = loop.create_task(irc_server.main_loop())
+	gathered = asyncio.gather(task1, task2, loop=loop)
+	loop.run_until_complete(gathered)
 except KeyboardInterrupt:
 	#loop.run_until_complete(main_server.client.logout())
 	loop.stop()

@@ -2,6 +2,7 @@ import inspect
 import re
 import traceback
 import typing
+from config import *
 
 def get_globals():
 	return globals()
@@ -12,19 +13,23 @@ class ShowHelpException(Exception):
 class PermissionException(Exception):
 	pass
 
-command_char = "!!"
+#command_char = "!!"
 class CommandParser:
-	commandRegex = re.compile(r"^{0}([^ ]+)(?: (.+))?$".format(command_char))
+	command_regex = re.compile(r"^{0}([^ ]+)(?: (.+))?$".format(command_char))
+	last_command_char = command_char
 	
 	argMatch = re.compile(r"(?:(['\"])(.*?)\1|(\S*))\s*")
 	endOfLineArgMatch = re.compile(r"(['\"])(.*?)\1|([\S\s]*?)\s*$")
 
 	def __init__(self, message):
-		self.message = message#.content
+		self.message = message
 
 		self.isCommand = False
-		if self.message.startswith(command_char):
-			commandParsed = re.search(self.commandRegex, self.message)
+		if command_char != self.last_command_char:
+			self.last_command_char = command_char
+			self.command_regex = re.compile(r"^{0}([^ ]+)(?: (.+))?$".format(command_char))
+		if True or self.message.startswith(command_char):
+			commandParsed = re.search(self.command_regex, self.message)
 			if commandParsed:
 				self.isCommand = True
 				self.command = commandParsed.group(1)

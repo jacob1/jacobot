@@ -12,7 +12,12 @@ async def reload_cmd(context, plugin_name : str):
 	if plugin_name == "config":
 		del sys.modules["config"]
 		handlers.plugins["config"] = importlib.import_module("config")
-		handlers.get_globals().update(handlers.plugins["config"].GetGlobals())
+		#handlers.get_globals().update(handlers.plugins["config"].GetGlobals())
+		for (modname, mod) in sys.modules.items():
+			#if hasattr(mod.__dict__, "loaded_config_py"):
+			if "loaded_config_py" in mod.__dict__:
+				print("Attempting to reload config.py for module " + modname)
+				mod.__dict__.update(handlers.plugins["config"].__dict__)
 		reload_obj = {"message":f"Reloading {plugin_name}.py", "module":plugin_name, "context":context}
 		raise handlers.ReloadedModuleException(reload_obj)
 	elif plugin_name == "handlers" or plugin_name == "common" or plugin_name == "connection":
@@ -61,3 +66,12 @@ async def unload_cmd(context, plugin_name : str):
 
 	await context.reply(f"Unloaded {plugin_name}.py")
 
+@command("eval", owner = True)
+async def eval_cmd(context, *, code : str):
+	try:
+		formatted_code = code.replace("\\n", "\n").replace("\\t", "\t")
+		ret = str(eval(formatted_code))
+	except Exception as e:
+		ret = str(type(e)) + ":" + str(e)
+
+	await context.reply(f"Ret: {ret}")
