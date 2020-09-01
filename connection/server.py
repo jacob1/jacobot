@@ -32,14 +32,13 @@ class DiscordServer(Server):
 
 		sender = DiscordUser(message.author)
 
-		if message.channel.is_private:
-			# TODO: consider supporting this. Not very important and not compatible with IRC though
-			if len(message.channel.recipients) != 1:
-				return
-			# message.channel is a PrivateChannel instance here
+		if isinstance(message.channel, discord.DMChannel):
 			receiver = DiscordUser(message.channel)
-		else:
+		elif isinstance(message.channel, discord.TextChannel):
 			receiver = DiscordChannel(message.channel)
+		# Probably a group dm, ignore for now
+		else:
+			return
 
 		context = Context(self, sender, receiver)
 		await self.event_handler(MessageEvent(context, message.content))
@@ -49,13 +48,13 @@ class DiscordServer(Server):
 		self.token = None # Clear for security reasons
 
 	async def reply(self, channel, message):
-		await self.client.send_message(channel.rawchannel, message)
+		await channel.rawchannel.send(message)
 
 	async def reply_in_private(self, user, message):
-		await self.client.send_message(user.rawuser, message)
+		await user.rawuser.send(message)
 
 	async def reply_in_notice(self, user, message):
-		await self.client.send_message(user.rawuser, message)
+		await user.rawuser.send(message)
 
 
 # Small class to store reader and writer during connection class reloads
@@ -65,7 +64,17 @@ class IrcClient:
 		self.reader = reader
 		self.writer = writer
 
+# Decorator for events
+def irchandler(event_name):
+	def irc_event_handler(func):
+		async def call_irc_event_handler(self, prefix, event, args):
+			await func(self, prefix, event, args)
+
+		irc_event_handlers[event_name] = call_irc_event_handler
+
+	return irc_event_handler
 irc_event_handlers = {}
+
 class IrcServer(Server):
 
 	def __init__(self, event_handler, *, host, port, ssl, nick, ident, account_name = None, account_password = None):
@@ -161,13 +170,6 @@ class IrcServer(Server):
 		(ident, host) = prefix.split("@")
 		return nick, ident, host
 
-	# Decorator for events
-	def irchandler(event_name):
-		def irc_event_handler(func):
-			async def call_irc_event_handler(self, prefix, event, args):
-				await func(self, prefix, event, args)
-			irc_event_handlers[event_name] = call_irc_event_handler
-		return irc_event_handler
 
 	@irchandler("ERROR")
 	async def server_error_handler(self, prefix, event, args):
@@ -206,6 +208,5 @@ class IrcServer(Server):
 					await handler(self, prefix, event, args)
 
 			if self.reconnect:
-				self.connect()
-		print("Exiting out of old read loop after reload")
-
+				await self.connect()
+		print("Main IRC Loop has exited")

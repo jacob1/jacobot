@@ -1,9 +1,17 @@
 import importlib
+import os
 import sys
 from typing import Optional
 
 from common import *
 import handlers
+
+@command("restart", owner = True)
+async def restart(context):
+	"""(restart) Restarts the bot."""
+
+	print("Restarting bot due to restart command")
+	os.execl(sys.executable, sys.executable, *sys.argv)
 
 @command("reload", owner = True)
 async def reload_cmd(context, plugin_name : str):
@@ -20,7 +28,7 @@ async def reload_cmd(context, plugin_name : str):
 				mod.__dict__.update(handlers.plugins["config"].__dict__)
 		reload_obj = {"message":f"Reloading {plugin_name}.py", "module":plugin_name, "context":context}
 		raise handlers.ReloadedModuleException(reload_obj)
-	elif plugin_name == "handlers" or plugin_name == "common" or plugin_name == "connection":
+	elif plugin_name == "handlers" or plugin_name == "common":
 		reload_obj = {"message":f"Reloading {plugin_name}.py", "module":plugin_name, "context":context}
 		raise handlers.ReloadedModuleException(reload_obj)
 

@@ -1,7 +1,7 @@
 import inspect
 import re
 import traceback
-import typing
+import typing_inspect
 from config import *
 
 def get_globals():
@@ -99,7 +99,7 @@ def command(name, owner = False):
 
 				optional = False
 				# Probably typing.Optional
-				if type(sigValue.annotation) == type(typing.Union):
+				if typing_inspect.is_union_type(sigValue.annotation):
 					optional = True
 
 				# Extract a word from the message. Show help if this argument doesn't exist

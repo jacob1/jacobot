@@ -9,7 +9,7 @@ class DiscordUser(User):
 
 	# TODO: proper permissions, not stored in this file
 	def is_owner(self):
-		return self.user.name == "jacob1" and self.user.id == "186987207033094146" and self.user.discriminator == "8633"
+		return self.user.name == "jacob1" and self.user.id == 186987207033094146 and self.user.discriminator == "8633"
 
 	@property
 	def rawuser(self):

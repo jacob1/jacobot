@@ -1,18 +1,16 @@
 import asyncio
-import copy
-import discord
 import importlib
 import socket # For error handler. Use asyncio?
 import sys
 import traceback
 
 try:
-        config = importlib.import_module("config")
-        globals().update(config.get_globals())
+	config = importlib.import_module("config")
+	globals().update(config.get_globals())
 except Exception:
-        print("Error loading config.py, cannot start bot")
-        print(traceback.format_exc())
-        sys.exit(1)
+	print("Error loading config.py, cannot start bot")
+	print(traceback.format_exc())
+	sys.exit(1)
 
 try:
 	common = importlib.import_module("common")
@@ -52,7 +50,7 @@ async def on_ready():
 def find_channel(server_name, channel_name):
 	client = main_server.client
 	search_server = None
-	for c_server in client.servers:
+	for c_server in client.guilds:
 		if c_server.name == server_name:
 			if search_server:
 				raise Exception(f"Two servers match '{server}'")
@@ -82,15 +80,15 @@ async def upload_error(tb):
 	sock.settimeout(1)
 	reply = b""
 	while True:
-	        try:
-	                reply += sock.recv(4096)
-	        except:
-	                break
+		try:
+			reply += sock.recv(4096)
+		except:
+			break
 	url = {key: value for key, value, *_ in [line.split(b" ") + [None] for line in reply.split(b"\n") if line]}[b"URL"].decode("utf-8")
 	admin = {key: value for key, value, *_ in [line.split(b" ") + [None] for line in reply.split(b"\n") if line]}[b"ADMIN"].decode("utf-8")
 
 	chan = find_channel(error_server, error_channel)
-	await main_server.client.send_message(chan, f"Error: {url} (admin link {admin})")
+	await chan.send(f"Error: {url} (admin link {admin})")
 
 # Handle an error. Prints it to console, then calls upload_error to upload it
 async def handle_error(context):
@@ -104,7 +102,7 @@ async def handle_error(context):
 		except Exception:
 			chan = find_channel(error_server, error_channel)
 			if chan:
-				await main_server.client.send_message(chan, "We heard you like errors, so we put an error in your error handler so you can error while you catch errors")
+				await chan.send("We heard you like errors, so we put an error in your error handler so you can error while you catch errors")
 			else:
 				print(f"Could not find error channel! {error_server}, {error_channel}")
 			print("=======ERROR=======\n{0}========END========\n".format(traceback.format_exc()))
@@ -119,7 +117,6 @@ async def on_message_runner(event):
 	global common
 	global config
 	global handler
-	global main_server
 
 	context = event.context
 	message = event.message
@@ -164,26 +161,6 @@ async def on_message_runner(event):
 			if failed:
 				ret += ". Failed plugins: " + ", ".join(failed)
 			await context.reply(ret)
-		elif reload_module == "connection":
-			for module_name in copy.copy(sys.modules):
-				if module_name[:11] == "connection.":
-					del sys.modules[module_name]
-			for i in range(len(clients)):
-				old_client = clients[i].client
-				server = importlib.import_module("connection.server")
-				print(type(clients[i]), type(clients[i]) == server.IrcServer)
-				if type(clients[i]) == server.DiscordServer:
-					clients[i] = server.DiscordServer(None, on_message)
-					clients[i].client = old_client
-				elif type(clients[i]) == server.IrcServer:
-					print("reloading irc")
-					clients[i].client = None
-					clients[i] = server.IrcServer(on_message, host="irc.freenode.net", port=6697, ssl=True, nick="potatobot", ident="jacobot")
-					clients[i].client = old_client
-					new_task = loop.create_task(clients[i].main_loop())
-					loop.run_until_complete(new_task)
-
-			await context.reply("Reloaded connection classes")
 
 #Multiple bots in one asyncio:
 #https://github.com/Rapptz/discord.py/issues/516
@@ -193,7 +170,7 @@ main_server = server.DiscordServer(botToken, on_message)
 #host, port, ssl, nick, ident, account_name, account_password
 irc_server = server.IrcServer(on_message, host="irc.freenode.net", port=6697, ssl=True, nick="potatobot", ident="jacobot")
 
-clients = [irc_server]
+clients = [irc_server, main_server]
 
 loop = asyncio.get_event_loop()
 try:
