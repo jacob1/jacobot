@@ -1,6 +1,5 @@
 import os
 import importlib
-import sys
 import traceback
 
 def get_globals():
@@ -16,7 +15,6 @@ def LoadMods():
 	failed = []
 
 	plugins["config"] = importlib.import_module("config")
-	globals().update(plugins["config"].get_globals())
 	plugins["common"] = importlib.import_module("common")
 	globals().update(plugins["common"].get_globals())
 

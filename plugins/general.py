@@ -7,6 +7,7 @@ import asyncio
 async def PingCmd(context, *, pong : Optional[str]):
 	"""PONG"""
 	if pong:
+		a = 0 / 0
 		await context.reply(f"pong {pong}")
 	else:
 		await context.reply("pong")

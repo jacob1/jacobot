@@ -2,7 +2,7 @@ import inspect
 import re
 import traceback
 import typing_inspect
-from config import *
+import config
 
 def get_globals():
 	return globals()
@@ -15,8 +15,8 @@ class PermissionException(Exception):
 
 #command_char = "!!"
 class CommandParser:
-	command_regex = re.compile(r"^{0}([^ ]+)(?: (.+))?$".format(command_char))
-	last_command_char = command_char
+	command_regex = re.compile(r"^{0}([^ ]+)(?: (.+))?$".format(config.command_char))
+	last_command_char = config.command_char
 	
 	argMatch = re.compile(r"(?:(['\"])(.*?)\1|(\S*))\s*")
 	endOfLineArgMatch = re.compile(r"(['\"])(.*?)\1|([\S\s]*?)\s*$")
@@ -25,10 +25,10 @@ class CommandParser:
 		self.message = message
 
 		self.isCommand = False
-		if command_char != self.last_command_char:
-			self.last_command_char = command_char
-			self.command_regex = re.compile(r"^{0}([^ ]+)(?: (.+))?$".format(command_char))
-		if True or self.message.startswith(command_char):
+		if config.command_char != self.last_command_char:
+			self.last_command_char = config.command_char
+			self.command_regex = re.compile(r"^{0}([^ ]+)(?: (.+))?$".format(config.command_char))
+		if True or self.message.startswith(config.command_char):
 			commandParsed = re.search(self.command_regex, self.message)
 			if commandParsed:
 				self.isCommand = True
