@@ -47,16 +47,6 @@ class DiscordServer(Server):
 		await self._client.start(self.token)
 		self.token = None # Clear for security reasons
 
-	async def reply(self, channel, message):
-		await channel.rawchannel.send(message)
-
-	async def reply_in_private(self, user, message):
-		await user.rawuser.send(message)
-
-	async def reply_in_notice(self, user, message):
-		await user.rawuser.send(message)
-
-
 # Small class to store reader and writer during connection class reloads
 class IrcClient:
 
@@ -89,6 +79,9 @@ class IrcServer(Server):
 		self.event_handler = event_handler
 		self.reconnect = False
 
+		self.reader = None
+		self.writer = None
+
 	async def connect(self):
 		self.reader, self.writer = await asyncio.open_connection(self.host, self.port, ssl = self.ssl)
 		self.writer.write(f"USER {self.ident} {self.nick} {self.nick} :jacobot rewrite\n".encode("utf-8"))
@@ -107,20 +100,11 @@ class IrcServer(Server):
 
 	@client.setter
 	def client(self, client):
-		if client == None:
+		if client is None:
 			self.reader = None
 		else:
 			self.reader = client.reader
 			self.writer = client.writer
-
-	async def reply(self, channel, message):
-		self.raw_send(f"PRIVMSG {channel.name} :{message}\n")
-
-	async def reply_in_private(self, user, message):
-		self.raw_send(f"PRIVMSG {user.nick} :{message}\n")
-
-	async def reply_in_notice(self, user, message):
-		self.raw_send(f"NOTICE {user.nick} :{message}\n")
 
 	def raw_send(self, message):
 		self.writer.write(f"{message}\n".encode("utf-8"))
@@ -182,13 +166,13 @@ class IrcServer(Server):
 	@irchandler("PRIVMSG")
 	async def privmsg_handler(self, prefix, event, args):
 		(nick, ident, host) = self.parse_prefix(prefix)
-		sender = IrcUser(nick, ident, host)
+		sender = IrcUser(nick, ident, host, self)
 
 		channel_name = args[0]
 		if channel_name[0] == "#":
-			receiver = IrcChannel(channel_name)
+			receiver = IrcChannel(channel_name, self)
 		else:
-			receiver = IrcUser(channel_name, None, None)
+			receiver = IrcUser(channel_name, None, None, self)
 
 		context = Context(self, sender, receiver)
 		await self.event_handler(MessageEvent(context, args[1]))
