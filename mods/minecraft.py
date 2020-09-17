@@ -313,7 +313,7 @@ harm         | harming          | glistering melon, fermented spider eye
 heal         | healing          | glistering melon
 strength     | strength         | blaze powder
 leap         | leaping          | rabbit's foot
-slow         | slowness         | sugar, fermented spider eye
+slowness     | slowness         | sugar, fermented spider eye
 swift, speed | swiftness        | sugar
 """
 
