@@ -23,6 +23,7 @@ AddSetting(__name__, "suspicious-email-providers", "")
 LoadSettings(__name__)
 
 emailmap = {}
+disposable_providers = {"gmail.com":False, "outlook.com":False, "hotmail.com":False, "yandex.ru":False}
 suspiciousEmails = GetSetting(__name__, "suspicious-email-providers").split(";")
 
 def CheckUsername(username):
@@ -102,7 +103,7 @@ def CheckRegistrationForumSpam(username, IP):
 	confidence = data["ip"]["confidence"]
 	frequency = data["ip"].get("frequency", 0)
 	SendMessage(GetSetting(__name__, "info-chan"), "{0}% chance of being a spammer, seen {1} times".format(confidence, frequency))
-	if int(confidence) > 10 or int(frequency) > 10:
+	if float(confidence) > 10 or float(frequency) > 10:
 		#BanUser(username, "1", "p", "Automatic ban: this IP address has been reported as spam")
 		return True
 	return False
@@ -113,6 +114,21 @@ def CheckRegistrationEmail(username, IP):
 		return
 	provider = email.split("@")[1]
 	emailmap[username] = email
+
+	return CheckDisposable(email, provider)
+
+def CheckDisposable(email, provider):
+	if provider in disposable_providers:
+		return disposable_providers[provider]
+	page = GetPage("https://disposable.debounce.io/?email=" + email, fakeuseragent=True)
+	if not page:
+		SendMessage(GetSetting(__name__, "info-chan"), "Error: Could not access disposable.debounce.io")
+		return
+	disposable_check = json.loads(page)
+	if disposable_check["disposable"] == "true":
+		disposable_providers[provider] = True
+		return True
+	disposable_providers[provider] = False
 	return False
 
 def CheckRegistration(message):
@@ -123,11 +139,13 @@ def CheckRegistration(message):
 		check = CheckIP(IP)
 		if not check[0]:
 			CheckRegistrationForumSpam(username, IP)
-			CheckRegistrationEmail(username, IP)
+			if CheckRegistrationEmail(username, IP):
+				SendMessage(GetSetting(__name__, "info-chan"), "Disposable email detected")
+				BanUser(username, "1", "p", "Automatic ban: Due to abuse, registration with disposable email addresses is not allowed")
 			return
 		if check[1] == "tor":
 			SendMessage(GetSetting(__name__, "info-chan"), "Warning: This account was registered using TOR")
-			#BanUser(username, "1", "p", "Automatic ban: Registeration using TOR has been temporarily disabled due to abuse")
+			#BanUser(username, "1", "p", "Automatic ban: Registration using TOR has been temporarily disabled due to abuse")
 		elif check[1] == "ipban":
 			BanUser(username, "1", "p", "Automatic ban: this IP address has been blacklisted")
 			SendMessage(GetSetting(__name__, "info-chan"), "Automatic ban: this IP address has been blacklisted")
@@ -1171,6 +1189,17 @@ def CheckForumSpamCmd(message):
 	frequency = ip.get("frequency", "[none]")
 	output = "{0} chance of being a spammer. Last seen {1}. Appears {2} times".format(confidence, lastseen, frequency)
 	message.Reply(output)
+
+@command("checkdisposable", minArgs=1, admin=True)
+def CheckDisposableCmd(message):
+	"""(checkdisposable <email>). Checks debounce.io for disposable email addresses."""
+	arg = message.GetArg(0)
+	if arg.find("@") >= 0:
+		provider = arg.split("@")[1]
+		disposable = CheckDisposable(arg, provider)
+	else:
+		disposable = CheckRegistrationEmail(arg, None)
+	message.Reply("Disposable email" if disposable else "Not disposable")
 
 @command("getemailraw", owner=True)
 def GetEmailRawCmd(message):

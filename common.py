@@ -134,10 +134,19 @@ def command(name, minArgs = 0, owner = False, admin = False, rateLimit = False):
 		return call_func
 	return real_command
 
-def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect=False, binary=False):
+def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect=False, binary=False, fakeuseragent=False):
 	try:
-		if cookies:
-			req = urllib.request.Request(url, data=urllib.parse.urlencode(headers).encode("utf-8") if headers else None, headers={'Cookie':cookies.encode("utf-8")})
+		if cookies or fakeuseragent:
+			extra_headers = {}
+			if cookies:
+				extra_headers['Cookie'] = cookies.encode("utf-8")
+			if fakeuseragent:
+				extra_headers["User-Agent"] = "Mozilla/5.0 (X11; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0"
+		else:
+			extra_headers = None
+
+		if extra_headers:
+			req = urllib.request.Request(url, data=urllib.parse.urlencode(headers).encode("utf-8") if headers else None, headers=extra_headers)
 		else:
 			req = urllib.request.Request(url, data=urllib.parse.urlencode(headers).encode("utf-8") if headers else None)
 		data = urllib.request.urlopen(req, timeout=10)
