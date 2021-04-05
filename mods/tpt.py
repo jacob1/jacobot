@@ -8,6 +8,7 @@ import time
 from collections import defaultdict
 from datetime import datetime, timedelta
 from time import sleep
+from ipaddress import ip_network, ip_address
 
 from common import *
 RegisterMod(__name__)
@@ -41,6 +42,7 @@ def CheckIP(IP):
 	if IP in torips:
 		return (True, "tor")
 	ipbans = GetData(__name__, "ipbans")
+	betterIP = ip_address(IP)
 	if ipbans:
 		todel = []
 		ret = None
@@ -48,8 +50,13 @@ def CheckIP(IP):
 			expires = info["expires"]
 			if expires and time.time() > info["expires"]:
 				todel.append(address)
-			elif IP.startswith(address):
-				ret = (True, "ipban")
+			else:
+				try:
+					if betterIP in ip_network(address):
+						ret = (True, "ipban")
+				except ValueError as e:
+					if IP.startswith(address):
+						ret = (True, "ipban")
 		if todel:
 			for d in todel:
 				del ipbans[d]
@@ -1078,8 +1085,12 @@ def IPban(message):
 			else:
 				expireTime = int(time.time()+timedelta(days=30).total_seconds())
 				info = {"reason":"no reason given", "expires":expireTime}
-				ipbans[IP] = info
-				message.Reply("Added {0} to the IP ban list".format(IP))
+				try:
+					ip_network(IP)
+					ipbans[IP] = info
+					message.Reply("Added {0} to the IP ban list".format(IP))
+				except ValueError as e:
+					message.Reply("{0} is not a valid subnet".format(IP))
 		elif IP not in ipbans:
 			message.Reply("{0} isn't in the IP ban list".format(IP))
 		elif action == "remove":
