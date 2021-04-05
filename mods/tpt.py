@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from time import sleep
 from ipaddress import ip_network, ip_address
 
+from mods.savechecker import savechecker
 from common import *
 RegisterMod(__name__)
 
@@ -23,8 +24,9 @@ AddSetting(__name__, "suspicious-email-providers", "")
 LoadSettings(__name__)
 
 emailmap = {}
-disposable_providers = {"gmail.com":False, "outlook.com":False, "hotmail.com":False, "yandex.ru":False}
+disposable_providers = GetData(__name__, "disposable-email-providers") or {"gmail.com":False, "outlook.com":False, "hotmail.com":False}
 suspiciousEmails = GetSetting(__name__, "suspicious-email-providers").split(";")
+registration_dates = {}
 
 def CheckUsername(username):
 	if username in emailmap:
@@ -60,8 +62,14 @@ def CheckIP(IP):
 						ret = (True, "ipban")
 		if todel:
 			for d in todel:
+				reason = None
+				if "reason" in ipbans[d] and ipbans[d]["reason"] != "no reason given":
+					reason = ipbans[d]["reason"]
 				del ipbans[d]
-				SendMessage(GetSetting(__name__, "info-chan"), "IP ban expired: {0}".format(d))
+				if reason:
+					SendMessage(GetSetting(__name__, "info-chan"), "IP ban expired: {0} ({1})".format(d, reason))
+				else:
+					SendMessage(GetSetting(__name__, "info-chan"), "IP ban expired: {0}".format(d))
 			StoreData(__name__, "ipbans", ipbans)
 		if ret:
 			return ret
@@ -85,6 +93,7 @@ def Parse(raw, text):
 		message = powderBotMatch.group(3)
 		if channel == GetSetting(__name__, "saves-chan"):
 			CheckTag(message)
+			CheckSave(message)
 		elif channel == GetSetting(__name__, "forum-chan"):
 			CheckPost(message)
 		elif channel == GetSetting(__name__, "info-chan"):
@@ -127,9 +136,10 @@ def CheckDisposable(email, provider):
 	disposable_check = json.loads(page)
 	if disposable_check["disposable"] == "true":
 		disposable_providers[provider] = True
-		return True
 	disposable_providers[provider] = False
-	return False
+	StoreData(__name__, "disposable-email-providers", disposable_providers)
+
+	return disposable_providers[provider]
 
 def CheckRegistration(message):
 	registrationMatch = re.match(r"^New registration: ([\w_-]+)\. https?:\/\/tpt\.io\/@([\w\_-]+) \[([0-9.]+)\] ?$", message)
@@ -138,7 +148,9 @@ def CheckRegistration(message):
 		IP = registrationMatch.group(3)
 		check = CheckIP(IP)
 		if not check[0]:
-			CheckRegistrationForumSpam(username, IP)
+			if CheckRegistrationForumSpam(username, IP):
+				BanUser(username, "1", "p", "Automatic ban: this IP address has been reported as spam")
+				return
 			if CheckRegistrationEmail(username, IP):
 				SendMessage(GetSetting(__name__, "info-chan"), "Disposable email detected")
 				BanUser(username, "1", "p", "Automatic ban: Due to abuse, registration with disposable email addresses is not allowed")
@@ -174,6 +186,44 @@ def CheckTag(message):
 					SendMessage(logchan, "Disabled tag {0}".format(tag))
 				else:
 					SendMessage(logchan, "Error: couldn't disable tag {0}".format(tag))
+
+num_offenses = {}
+def CheckSave(message):
+	logchan = "+"+GetSetting(__name__, "saves-chan")
+	saveMatch = re.match("^(Updated|New): \u000302'([^\u000F]+)'\u000F by ?\u000305 ?([\w-]+)\u000314 \((\d+) comments?, score (\d+), (\d+) bumps?\)\u000F; https://tpt.io/~(\d+)$", message)
+	if saveMatch:
+		status = saveMatch.group(1)
+		title = saveMatch.group(2)
+		username = saveMatch.group(3)
+		numComments = saveMatch.group(4)
+		score = saveMatch.group(5)
+		bumps = saveMatch.group(6)
+		saveId = saveMatch.group(7)
+		#SendMessage(logchan, "Data: {0}, {1}, {2}, {3}, {4}, {5}, {6}".format(status, title, username, numComments, score, bumps, saveId))
+		#SendMessage(logchan, "Registration Time: {0}".format(GetRegistrationDate(username)))
+		(numParts, numDeco) = savechecker.ValidateSave(saveId)
+		if numParts > 0 and numDeco / numParts > .8 and numParts > 10000:
+			#SendMessage(logchan, "Num parts: {0}, percent deco: {1}".format(numParts, numDeco / numParts))
+			registrationTime = int(GetRegistrationDate(username))
+			if registrationTime > time.time() - 7200:
+				if not username in num_offenses:
+					num_offenses[username] = 1
+				else:
+					num_offenses[username] = num_offenses[username] + 1
+
+				if num_offenses[username] > 1:
+					SendMessage(logchan, "Automatically disabled save https://tpt.io/~{0} due to being {1}% deco".format(saveId, numDeco / numParts * 100))
+					SendMessage("#powder-info", "Automatically disabled save https://tpt.io/~{0} due to being {1}% deco".format(saveId, numDeco / numParts * 100))
+					PromotionLevel(saveId, -2)
+					DoComment(saveId, "This save has been automatically disabled due to anti-spam measures. If this was in error, a moderator will publish it shortly.")
+				else:
+					SendMessage(logchan, "Found save https://tpt.io/~{0} which is {1}% deco".format(saveId, numDeco / numParts * 100))
+					SendMessage("#powder-info", "Found save https://tpt.io/~{0} which is {1}% deco".format(saveId, numDeco / numParts * 100))
+
+				if num_offenses[username] >= 5:
+					SendMessage(logchan, "Account less than 2 hours old, applying ban".format(GetRegistrationDate(username)))
+					BanUser(username, "1", "d", "Automatic ban: This account has triggered anti-spam mechanisms")
+		#SendMessage(logchan, "Num parts: {0}, num deco: {1}".format(numParts, numDeco))
 
 def CheckPost(message):
 	logchan = "+"+GetSetting(__name__, "forum-chan")
@@ -301,10 +351,10 @@ def CheckCommentBans():
 	           172964:"TheCARNUFEX", 118259:"VIP84", 63378:"PinkLeopard", 161794:"Coffee", 169436:"ludapecurka123", 147798:"Wasteland",
 	           189416:"Velociraptor", 184385:"The_Admiral", 163114:"REALkittyAndCats", 193090:"JellyfishGiant", 173754:"potatoman6778",
 	           194818:"Supercrafter", 190563:"BokkaB", 40317:"Vampireax", 149086:"Frads_man", 168401:"SuperJohn", 149196:"CatArmour",
-	           150099:"Umm"}
+	           150099:"Umm",159252:"LiquidPlasma",202070:"heptium345"}
 	#commentbans = {"DrBrick":["JanKaszanka","troy7838"], "JanKaszanka":["DrBrick"], "troy7838":["DrBrick"]}
-	commentbans = {"TheCARNUFEX":["VIP84", "Coffee", "PinkLeopard"], "Supercrafter":["BokkaB", "CatArmour"], "BokkaB":["SuperCrafter"], "Vampireax":["Frads_man","Umm"], "Frads_man":["Vampireax"],
-			"Umm":["Vampireax"]}
+	commentbans = {"Supercrafter":["BokkaB", "CatArmour"], "BokkaB":["SuperCrafter"], "Vampireax":["Frads_man","Umm"], "Frads_man":["Vampireax"],
+			"Umm":["Vampireax"], "heptium345":["LiquidPlasma"], "LiquidPlasma":["heptium345"]}
 	for user, commentban in commentbans.items():
 		userid = -1
 		for useri, username in usermap.items():
@@ -406,6 +456,13 @@ def GetUserID(username):
 		return -1
 	thing = page.find("\"ID\":")
 	return page[thing+5:page.find(",", thing)]
+
+def GetRegistrationDate(username):
+	page = GetPage("https://powdertoy.co.uk/User.json?Name={}".format(username))
+	if not page:
+		return None
+	parsed = json.loads(page)
+	return parsed["User"]["RegisterTime"]
 
 #Ban / Unban Functions
 def BanUser(username, time, timeunits, reason):
@@ -1080,7 +1137,7 @@ def UpdateTor(message):
 
 @command("ipban", minArgs = 1, admin = True)
 def IPban(message):
-	"""(ipban add <ip>|remove <ip>|mark <ip> <reason>|makrperm <ip> list). Modifies the IP bans list. Admin only."""
+	"""(ipban add <ip>|remove <ip>|mark <ip> <reason>|makeperm <ip>|list). Modifies the IP bans list. Admin only."""
 	ipbans = GetData(__name__, "ipbans")
 	if not ipbans:
 		ipbans = {}
