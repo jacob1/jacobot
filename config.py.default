@@ -8,8 +8,8 @@ botIdent = "potatobot"
 botRealname = "unnoficial jacobot clone"
 
 botAccount = ""
-botPassword = ""
-NickServ = False
+botPassword = None
+sasl = True
 
 ownerHostmasks = ("",)
 adminHostmasks = ("",)

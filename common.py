@@ -134,6 +134,19 @@ def command(name, minArgs = 0, owner = False, admin = False, rateLimit = False):
 		return call_func
 	return real_command
 
+hooks = {}
+def hook(name):
+	"""Hooks onto a raw IRC event or numeric"""
+	def real_hook(func):
+		def call_func(prefix : str, command : str, args : list[str]):
+			return func(prefix, command, args)
+		call_func.__doc__ = func.__doc__
+		if not name in hooks:
+			hooks[name] = []
+		hooks[name].append(call_func)
+		return call_func
+	return real_hook
+
 def GetPage(url, cookies = None, headers = None, removeTags = False, getredirect=False, binary=False, fakeuseragent=False):
 	try:
 		if cookies or fakeuseragent:
