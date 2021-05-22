@@ -4,3 +4,4 @@ settings/
 saves/
 *.txt
 *.pyc
+.idea

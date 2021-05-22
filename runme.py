@@ -39,12 +39,22 @@ except Exception:
 try:
 	handler = importlib.import_module("handlers")
 	handler.LoadMods()
+	handler.LoadIrcHooks()
 except Exception:
 	print("Error loading handlers.py, cannot start bot")
 	print(traceback.format_exc())
 	sys.exit(1)
 
 def SocketSend(socket, message):
+	blocked_strings = ["AUTHENTICATE", "ns identify"]
+	did_block = False
+	for blocked_string in blocked_strings:
+		if message[:len(blocked_string)] == blocked_string:
+			Print(f"--> {blocked_string} [REDACTED]")
+			did_block = True
+			break
+	if not did_block:
+		Print("--> %s" % message.rstrip())
 	socket.send(message.encode('utf-8'))
 
 def Print(message):
@@ -66,13 +76,19 @@ def Connect():
 	if useSSL:
 		irc = ssl.wrap_socket(irc)
 	irc.setblocking(0)
+
+	if sasl:
+		if not botPassword:
+			print("Fatal: sasl requested but botPassword is not set")
+			sys.exit(1)
+		SocketSend(irc, "CAP LS 302\n")
+
 	SocketSend(irc, "USER %s %s %s :%s\n" % (botIdent, botNick, botNick, botRealname))
 	SocketSend(irc, "NICK %s\n" % (botNick))
-	if NickServ:
+	if botPassword and not sasl:
 		SocketSend(irc, "ns identify %s %s\n" % (botAccount, botPassword))
-	else:
-		for i in channels:
-			SocketSend(irc, "JOIN %s\n" % (i))
+	elif not botPassword:
+		handler.JoinChans()
 
 def WriteAllData():
 	common.WriteAllData(force=True)
@@ -151,6 +167,7 @@ def main():
 							handler = importlib.import_module("handlers")
 							common = importlib.import_module("common")
 							handler.LoadMods()
+							handler.LoadIrcHooks()
 						except Exception:
 							common.SetCurrentChannel(e.args[0]["channel"])
 							PrintError()
@@ -169,6 +186,7 @@ def main():
 						common.SetCurrentChannel(None)
 						common.SetRateLimiting(True)
 						handler.LoadMods()
+						handler.LoadIrcHooks()
 						SocketSend(irc, "PRIVMSG {0} :Reloaded common.py and all plugins\n".format(e.args[0]["channel"]))
 				except SystemExit:
 					SocketSend(irc, "QUIT :i'm a potato\n")
@@ -183,11 +201,9 @@ def main():
 			if common.messageQueue and (time.time() > nextSend or not common.DoRateLimiting()):
 				if not common.DoRateLimiting():
 					while common.messageQueue:
-						Print("--> %s" % common.messageQueue[0])
 						SocketSend(irc, common.messageQueue[0])
 						common.messageQueue.pop(0)
 				elif time.time() > nextSend:
-					Print("--> %s" % common.messageQueue[0])
 					SocketSend(irc, common.messageQueue[0])
 					common.messageQueue.pop(0)
 					if len(common.messageQueue) > 3:
