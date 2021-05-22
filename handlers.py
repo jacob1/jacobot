@@ -4,6 +4,7 @@ import traceback
 import importlib
 from datetime import datetime
 import base64
+from typing import List
 
 class ReloadedModuleException(Exception):
 	pass
@@ -52,7 +53,7 @@ def LoadIrcHooks():
 	doing_sasl_registration = False
 	"""Register hooks for various IRC events and numerics"""
 	@hook("396")
-	def event_hosthidden(prefix : str, command : str, args : list[str]):
+	def event_hosthidden(prefix : str, command : str, args : List[str]):
 		"""Joins IRC channels once we have identified and had a cloak set"""
 		JoinChans()
 
@@ -61,7 +62,7 @@ def LoadIrcHooks():
 
 	@hook("433")
 	@hook("437")
-	def event_nicknameinuse(prefix : str, command : str, args : list[str]):
+	def event_nicknameinuse(prefix : str, command : str, args : List[str]):
 		"""Nickname is in use (433) or unavailable (437), use temporary nick to logon then later regain the nick"""
 		nonlocal doing_sasl_registration
 		nonlocal regain_attempts
@@ -85,7 +86,7 @@ def LoadIrcHooks():
 	server_caps = {}
 	enabled_caps = {}
 	@hook("CAP")
-	def command_cap(prefix : str, command : str, args : list[str]):
+	def command_cap(prefix : str, command : str, args : List[str]):
 		nonlocal server_caps
 		nonlocal enabled_caps
 		nonlocal doing_sasl_registration
@@ -133,7 +134,7 @@ def LoadIrcHooks():
 
 	if sasl:
 		@hook("AUTHENTICATE")
-		def command_authenticate(prefix : str, command : str, args : list[str]):
+		def command_authenticate(prefix : str, command : str, args : List[str]):
 			if args[0] == "+":
 				account = botAccount.encode("utf-8")
 				password = botPassword.encode("utf-8")
@@ -141,7 +142,7 @@ def LoadIrcHooks():
 				Send("AUTHENTICATE " + auth_token + "\n")
 
 		@hook("903")
-		def event_saslsuccess(prefix : str, command : str, args : list[str]):
+		def event_saslsuccess(prefix : str, command : str, args : List[str]):
 			nonlocal doing_sasl_registration
 			nonlocal needs_regain_command
 
@@ -158,7 +159,7 @@ def LoadIrcHooks():
 		@hook("905")
 		@hook("906")
 		@hook("908")
-		def event_saslfailed(prefix : str, command : str, args : list[str]):
+		def event_saslfailed(prefix : str, command : str, args : List[str]):
 			print("SASL Failed, aborting")
 			sys.exit(1)
 

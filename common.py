@@ -5,6 +5,7 @@ import re
 import time
 import os
 import json
+from typing import List
 
 from config import botNick, adminHostmasks, ownerHostmasks, commandChar
 
@@ -138,7 +139,7 @@ hooks = {}
 def hook(name):
 	"""Hooks onto a raw IRC event or numeric"""
 	def real_hook(func):
-		def call_func(prefix : str, command : str, args : list[str]):
+		def call_func(prefix : str, command : str, args : List[str]):
 			return func(prefix, command, args)
 		call_func.__doc__ = func.__doc__
 		if not name in hooks:
