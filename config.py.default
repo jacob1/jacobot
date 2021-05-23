@@ -1,4 +1,4 @@
-server = "chat.freenode.net"
+server = "irc.libera.chat"
 port = 6697
 useSSL = True
 channels = ("",)
