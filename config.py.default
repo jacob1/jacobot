@@ -10,6 +10,8 @@ botRealname = "unnoficial jacobot clone"
 botAccount = ""
 botPassword = None
 sasl = True
+certfp_certfile = None
+certfp_keyfile = None
 
 ownerHostmasks = ("",)
 adminHostmasks = ("",)
