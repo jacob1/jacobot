@@ -29,6 +29,9 @@ if not configured:
 	print("you have not configured the bot, open up config.py to edit settings")
 	sys.exit(0)
 
+if certfp_certfile and not sasl:
+	print("To use CertFP, you must enable sasl")
+
 try:
 	common = importlib.import_module("common")
 except Exception:
@@ -74,7 +77,27 @@ def Connect():
 	#irc.connect((server,6667))
 	irc = socket.create_connection((server, port))
 	if useSSL:
-		irc = ssl.wrap_socket(irc)
+		context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+
+		# Enable certificate validation
+		context.verify_mode = ssl.CERT_REQUIRED
+		context.check_hostname = True
+		context.load_default_certs()
+
+		# Disable insecure protocols / options
+		context.options |= ssl.OP_NO_SSLv2
+		context.options |= ssl.OP_NO_SSLv3
+		context.options |= ssl.OP_NO_TLSv1
+		context.options |= ssl.OP_NO_TLSv1_1
+		context.options |= ssl.OP_NO_COMPRESSION
+		context.options |= ssl.OP_NO_TICKET
+
+		# For certfp option
+		if certfp_certfile:
+			context.load_cert_chain(certfp_certfile, certfp_keyfile, password="")
+
+		irc = context.wrap_socket(irc, server_hostname=server)
+
 	irc.setblocking(0)
 
 	if sasl:

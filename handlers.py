@@ -50,15 +50,16 @@ def Tick():
 		mods["common"].WriteAllData()
 
 def LoadIrcHooks():
-	doing_sasl_registration = False
 	"""Register hooks for various IRC events and numerics"""
+
+	doing_sasl_registration = False
+	needs_regain_command = None
+	regain_attempts = 0
+
 	@hook("396")
 	def event_hosthidden(prefix : str, command : str, args : List[str]):
 		"""Joins IRC channels once we have identified and had a cloak set"""
 		JoinChans()
-
-	needs_regain_command = None
-	regain_attempts = 0
 
 	@hook("433")
 	@hook("437")
@@ -90,9 +91,16 @@ def LoadIrcHooks():
 		nonlocal server_caps
 		nonlocal enabled_caps
 		nonlocal doing_sasl_registration
+		nonlocal needs_regain_command
+		nonlocal regain_attempts
 
 		cap_type = args[1]
 		if cap_type == "LS":
+			# Reset variables on reconnection
+			doing_sasl_registration = False
+			needs_regain_command = None
+			regain_attempts = 0
+
 			for cap in args[-1].split():
 				if cap.find("=") != -1:
 					(key, value) = cap.split("=", 1)
@@ -106,7 +114,8 @@ def LoadIrcHooks():
 
 			requested_caps = []
 			if sasl:
-				if server_caps["sasl"] and "PLAIN" in server_caps["sasl"].upper().split(","):
+				requested_sasl_type = "PLAIN" if not certfp_certfile else "EXTERNAL"
+				if server_caps["sasl"] and requested_sasl_type in server_caps["sasl"].upper().split(","):
 					requested_caps.append("sasl")
 					doing_sasl_registration = True
 				else:
@@ -124,7 +133,8 @@ def LoadIrcHooks():
 				else:
 					enabled_caps[cap] = True
 					if cap == "sasl":
-						Send("AUTHENTICATE PLAIN\n")
+						requested_sasl_type = "PLAIN" if not certfp_certfile else "EXTERNAL"
+						Send(f"AUTHENTICATE {requested_sasl_type}\n")
 
 		elif cap_type == "NAK" or cap_type == "DEL":
 			for cap in args[-1].split():
@@ -136,10 +146,14 @@ def LoadIrcHooks():
 		@hook("AUTHENTICATE")
 		def command_authenticate(prefix : str, command : str, args : List[str]):
 			if args[0] == "+":
-				account = botAccount.encode("utf-8")
-				password = botPassword.encode("utf-8")
-				auth_token = base64.b64encode(b"\0".join((account, account, password))).decode("utf-8")
-				Send("AUTHENTICATE " + auth_token + "\n")
+				requested_sasl_type = "PLAIN" if not certfp_certfile else "EXTERNAL"
+				if requested_sasl_type == "PLAIN":
+					account = botAccount.encode("utf-8")
+					password = botPassword.encode("utf-8")
+					auth_token = base64.b64encode(b"\0".join((account, account, password))).decode("utf-8")
+					Send("AUTHENTICATE " + auth_token + "\n")
+				else:
+					Send("AUTHENTICATE +\n")
 
 		@hook("903")
 		def event_saslsuccess(prefix : str, command : str, args : List[str]):
