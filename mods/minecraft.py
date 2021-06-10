@@ -19,7 +19,7 @@ from common import *
 RegisterMod(__name__)
 
 AddSetting(__name__, "craftinglist-filename", "mods/minecraft-craftinglist.txt")
-AddSetting(__name__, "dynmap-url", "http://dynmap.starcatcher.us")
+AddSetting(__name__, "dynmap-url", "https://dynmap.starcatcher.us")
 AddSetting(__name__, "rcon-address", "localhost")
 AddSetting(__name__, "rcon-port", "25575")
 AddSetting(__name__, "rcon-password", "")
@@ -34,7 +34,7 @@ if has_rcon:
 		rcon_error = True
 
 def Parse(raw, text):
-	minecraftRelayMatch = re.match("^:potatorelay!~?mcrelay@unaffiliated/jacob1/bot/jacobot PRIVMSG #powder-mc :(.*)$", raw)
+	minecraftRelayMatch = re.match("^:(?:potato|mc)relay!~?mcrelay@user/jacob1/bot/potatorelay PRIVMSG #powder-mc :(.*)$", raw)
 	if minecraftRelayMatch:
 		message = minecraftRelayMatch.group(1)
 		messageMatch = re.match("\u000314\[(\S+) connected\]", message)
@@ -52,6 +52,8 @@ def Parse(raw, text):
 			#motd = "[MOTD] Server is upgraded to 1.15. Dynmap will be re-added when that plugin is updated to 1.15"
 			#motd = "[MOTD] This server will be upgraded to 1.16 and reset the weekend of June 26th/27st. Details: https://tpt.io/.312730"
 			#motd = "[MOTD] The map has been reset. Have fun on the new world :)"
+			#motd = "[MOTD] Due to the hostile takeover of the Freenode IRC network, the IRC relay has moved to irc.libera.chat #powder-mc"
+			motd = "[MOTD] This server will update to 1.17 once dynmap releases, or this weekend, whichever is sooner"
 			if motd:
 				try:
 					RunRconCommand(None, 'tellraw {0} {{"text":"{1}", "color":"green"}}'.format(username, motd))
@@ -562,7 +564,7 @@ def GetMap(message):
 				maptype = "s"
 			elif args[1] == "cave" and dimension == "w":
 				maptype = "c"
-		message.Reply("http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension, maptype, 5, match.group(1), match.group(3) or match.group(2)))
+		message.Reply("https://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension, maptype, 5, match.group(1), match.group(3) or match.group(2)))
 		return
 	# Normal player getmap
 	name = player['name']
@@ -575,8 +577,8 @@ def GetMap(message):
 			maptype = "s" #surface
 		elif message.GetArg(1).lower() == "cave" and dimension == "world":
 			maptype = "c" #cave
-	#message.Reply("http://dynmap.starcatcher.us/?worldname={0}&mapname={1}&zoom=5&x={2}&y={3}&z={4}".format(dimension, maptype, pos[0], pos[1], pos[2]))
-	message.Reply("http://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension.split("_")[-1][0], maptype, 5, pos[0], pos[2]))
+	#message.Reply("https://dynmap.starcatcher.us/?worldname={0}&mapname={1}&zoom=5&x={2}&y={3}&z={4}".format(dimension, maptype, pos[0], pos[1], pos[2]))
+	message.Reply("https://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension.split("_")[-1][0], maptype, 5, pos[0], pos[2]))
 
 @command("getclaim")
 def GetClaim(message):

@@ -40,7 +40,7 @@ def SendNotice(target, msg):
 class Message(object):
 	privmsgRegex = r"^:(([^!]+)!([^@]+)@([^ ]+)) PRIVMSG ([^ ]+) :(.+)$"
 	commandRegex = r"^{0}([^ ]+)(?: (.+))?$".format(commandChar)
-	minecraftRegex = r"^:(?:potatorelay!~mcrelay@unaffiliated/jacob1/bot/jacobot|creativerelay!~mcrelay@75-110-137-129.nbrncmtk01.res.dyn.suddenlink.net) PRIVMSG #powder-mc :<([^>]+)\x0F> (.+)$"
+	minecraftRegex = r"^:(?:(?:potato|mc|creative)relay!~mcrelay@user/jacob1/bot/potatorelay) PRIVMSG #powder-mc :<([^>]+)\x0F> (.+)$"
 
 	def __init__(self, rawline):
 		parsed = re.search(self.privmsgRegex, rawline)
