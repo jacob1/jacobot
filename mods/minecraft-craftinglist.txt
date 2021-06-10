@@ -8,6 +8,7 @@ Replacements here (for easier searaches)
 =Wooden | Wood
 =Iron Ingot | Iron
 =Gold Ingot | Gold
+=Copper Ingot | Copper
 =Lapis Lazuli | Lapis
 =Panes | Pane
 =Glistening | Glistering
@@ -73,6 +74,18 @@ Replacements here (for easier searaches)
  Quartz Brick | 4 | Block of Quartz - Block of Quartz / Block of Quartz - Block of Quartz
  Purpur Slab | 6 | Purpur Block - Purpur Block - Purpur Block
  End Stone Brick Slab | 6 | End Stone Bricks - End Stone Bricks - End Stone Bricks
+ Cut Copper Slab | 6 | Cut Copper - Cut Copper - Cut Copper
+ Exposed Cut Copper Slab | 6 | Exposed Cut Copper - Exposed Cut Copper - Exposed Cut Copper
+ Weathered Cut Copper Slab | 6 | Weathered Cut Copper - Weathered Cut Copper - Weathered Cut Copper
+ Oxidized Cut Copper Slab | 6 | Oxidized Cut Copper - Oxidized Cut Copper - Oxidized Cut Copper
+ Waxed Cut Copper Slab | 6 | Waxed Cut Copper - Waxed Cut Copper - Waxed Cut Copper
+ Waxed Exposed Cut Copper Slab | 6 | Waxed Exposed Cut Copper - Waxed Exposed Cut Copper - Waxed Exposed Cut Copper
+ Waxed Weathered Cut Copper Slab | 6 | Waxed Weathered Cut Copper - Waxed Weathered Cut Copper - Waxed Weathered Cut Copper
+ Waxed Oxidized Cut Copper Slab | 6 | Waxed Oxidized Cut Copper - Waxed Oxidized Cut Copper - Waxed Oxidized Cut Copper
+ Cobbled Deepslate Slab | 6 | Cobbled Deepslate - Cobbled Deepslate - Cobbled Deepslate
+ Polished Deepslate Slab | 6 | Polished Deepslate - Polished Deepslate - Polished Deepslate
+ Deepslate Brick Slab | 6 | Deepslate Bricks - Deepslate Bricks - Deepslate Bricks
+ Deepslate Tile Slab | 6 | Deepslate Tiles - Deepslate Tiles - Deepslate Tiles
 
  Wood Stairs | 4 | Wood Plank - - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank - Wood Plank
  Cobblestone Stairs | 4 | Cobblestone - - / Cobblestone - Cobblestone - / Cobblestone - Cobblestone - Cobblestone
@@ -96,9 +109,21 @@ Replacements here (for easier searaches)
  Smooth Quartz Stairs | 4 | Smooth Quartz - - / Smooth Quartz - Smooth Quartz - / Smooth Quartz - Smooth Quartz - Smooth Quartz
  Purpur Stairs | 4 | Purpur Block - - / Purpur Block - Purpur Block - / Purpur Block - Purpur Block - Purpur Block
  End Stone Brick Stairs | 4 | End Stone Bricks - - / End Stone Bricks - End Stone Bricks - / End Stone Bricks - End Stone Bricks - End Stone Bricks
+ Cut Copper Stairs | 4 | Cut Copper - - / Cut Copper - Cut Copper - / Cut Copper - Cut Copper - Cut Copper
+ Exposed Cut Copper Stairs | 4 | Exposed Cut Copper - - / Exposed Cut Copper - Exposed Cut Copper - / Exposed Cut Copper - Exposed Cut Copper - Exposed Cut Copper
+ Weathered Cut Copper Stairs  | 4 | Weathered Cut Copper - - / Weathered Cut Copper - Weathered Cut Copper - / Weathered Cut Copper - Weathered Cut Copper - Weathered Cut Copper
+ Oxidized Cut Copper Stairs | 4 | Oxidized Cut Copper - - / Oxidized Cut Copper - Oxidized Cut Copper - / Oxidized Cut Copper - Oxidized Cut Copper - Oxidized Cut Copper
+ Waxed Cut Copper Stairs | 4 | Waxed Cut Copper - - / Waxed Cut Copper - Waxed Cut Copper - / Waxed Cut Copper - Waxed Cut Copper - Waxed Cut Copper
+ Waxed Exposed Cut Copper Stairs | 4 | Waxed Exposed Cut Copper - - / Waxed Exposed Cut Copper - Waxed Exposed Cut Copper - / Waxed Exposed Cut Copper - Waxed Exposed Cut Copper - Waxed Exposed Cut Copper
+ Waxed Weathered Cut Copper Stairs | 4 | Waxed Weathered Cut Copper - - / Waxed Weathered Cut Copper - Waxed Weathered Cut Copper - / Waxed Weathered Cut Copper - Waxed Weathered Cut Copper - Waxed Weathered Cut Copper
+ Waxed Oxidized Cut Copper Stairs | 4 | Waxed Oxidized Cut Copper - - / Waxed Oxidized Cut Copper - Waxed Oxidized Cut Copper - / Waxed Oxidized Cut Copper - Waxed Oxidized Cut Copper - Waxed Oxidized Cut Copper
+ Cobbled Deepslate Stairs | 4 | Cobbled Deepslate - - / Cobbled Deepslate - Cobbled Deepslate - / Cobbled Deepslate - Cobbled Deepslate - Cobbled Deepslate
+ Polished Deepslate Stairs | 4 | Polished Deepslate - - / Polished Deepslate - Polished Deepslate - / Polished Deepslate - Polished Deepslate - Polished Deepslate
+ Deepslate Brick Stairs | 4 | Deepslate Bricks - - / Deepslate Bricks - Deepslate Bricks - / Deepslate Bricks - Deepslate Bricks - Deepslate Bricks
+ Deepslate Tile Stairs | 4 | Deepslate Tiles - - / Deepslate Tiles - Deepslate Tiles - / Deepslate Tiles - Deepslate Tiles - Deepslate Tiles
 
  Cobblestone Wall | 6 | - - / Cobblestone - Cobblestone - Cobblestone / Cobblestone - Cobblestone - Cobblestone
- Mossy Cobblestone Wall | 6 | - - / Moss Stone - Moss Stone - Moss Stone / Moss Stone - Moss Stone - Moss Stone
+ Mossy Cobblestone Wall | 6 | - - / Mossy Cobblestone - Mossy Cobblestone - Mossy Cobblestone / Mossy Cobblestone - Mossy Cobblestone - Mossy Cobblestone
  Andesite Wall | 6 | - - / Andesite - Andesite - Andesite / Andesite - Andesite - Andesite
  Granite Wall | 6 | - - / Granite - Granite - Granite / Granite - Granite - Granite
  Diorite Wall | 6 | - - / Diorite - Diorite - Diorite / Diorite - Diorite - Diorite
@@ -111,6 +136,10 @@ Replacements here (for easier searaches)
  Red Nether Brick Wall | 6 | - - / Red Nether Bricks - Red Nether Bricks - Red Nether Bricks / Red Nether Bricks - Red Nether Bricks - Red Nether Bricks
  End Stone Brick Wall | 6 | - - / End Stone Bricks - End Stone Bricks - End Stone Bricks / End Stone Bricks - End Stone Bricks - End Stone Bricks
  Prismarine Wall | 6 | - - / Prismarine - Prismarine - Prismarine / Prismarine - Prismarine - Prismarine
+ Cobbled Deepslate Wall | 6 | Cobbled Deepslate - Cobbled Deepslate - Cobbled Deepslate / Cobbled Deepslate - Cobbled Deepslate - Cobbled Deepslate
+ Polished Deepslate Wall | 6 | Polished Deepslate - Polished Deepslate - Polished Deepslate / Polished Deepslate - Polished Deepslate - Polished Deepslate
+ Deepslate Brick Wall | 6 | Deepslate Bricks - Deepslate Bricks - Deepslate Bricks / Deepslate Bricks - Deepslate Bricks - Deepslate Bricks
+ Deepslate Tile Wall | 6 | Deepslate Tiles - Deepslate Tiles - Deepslate Tiles / Deepslate Tiles - Deepslate Tiles - Deepslate Tiles
 
  Snow Block,Snow | 1 | Snowball - Snowball / Snowball - Snowball
  Snow Layer | 6 | Snow - Snow - Snow
@@ -119,6 +148,7 @@ Replacements here (for easier searaches)
  Stone Brick,Stone Bricks | 4 | Stone - Stone / Stone - Stone
  Chiseled Stone Brick,Chiseled Stone Bricks | 1 | Stone Brick Slab / Stone Brick Slab
  Mossy Stone Brick,Mossy Stone Bricks | 1 | Stone Brick - Vines
+ Mossy Stone Brick (alt),Mossy Stone Bricks (alt)| 1 | Stone Brick - Moss Block
  Nether Brick,Nether Bricks | 1 | Nether Brick (item) - Nether Brick (item) / Nether Brick (item) - Nether Brick (item)
  Red Nether Brick,Red Nether Bricks | 1 | Nether Wart - Nether Brick (item) / Nether Brick (item) - Nether Wart
  Chiseled Nether Brick,Chiseled Nether Bricks | 1 | Nether Brick Slab / Nether Brick Slab
@@ -149,6 +179,12 @@ Replacements here (for easier searaches)
  Coarse Dirt | 4 | Dirt - Gravel / Gravel - Dirt
  Bone Meal | 9 | Bone Block
  Polished Basalt | 4 | Basalt - Basalt / Basalt - Basalt
+ Block of Amethyst | 1 | Amethyst Shard - Amethyst Shard / Amethyst Shard - Amethyst Shard
+ Dripstone Block | 1 | Pointed Dripstone - Pointed Dripstone / Pointed Dripstone - Pointed Dripstone
+ Polished Deepslate | 4 | Cobbled Deepslate - Cobbled Deepslate / Cobbled Deepslate - Cobbled Deepslate
+ Deepslate Bricks | 4 | Polished Deepslate - Polished Deepslate / Polished Deepslate - Polished Deepslate
+ Deepslate Tiles | 4 | Deepslate Bricks - Deepslate Bricks / Deepslate Bricks - Deepslate Bricks
+ Chiseled Deepslate Slab | 1 | Cobbled Deepslate Slab / Cobbled Deepslate Slab
 
  Ender Chest | 1 | Obsidian - Obsidian - Obsidian / Obsidian - Eye of Ender - Obsidian / Obsidian - Obsidian - Obsidian
  Anvil | 1 | Block of Iron - Block of Iron - Block of Iron / - Iron - / Iron - Iron - Iron
@@ -173,6 +209,23 @@ Replacements here (for easier searaches)
  Lodestone | 1 | Chiseled Stone Bricks - Chiseled Stone Bricks - Chiseled Stone Bricks / Chiseled Stone Bricks - Netherite - Chiseled Stone Bricks / Chiseled Stone Bricks - Chiseled Stone Bricks - Chiseled Stone Bricks
  Respawn Anchor | 1 | Crying Obsidian - Crying Obsidian - Crying Obsidian / Glowstone Block - Glowstone Block - Glowstone Block / Crying Obsidian - Crying Obsidian - Crying Obsidian 
  Target | 1 | - Redstone - / Redstone - Hay Bale - Redstone / - Redstone -
+
+ Cut Copper | 4 | Block of Copper - Block of Copper / Block of Copper - Block of Copper
+ Exposed Cut Copper | 4 | Exposed Copper - Exposed Copper / Exposed Copper - Exposed Copper
+ Weathered Cut Copper | 4 | Weathered Copper - Weathered Copper / Weathered Copper
+ Oxidized Cut Copper | 4 | Oxidized Copper - Oxidized Copper / Oxidized Copper - Oxidized Copper
+ Waxed Block of Copper,Waxed Copper Block | 1 | Block of Copper - Honeycomb
+ Waxed Exposed Copper | 1 | Exposed Copper - Honeycomb
+ Waxed Weathered Copper | 1 | Weathered Copper - Honeycomb
+ Waxed Oxidized Copper | 1 | Oxidized Copper - Honeycomb
+ Waxed Cut Copper | 1 | Cut Copper - Honeycomb
+ Waxed Exposed Cut Copper | 1 | Exposed Cut Copper - Honeycomb
+ Waxed Weathered Cut Copper | 1 | Weathered Cut Copper - Honeycomb
+ Waxed Oxidized Cut Copper | 1 | Oxidized Cut Copper - Honeycomb
+ Waxed Cut Copper | 4 | Waxed Block of Copper - Waxed Block of Copper / Waxed Block of Copper - Waxed Block of Copper
+ Waxed Exposed Cut Copper | 4 | Waxed Exposed Copper - Waxed Exposed Copper / Waxed Exposed Copper - Waxed Exposed Copper
+ Waxed Weathered Cut Copper | 4 | Waxed Weathered Copper - Waxed Weathered Copper / Waxed Weathered Copper - Waxed Weathered Copper
+ Waxed Oxidized Cut Copper | 4 | Waxed Oxidized Copper - Waxed Oxidized Copper / Waxed Oxidized Copper - Waxed Oxidized Copper
 
 //////////////////////////
 //Transportation recipes//
@@ -228,6 +281,7 @@ Replacements here (for easier searaches)
  Flint and Steel | 1 | Iron - / - Flint
  Bucket | 1 | Iron - - Iron / - Iron -
  Compass | 1 | - Iron - / Iron - Redstone - Iron / - Iron -
+ Spyglass | 1 | - Amethyst Shard - / - Copper - / - Copper -
 
  Map | 1 | Paper - Paper - Paper / Paper - Compass - Paper / Paper - Paper - Paper
  Map (zoomed out) | 1 | Paper - Paper - Paper / Paper - Map - Paper / Paper - Paper - Paper
@@ -335,17 +389,25 @@ Replacements here (for easier searaches)
  Block of Redstone,Redstone Block | 1 | Redstone - Redstone - Redstone / Redstone - Redstone - Redstone / Redstone - Redstone - Redstone
  Block of Coal,Coal Block | 1 | Coal - Coal - Coal / Coal - Coal - Coal / Coal - Coal - Coal
  Block of Netherite,Netherite block | 1 | Netherite - Netherite - Netherite / Netherite - Netherite - Netherite / Netherite - Netherite - Netherite
+ Block of Copper,Copper Block | 1 | Copper - Copper - Copper / Copper - Copper - Copper / Copper - Copper - Copper
  Slime Block | 1 | Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball
  Melon Block,Melon | 1 | Melon - Melon - Melon /  Melon - Melon - Melon /  Melon - Melon - Melon
 
  Lead | 2 | String - String - / String - Slimeball - / - - String
  Ladder | 3 | Stick - - Stick / Stick - Stick - Stick / Stick - - Stick
  Glass Pane | 16 | Glass - Glass - Glass / Glass - Glass - Glass
+ Tinted Glass | 2 | - Amethyst Shard - / Amethyst Shard - Glass - Amethyst Shard / - Amethyst Shard -
  Iron Bars | 16 | - - / Iron - Iron - Iron / Iron - Iron - Iron 
  Wood Fence,Fence | 3 | - - / Wood Plank - Stick - Wood Plank / Wood Plank - Stick - Wood Plank
  Nether Brick Fence | 6 | - - / Nether Brick - Nether Brick (item) - Nether Brick / Nether Brick - Nether Brick (item) - Nether Brick
  Fence Gate,Gate | 1 | - - / Stick - Wood Plank - Stick / Stick - Wood Plank - Stick
- Moss Stone | 1 | Cobblestone - Vines
+ Mossy Cobblestone | 1 | Cobblestone - Vines
+ Mossy Cobblestone (alt) | 1 | Cobblestone - Moss Block
+ Mossy Stone Bricks | 1 | Stone Bricks - Moss Block
+ Moss Carpet | 3 | Moss Block - Moss Block
+ Candle | 1 | String / Candle
+ Dyed Candle | 1 | Candle - Dye
+#Bundle | 1 | String - Rabbit Hide - String / Rabbit Hide - - Rabbit Hide / Rabbit Hide - Rabbit Hide - Rabbit Hide
 
  Iron | 9 | Iron Block
  Gold | 9 | Gold Block
@@ -354,10 +416,21 @@ Replacements here (for easier searaches)
  Emerald | 9 | Block of Emerald
  Redstone | 9 | Block of Redstone
  Coal | 9 | Block of Coal
+ Copper | 9 | Block of Copper
+ Copper (alt) | 9 | Waxed Block of Copper
  Slimeball | 9 | Slime Block
+
+ Block of Raw Copper | 1 | Raw Copper - Raw Copper - Raw Copper / Raw Copper - Raw Copper - Raw Copper / Raw Copper - Raw Copper - Raw Copper
+ Block of Raw Gold | 1 | Raw Gold - Raw Gold - Raw Gold / Raw Gold - Raw Gold - Raw Gold / Raw Gold - Raw Gold - Raw Gold
+ Block of Raw Iron | 1 | Raw Iron - Raw Iron - Raw Iron / Raw Iron - Raw Iron - Raw Iron / Raw Iron - Raw Iron - Raw Iron
+
+ Raw Copper | 9 | Block of Raw Copper
+ Raw Gold | 9 | Block of Raw Gold
+ Raw Iron | 9 | Block of Raw Iron
 
  Painting | 1 | Stick - Stick - Stick / Stick - Wool - Stick / Stick - Stick - Stick
  Item Frame | 1 | Stick - Stick - Stick / Stick - Leather - Stick / Stick - Stick - Stick
+ Glow Item Frame | 1 | Glow Ink Sac - Item Frame
  Sign | 3 | Wood Plank - Wood Plank - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Stick -
  Armor Stand | 1 | Stick - Stick - Stick / - Stick - / Stick - Smooth Stone Slab - Stick
 
@@ -372,6 +445,7 @@ Replacements here (for easier searaches)
  End Crystal | 1 | Glass - Glass - Glass / Glass - Eye of ender - Glass / Glass - Ghast Tear - Glass
  Flower Pot | 1 | - - / Brick - - Brick / - Brick -
  Banner | 1 | Wool - Wool - Wool / Wool - Wool - Wool / - Stick -
+ Lightning Rod | 1 | - Copper Ingot - / - Copper Ingot - / - Copper Ingot -
 
  Sea Lantern | 1 | Prismarine Shard - Prismarine Crystals - Prismarine Shard / Prismarine Crystals - Prismarine Crystals - Prismarine Crystals / Prismarine Shard - Prismarine Crystals - Prismarine Shard
  Prismarine | 1 | Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard
