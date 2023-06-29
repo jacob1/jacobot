@@ -283,7 +283,7 @@ class _calculator(object):
 			if i >= len(expression):
 				break
 			char = expression[i]
-			if funcNameStart >= 0 and char not in string.ascii_letters and not (char == ")" and i > 0 and expression[i-1] == "j"):
+			if funcNameStart >= 0 and char not in string.ascii_letters and char not in string.digits and not (char == ")" and i > 0 and expression[i-1] == "j"):
 				if char == "(":
 					stack.append((i, expression[funcNameStart:i]))
 					funcNameStart = -2
