@@ -33,6 +33,89 @@ class _calculator(object):
 		self._expectargs(args, 1, offset)
 		return args[0]**0.5
 
+	def log(self, args, offset):
+		self._expectargs(args, 1, offset)
+		if len(args) > 1:
+			return math.log(args[0], args[1])
+		return math.log(args[0])
+
+	def log2(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.log2(args[0])
+
+	def log10(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.log10(args[0])
+
+	def exp(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.exp(args[0])
+
+	def cos(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.cos(args[0])
+
+	def sin(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.sin(args[0])
+
+	def tan(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.tan(args[0])
+
+	def acos(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.acos(args[0])
+
+	def asin(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.asin(args[0])
+
+	def atan(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.atan(args[0])
+
+	def atan2(self, args, offset):
+		self._expectargs(args, 2, offset)
+		return math.atan2(args[0], args[1])
+
+	def acosh(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.acosh(args[0])
+
+	def asinh(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.asinh(args[0])
+
+	def atanh(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.atanh(args[0])
+
+	def cosh(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.cosh(args[0])
+
+	def sinh(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.sinh(args[0])
+
+	def tanh(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.tanh(args[0])
+
+	def abs(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.fabs(args[0])
+
+	def ceil(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.ceil(args[0])
+
+	def floor(self, args, offset):
+		self._expectargs(args, 1, offset)
+		return math.floor(args[0])
+
+
 	# Convert a string to a number (string is assumed to actually be a number)
 	def _converttonumber(self, expression, isNegative):
 		if not "." in expression and not "e" in expression:
