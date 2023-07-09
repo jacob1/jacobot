@@ -41,7 +41,7 @@ def SeenMc(message):
 		if lastSeen:
 			timemsg = datetime.datetime.utcfromtimestamp(lastSeen["time"]).strftime("%a %b %d %Y at %I:%M:%S%p UTC")
 			message.Reply("{0} was last seen on {1} on {2}: {3}".format(user, lastSeen["server"], timemsg, lastSeen["message"]))
-		if lastConnection and lastConnection["time"] - 600 > lastSeen["time"]:
+		if lastConnection and (not lastSeen or lastConnection["time"] - 600 > lastSeen["time"]):
 			timemsg = datetime.datetime.utcfromtimestamp(lastConnection["time"]).strftime("%a %b %d %Y at %I:%M:%S%p UTC")
 			connectionType = "disconnected from" if lastConnection["type"] == "disconnected" else "connected to"
-			message.Reply("{0} last {1} {2} on {3}".format(user, connectionType, lastSeen["server"], timemsg))
+			message.Reply("{0} last {1} {2} on {3}".format(user, connectionType, lastConnection["server"], timemsg))
