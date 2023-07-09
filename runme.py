@@ -77,7 +77,7 @@ def Connect():
 	#irc.connect((server,6667))
 	irc = socket.create_connection((server, port))
 	if useSSL:
-		context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+		context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
 
 		# Enable certificate validation
 		context.verify_mode = ssl.CERT_REQUIRED
