@@ -10,7 +10,7 @@ class Tokenizer(object):
         :param string: String to tokenize
         """
         # Remove all whitespace:
-        self.string = s.translate(str.maketrans("", "", string.whitespace))
+        self.string = s
         self.tokens = []
         self.itr = 0
         self.buffer = {}
@@ -22,6 +22,11 @@ class Tokenizer(object):
         ]
         while self.itr < len(self.string):
             found = False
+
+            # Ignore whitespace
+            while self.itr < len(self.string) and self.string[self.itr] in string.whitespace:
+                self.itr = self.itr + 1
+
             for token in TOKENS:
                 token, i = token.scan(self)
                 if token:

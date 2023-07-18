@@ -83,7 +83,7 @@ def shunting_yard(tokenizer):
 
         elif isinstance(token, lexer.CommaToken):
             # While top is not left ( or [
-            while not _is_left_matchable(op_stack[-1]):
+            while len(op_stack) and not _is_left_matchable(op_stack[-1]):
                 out_stack.append(op_stack.pop())
 
         elif _is_left_matchable(token): # Left paren or vector
@@ -156,6 +156,9 @@ def parse(expr):
 
     if not len(stack):
         raise RuntimeError("Failed to evaluate result (missing parentheses?)")
+
+    if len(stack) > 1 and not (len(stack) == 2 and isinstance(stack[0], lexer.StartToken)):
+        raise RuntimeError("Failed to evaluate result (too many items on stack)")
 
     return stack[-1]
 
