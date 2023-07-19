@@ -138,8 +138,8 @@ FUNCTIONS = {
     "abs": Function(lambda args: abs(args[0]), 1, "absolute value of x"),
     "ceil": Function(lambda args: math.ceil(args[0]), 1, "rounds up x"),
     "floor": Function(lambda args: math.floor(args[0]), 1, "rounds down x"),
-    "gcd": Function(lambda args: math.gcd(args), -1, "greatest common denominator of all arguments"),
-    "lcm": Function(lambda args: math.lcm(args), -1, "least common multiple of all arguments"),
+    "gcd": Function(lambda args: math.gcd(*args), -1, "greatest common denominator of all arguments"),
+    "lcm": Function(lambda args: math.lcm(*args), -1, "least common multiple of all arguments"),
     "sqrt": Function(lambda args: cmath.sqrt(args[0]), 1, "square root of x"),
     "cbrt": Function(lambda args: (args[0]) ** (1/3), 1, "cubed root of x"),
 

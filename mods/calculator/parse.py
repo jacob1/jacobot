@@ -126,17 +126,19 @@ def parse(expr):
     out_stack = shunting_yard(expr)
     stack = []
 
-    def get_n_tokens(n):
+    def get_n_tokens(n, scan_to_start):
         """
         Attempt tp consume n tokens from the stack. If n == -1 then will
         consume until a start token is hit. If the number of arguments detected
         does not match n and n >= 0 this will throw an error
 
         :param n: Number of tokens to consume, or -1 for vararg functions
+        :param scan_to_start: Scan until we find a StartToken. If we don't get the expected number of arguments, throw an error
         :return: Array of args in forward order
         """
+
         args = []
-        while ((n >= 0 and len(args) < n) or n == -1) and len(stack) and not isinstance(stack[-1], lexer.StartToken):
+        while (scan_to_start or (n >= 0 and len(args) < n) or n == -1) and len(stack) and not isinstance(stack[-1], lexer.StartToken):
             t = stack.pop()
             if not isinstance(t, lexer.StartToken):
                 args.append(t)
@@ -150,7 +152,7 @@ def parse(expr):
         return args[::-1]
 
     for token in out_stack:
-        val = token.eval(get_n_tokens(token.argc))
+        val = token.eval(get_n_tokens(token.argc, _token_is_function(token)))
         if val != None:
             stack.append(val)
 
