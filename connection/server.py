@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 import asyncio
+from typing import Any, Tuple
+
 import discord
 
 from event import *
@@ -8,44 +12,123 @@ from connection.user import *
 
 # Generic Server class, subclasses (DiscordServer and IrcServer) will implement connection and send out events
 class Server:
-	pass
+	@abstractmethod
+	def find_user(self, context : Context, search_str : str, *, requested_for : User = None) -> Tuple[bool, User|None|set]:
+		pass
+
+	@abstractmethod
+	def find_channel(self, context : Context, search_str : str, *, requested_for : User = None, exact_match : bool = False) -> Tuple[bool, Channel|None|set]:
+		pass
 
 class DiscordServer(Server):
 
-	def __init__(self, token, event_handler):
-		self.client = discord.Client()
-		self.token = token
-		self.event_handler = event_handler
+	def __init__(self, name : str, token : str, owners : list[dict[str, Any]], guilds : list[dict[str, Any]], event_handler):
+		self._name = name
+		self._token = token
+		self._owners = owners
+		self._guilds = guilds
+		self._event_handler = event_handler
+
+		intents = discord.Intents.default()
+		intents.members = True
+		intents.typing = False
+		intents.message_content = True
+		self.client = discord.Client(intents=intents)
 
 	@property
-	def client(self):
+	def client(self) -> discord.client.Client:
 		return self._client
 
 	@client.setter
-	def client(self, client):
+	def client(self, client : discord.client.Client):
 		self._client = client
 		client.event(self.on_message)
+
+	@property
+	def name(self) -> str:
+		return self._name
 
 	async def on_message(self, message):
 		if message.author == self.client.user:
 			return
 
-		sender = DiscordUser(message.author)
+		sender = DiscordUser(message.author, self)
 
 		if isinstance(message.channel, discord.DMChannel):
-			receiver = DiscordUser(message.channel)
+			receiver = DiscordUser(message.channel, self)
+			server_name = "discord"
 		elif isinstance(message.channel, discord.TextChannel):
 			receiver = DiscordChannel(message.channel)
+			server_id = message.channel.guild.id
+			server_name = None
+			for guild in self._guilds:
+				if guild["id"] == server_id:
+					server_name = guild["name"]
+					break
+			if not server_name:
+				return
 		# Probably a group dm, ignore for now
 		else:
 			return
 
-		context = Context(self, sender, receiver)
-		await self.event_handler(MessageEvent(context, message.content))
+		context = Context("discord", server_name, self, sender, receiver)
+		await self._event_handler(MessageEvent(context, message.content))
 
 	async def connect(self):
-		await self._client.start(self.token)
-		self.token = None # Clear for security reasons
+		await self._client.start(self._token)
+		self._token = None # Clear for security reasons
+
+	def find_user(self, server_name : str, search_str : str, *, requested_for : DiscordUser = None) -> Tuple[bool, DiscordUser|None|set]:
+		all_matches = set()
+		server_matches = set()
+		search_str_lower = search_str.lower()
+		for server in self.client.guilds:
+			# Only allow users to see other users present in their own discords
+			if requested_for:
+				found = False
+				for s_member in server.members:
+					if s_member.id == requested_for.account_name:
+						found = True
+						break
+				if not found:
+					continue
+			# Search server for matching members
+			for s_member in server.members:
+				if (s_member.name.lower().startswith(search_str_lower)
+						or s_member.display_name.lower().startswith(search_str_lower)
+						or f"{s_member.display_name.lower()}#{s_member.discriminator}" == search_str_lower):
+					all_matches.add(s_member)
+					if server_name == server.name:
+						server_matches.add(s_member)
+		if len(server_matches) == 1:
+			return True, DiscordUser(server_matches.pop(), self)
+		if len(server_matches) == 0 and len(all_matches) == 1:
+			return True, DiscordUser(all_matches.pop(), self)
+		if len(server_matches) == 0 and len(all_matches) == 0:
+			return False, None
+		return False, set([DiscordUser(u, self) for u in all_matches.union(server_matches)])
+
+	def find_channel(self, server_name : str, search_str : str, *, requested_for : User | None = None, exact_match : bool = False) -> Tuple[bool, DiscordChannel|None|set]:
+		matches = set()
+		search_str_lower = search_str.lower()
+		for server in self.client.guilds:
+			if server_name != server.name:
+				continue
+
+			# Search server for matching channels
+			for channel in server.channels:
+				if (exact_match and channel.name.lower() == search_str_lower or
+						not exact_match and channel.name.lower().startswith(search_str_lower)):
+					# Verify the requesting user can see this channel
+					for member in channel.members:
+						if not requested_for or member.id == requested_for.account_name:
+							matches.add(channel)
+							break
+		if len(matches) == 1:
+			return True, DiscordChannel(matches.pop())
+		if len(matches) == 0:
+			return False, None
+		return False, set([DiscordChannel(c) for c in matches])
 
 # Small class to store reader and writer during connection class reloads
 class IrcClient:
@@ -67,7 +150,9 @@ irc_event_handlers = {}
 
 class IrcServer(Server):
 
-	def __init__(self, event_handler, *, host, port, ssl, nick, ident, account_name = None, account_password = None):
+	def __init__(self, event_handler, *, name, host, port, ssl, nick, ident, owners, channels,
+				 account_name = None, account_password = None):
+		self._name = name
 		self.host = host
 		self.port = port
 		self.ssl = ssl
@@ -75,6 +160,8 @@ class IrcServer(Server):
 		self.ident = ident
 		self.account_name = account_name
 		self.account_password = account_password
+		self.owners = owners
+		self.channels = channels
 
 		self.event_handler = event_handler
 		self.reconnect = False
@@ -88,11 +175,16 @@ class IrcServer(Server):
 		self.writer.write(f"NICK {self.nick}\n".encode("utf-8"))
 		if self.account_name:
 			self.writer.write(f"ns identify {self.account_name} {self.account_password}\n".encode("utf-8"))
-		self.writer.write("JOIN ##jacob1\n".encode("utf-8"))
+		for channel in self.channels:
+			self.writer.write(f"JOIN {channel}\n".encode("utf-8"))
 
 		# https://docs.python.org/3.5/library/asyncio-eventloop.html
 		# https://docs.python.org/3.5/library/asyncio-protocol.html#asyncio-transport
 		# https://docs.python.org/3.5/library/asyncio-stream.html#asyncio-register-socket-streams    <-----
+
+	@property
+	def name(self):
+		return self._name
 
 	@property
 	def client(self):
@@ -107,6 +199,7 @@ class IrcServer(Server):
 			self.writer = client.writer
 
 	def raw_send(self, message):
+		print(f"--> {message.strip()}")
 		self.writer.write(f"{message}\n".encode("utf-8"))
 
 	def parse_raw_line(self, line):
@@ -149,10 +242,14 @@ class IrcServer(Server):
 
 		return prefix, event, args
 
-	def parse_prefix(self, prefix):
+	@staticmethod
+	def parse_prefix(prefix):
 		(nick, identhost) = prefix.split("!")
+		if nick[0] == ":":
+			nick = nick[1:]
+
 		(ident, host) = prefix.split("@")
-		return nick, ident, host
+		return nick, ident.split("!")[1], host
 
 
 	@irchandler("ERROR")
@@ -174,7 +271,7 @@ class IrcServer(Server):
 		else:
 			receiver = IrcUser(channel_name, None, None, self)
 
-		context = Context(self, sender, receiver)
+		context = Context("irc", self.name, self, sender, receiver)
 		await self.event_handler(MessageEvent(context, args[1]))
 
 	async def main_loop(self):
@@ -194,3 +291,31 @@ class IrcServer(Server):
 			if self.reconnect:
 				await self.connect()
 		print("Main IRC Loop has exited")
+
+	def find_user(self, context : Context, search_str : str, *, requested_for : User = None) -> Tuple[bool, IrcUser|None|set]:
+		if search_str == "jacob1":
+			return True, IrcUser("jacob1", "jacob1", "Powder/Developer/jacob1", self)
+		if search_str == "jacob1_":
+			return True, IrcUser("jacob1_", "~jacob1", "Powder/Developer/jacob1", self)
+		elif search_str == "mooo":
+			return True, IrcUser("mooo", "~jacob1", "Powder/Developer/jacob1", self)
+		elif search_str == "Liver_K":
+			return True, IrcUser("Liver_K", "Liver", "user/Liver", self)
+		elif search_str == "Liver-K":
+			return True, IrcUser("Liver-K", "Liver", "user/Liver", self)
+		return False, None
+		#raise Exception("find_user not implemented for IrcServer")
+
+	def find_channel(self, context : Context, search_str : str, *, requested_for : User = None, exact_match : bool = False) -> Tuple[bool, IrcChannel|None|set]:
+		matches = set()
+		search_str_lower = search_str.lower()
+
+		# Search server for matching channels
+		for channel in self.channels:
+			if channel.lower().startswith(search_str_lower):
+				matches.add(channel)
+		if len(matches) == 1:
+			return True, IrcChannel(matches.pop(), self)
+		if len(matches) == 0:
+			return False, None
+		return False, set([IrcChannel(c, self) for c in matches])

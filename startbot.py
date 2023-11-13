@@ -4,6 +4,8 @@ import socket # For error handler. Use asyncio?
 import sys
 import traceback
 
+import permissions
+
 try:
 	config = importlib.import_module("config")
 	#globals().update(config.get_globals())
@@ -37,29 +39,13 @@ except Exception:
 # Find a channel or member in this server
 # server should be full name of the server, like "TPT Unofficial Server"
 # channel can be a channel name like "#bot-commands" or a user like "jacob1#8633"
-def find_channel(connection_name, server_name, channel_name):
+def find_channel(connection_name, server_name, channel_name) -> "Channel | User":
 	client = clients[connection_name]
-	if type(client) == server.DiscordServer:
-		search_server = None
-		for c_server in client.client.guilds:
-			if c_server.name == server_name:
-				if search_server:
-					raise Exception(f"Two servers match '{server}'")
-				search_server = c_server
-		if channel_name[0] == "#":
-			stripped_channel_name = channel_name[1:]
-			for s_channel in search_server.channels:
-				if s_channel.name == stripped_channel_name:
-					return s_channel
-		user_split = channel_name.split("#")
-		if len(user_split) == 2:
-			for s_member in search_server.members:
-				if s_member.name == user_split[0] and s_member.discriminator == user_split[1]:
-					return s_member
-		return None
-	elif type(client) == server.IrcServer:
-		# TODO: implement
-		pass
+	_, chan = client.find_channel(server_name, channel_name, exact_match=True)
+	if chan is None:
+		_, chan = client.find_user(server_name, channel_name)
+
+	return chan
 
 def log_message(message):
 	#if message.author == client.user:
@@ -69,24 +55,18 @@ def log_message(message):
 
 # Upload an error to tcp.st, and print the link to the error channel defined in error_server / error_channel
 async def upload_error(tb):
-	sock = socket.create_connection(("tcp.st", 7777))
-	sock.sendall(tb.encode("utf-8"))
-	sock.settimeout(1)
-	reply = b""
-	while True:
-		try:
-			reply += sock.recv(4096)
-		except:
-			break
-	url = {key: value for key, value, *_ in [line.split(b" ") + [None] for line in reply.split(b"\n") if line]}[b"URL"].decode("utf-8")
-	admin = {key: value for key, value, *_ in [line.split(b" ") + [None] for line in reply.split(b"\n") if line]}[b"ADMIN"].decode("utf-8")
-
-	for error_channel in config.error_channels:
-		chan = find_channel(error_channel["connection_name"], error_channel["server"], error_channel["channel"])
-		if chan:
-			await chan.send(f"Error: {url} (admin link {admin})")
-		else:
-			print(f"Could not find error channel! {error_channel['connection_name']}, {error_channel['connection_name']}, {error_channel['connection_name']}")
+	# TODO: this is just copied from jacobot and not actually async
+	with socket.socket() as sock:
+		sock.connect(("termbin.com", 9999))
+		sock.send(traceback.format_exc().encode("utf-8", "replace"))
+		received_data = sock.recv(1024).decode("utf-8")
+		for error_channel in config.error_channels:
+			chan = find_channel(error_channel["connection_name"], error_channel["server"], error_channel["channel"])
+			if chan:
+				await chan.reply(f"Error: {received_data}")
+			else:
+				print(
+					f"Could not find error channel! {error_channel['connection_name']}, {error_channel['server']}, {error_channel['channel']}")
 
 # Handle an error. Prints it to console, then calls upload_error to upload it
 async def handle_error(context):
@@ -101,7 +81,7 @@ async def handle_error(context):
 		for error_channel in config.error_channels:
 			chan = find_channel(error_channel["connection_name"], error_channel["server"], error_channel["channel"])
 			if chan:
-				await chan.send("We heard you like errors, so we put an error in your error handler so you can error while you catch errors")
+				await chan.reply("We heard you like errors, so we put an error in your error handler so you can error while you catch errors")
 			else:
 				print(f"Could not find error channel! {error_channel['connection_name']}, {error_channel['connection_name']}, {error_channel['connection_name']}")
 			print("=======ERROR=======\n{0}========END========\n".format(traceback.format_exc()))
@@ -136,7 +116,9 @@ async def on_message_runner(event):
 				for modname, plugin in handler.plugins.items():
 					if plugin.__name__ in sys.modules:
 						del sys.modules[plugin.__name__]
-				del sys.modules["handlers"]
+				for modname in ["handlers", "permissions"]:
+					if modname in sys.modules:
+						del sys.modules[modname]
 				handler = importlib.import_module("handlers")
 				common = importlib.import_module("common")
 				_, failed = handler.LoadMods()
@@ -150,10 +132,21 @@ async def on_message_runner(event):
 					ret += ". Failed plugins: " + ", ".join(failed)
 				await context.reply(ret)
 		elif reload_module == "common":
-			#common.WriteAllData(force=True)
+			common.FlushAllData()
+			# Delete all loaded plugins
 			for modname, plugin in handler.plugins.items():
 				if plugin.__name__ in sys.modules:
 					del sys.modules[plugin.__name__]
+
+			# Extra modules to delete
+			to_del = []
+			for module in sys.modules:
+				if module == "permissions" or module.startswith("permissions."):
+					to_del.append(module)
+			for module in to_del:
+				del sys.modules[module]
+
+			# Start reimport
 			common = importlib.import_module("common")
 			_, failed = handler.LoadMods()
 			ret = "Reloaded common.py and all plugins"
@@ -163,16 +156,22 @@ async def on_message_runner(event):
 
 clients = {}
 for connection in config.connections:
+	if "enabled" in connection and connection["enabled"] is False:
+		continue
 	connection_name = connection["name"]
 	if connection["type"] == "irc":
 		clients[connection_name] = server.IrcServer(on_message,
-				 host=connection["host"],
-				 port=connection["port"],
-				 ssl=connection["ssl"],
-				 nick=connection["nick"],
-				 ident=connection["ident"])
+				name=connection_name,
+				host=connection["host"],
+				port=connection["port"],
+				ssl=connection["ssl"],
+				nick=connection["nick"],
+				ident=connection["ident"],
+				owners=connection["owners"],
+				channels=connection["channels"])
 	elif connection["type"] == "discord":
-		clients[connection_name] = server.DiscordServer(connection["token"], on_message)
+		clients[connection_name] = server.DiscordServer(connection_name, connection["token"], connection["owners"],
+				connection["guilds"], on_message)
 	else:
 		print(f"Invalid connection type {connection[type]}")
 		sys.exit(1)
@@ -190,7 +189,7 @@ try:
 		else:
 			print("Unknown client type")
 			sys.exit(1)
-	gathered = asyncio.gather(*tasks, loop=loop)
+	gathered = asyncio.gather(*tasks)
 	loop.run_until_complete(gathered)
 except KeyboardInterrupt:
 	loop.stop()

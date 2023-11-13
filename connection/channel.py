@@ -6,18 +6,23 @@ class Channel(ABC):
 	async def reply(self, message):
 		pass
 
+	@property
+	@abstractmethod
+	def name(self) -> str:
+		pass
+
 class DiscordChannel(Channel):
 
 	def __init__(self, channel):
-		self.channel = channel
+		self._channel = channel
 
 	@property
 	def rawchannel(self):
-		return self.channel
+		return self._channel
 
 	@property
-	def name(self):
-		return self.channel.name
+	def name(self) -> str:
+		return self._channel.name
 
 	@property
 	def users(self):
@@ -26,14 +31,14 @@ class DiscordChannel(Channel):
 	# Some test functions
 	@property
 	def topic(self):
-		return self.channel.topic
+		return self._channel.topic
 
 	@topic.setter
 	def topic(self, topic):
 		raise Exception("no topic setting support right now")
 
 	async def reply(self, message):
-		await self.channel.send(message)
+		await self._channel.send(message)
 
 class IrcChannel(Channel):
 
@@ -42,7 +47,7 @@ class IrcChannel(Channel):
 		self._server = server
 
 	@property
-	def name(self):
+	def name(self) -> str:
 		return self._name
 
 	@property

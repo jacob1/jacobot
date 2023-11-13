@@ -1,20 +1,23 @@
 import importlib
 import os
 import sys
-from typing import Optional
 
 from common import *
 import handlers
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+	from connection.context import Context
+
 @command("restart", owner = True)
-async def restart(context):
+async def restart(context : "Context"):
 	"""(restart) Restarts the bot."""
 
 	print("Restarting bot due to restart command")
 	os.execl(sys.executable, sys.executable, *sys.argv)
 
 @command("reload", owner = True)
-async def reload_cmd(context, plugin_name : str):
+async def reload_cmd(context : "Context", plugin_name : str):
 	"""(reload <plugin_name>) Reloads a plugin."""
 
 	if plugin_name == "config":
@@ -42,7 +45,7 @@ async def reload_cmd(context, plugin_name : str):
 	await context.reply("Reloaded {0}.py".format(plugin_name))
 
 @command("load", owner = True)
-async def load_cmd(context, plugin_name : str):
+async def load_cmd(context : "Context", plugin_name : str):
 	"""(load <plugin_name>) Loads a plugin."""
 
 	if plugin_name in ["common", "handlers", "config", "connection"]:
@@ -60,7 +63,7 @@ async def load_cmd(context, plugin_name : str):
 	await context.reply(f"Loaded {plugin_name}.py")
 
 @command("unload", owner = True)
-async def unload_cmd(context, plugin_name : str):
+async def unload_cmd(context : "Context", plugin_name : str):
 	"""(unload <plugin_name>) Unloads a plugin."""
 
 	if plugin_name not in handlers.plugins or plugin_name in ["common", "handlers", "config", "connection"]:
@@ -75,7 +78,7 @@ async def unload_cmd(context, plugin_name : str):
 	await context.reply(f"Unloaded {plugin_name}.py")
 
 @command("eval", owner = True)
-async def eval_cmd(context, *, code : str):
+async def eval_cmd(context : "Context", *, code : str):
 	try:
 		formatted_code = code.replace("\\n", "\n").replace("\\t", "\t")
 		ret = str(eval(formatted_code))
@@ -83,3 +86,7 @@ async def eval_cmd(context, *, code : str):
 		ret = str(type(e)) + ":" + str(e)
 
 	await context.reply(f"Ret: {ret}")
+
+@command("error", owner = True)
+async def error_cmd(context : "Context"):
+	await context.reply(str(0/0))

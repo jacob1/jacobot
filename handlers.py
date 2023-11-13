@@ -1,6 +1,12 @@
 import os
 import importlib
 import traceback
+import typing
+
+import config
+
+if typing.TYPE_CHECKING:
+	from common import CommandParser
 
 def get_globals():
 	return globals()
@@ -32,23 +38,28 @@ def LoadMods():
 	print("Done loading plugins")
 	return loaded, failed
 
-async def HandleMessage(context, message):
-
-	command_parser = CommandParser(message)
-	if not command_parser.isCommand:
-		return
-
-	for mod in commands:
-		for i in commands[mod]:
-			if command_parser.command == i[0]:
-				try:
-					await i[1](context, command_parser)
-				except plugins["common"].ShowHelpException:
-					if i[1].__doc__:
-						await context.reply("Usage: %s" % (i[1].__doc__))
-					else:
-						await context.reply("Invalid arguments (no help text available)")
-				except plugins["common"].PermissionException:
-					await context.reply_in_notice("This command is owner-only")
-				return
-
+async def HandleMessage(context, message : str) -> None:
+	command_parser = CommandParser(message, config.command_char)
+	try:
+		command_parser.parse(context)
+		if not command_parser.isCommand:
+			return
+		await command_parser.call(context)
+	except plugins["common"].NoSuchCommandException as e:
+		await context.reply_in_notice(e.message)
+	except plugins["common"].AmbiguousException as e:
+		await context.reply_in_notice(e.message)
+	except plugins["common"].PermissionException as e:
+		if e.message:
+			await context.reply_in_notice(e.message)
+	except plugins["common"].BadUserMatch as e:
+		await context.reply_in_notice(e.message)
+	except plugins["common"].ShowHelpException:
+		if command_parser.subcommand:
+			doc = command_parser.subcommand.get_help()
+		else:
+			doc = command_parser.command.get_help()
+		if doc:
+			await context.reply(f"Usage: {doc}")
+		else:
+			await context.reply("Invalid arguments (no help text available)")

@@ -9,32 +9,54 @@ class User(ABC):
 	async def reply_in_notice(self, message):
 		pass
 
+	@abstractmethod
+	def is_owner(self):
+		pass
+
+	@property
+	@abstractmethod
+	def nick(self) -> str:
+		pass
+
+	@property
+	@abstractmethod
+	def account_name(self) -> str:
+		pass
+
 class DiscordUser(User):
 
-	def __init__(self, user):
-		self.user = user
+	def __init__(self, user, server):
+		self._user = user
+		self._server = server
 
-	# TODO: proper permissions, not stored in this file
+	def __str__(self):
+		return self._user.display_name
+
 	def is_owner(self):
-		return self.user.name == "jacob1" and self.user.id == 186987207033094146 and self.user.discriminator == "8633"
+		for owner in self._server._owners:
+			if self._user.id == owner["id"]:
+				return True
+		return False
 
 	@property
 	def rawuser(self):
-		return self.user
+		return self._user
 
 	@property
 	def nick(self):
-		return self.user.display_name
+		return self._user.display_name
 
 	@property
-	def account_name(self):
-		return self.user.name
+	def account_name(self) -> str:
+		return self._user.id
 
 	async def reply(self, message):
-		await self.user.send(message)
+		print(f"--> [{self.nick}] {message.strip()}")
+		await self._user.send(message)
 
 	async def reply_in_notice(self, message):
-		await self.user.send(message)
+		print(f"--> [{self.nick}] {message.strip()}")
+		await self._user.send(message)
 
 class IrcUser(User):
 
@@ -45,8 +67,11 @@ class IrcUser(User):
 		self._host = host
 		self._server = server
 
+	def __str__(self):
+		return self._nick
+
 	def is_owner(self):
-		return self._host == "Powder/Developer/lykos.jacob1"
+		return self.account_name in self._server.owners
 
 	@property
 	def nick(self):
@@ -54,8 +79,8 @@ class IrcUser(User):
 
 	# TODO
 	@property
-	def account_name(self):
-		return None
+	def account_name(self) -> str:
+		return f"{self._ident}@{self._host}"
 
 	async def reply(self, message):
 		self._server.raw_send(f"PRIVMSG {self.nick} :{message}\n")
