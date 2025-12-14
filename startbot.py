@@ -4,6 +4,14 @@ import socket # For error handler. Use asyncio?
 import sys
 import traceback
 
+try:
+	loop = asyncio.get_event_loop()
+except:
+	# Fishy bug
+	# Workaround for RuntimeError: There is no current event loop in thread 'MainThread'.
+	loop = asyncio.new_event_loop()
+	asyncio.set_event_loop(loop)
+
 import permissions
 
 try:
@@ -154,6 +162,26 @@ async def on_message_runner(event):
 				ret += ". Failed plugins: " + ", ".join(failed)
 			await context.reply(ret)
 
+async def handle_socket_message(reader, writer) -> None:
+	"""Handle incoming messages by forwarding them to common.py's socket handler"""
+
+	await common.handle_socket_message(reader, writer)
+
+async def server_loop(host : str, port : int) -> None:
+	"""Handle socket loop for remote control socket
+
+	:param host: Host to bind socket to
+	:param port: Port to bind socket to
+	"""
+
+	socket_server = await asyncio.start_server(handle_socket_message, host, port)
+
+	addrs = ', '.join(str(sock.getsockname()) for sock in socket_server.sockets)
+	print(f'Serving on {addrs}')
+
+	async with socket_server:
+		await socket_server.serve_forever()
+
 clients = {}
 for connection in config.connections:
 	if "enabled" in connection and connection["enabled"] is False:
@@ -176,7 +204,6 @@ for connection in config.connections:
 		print(f"Invalid connection type {connection[type]}")
 		sys.exit(1)
 
-loop = asyncio.get_event_loop()
 try:
 	tasks = []
 	for connection_name, client in clients.items():
@@ -189,6 +216,9 @@ try:
 		else:
 			print("Unknown client type")
 			sys.exit(1)
+	if config.socket["enabled"]:
+		tasks.append(loop.create_task(server_loop(config.socket["host"], config.socket["port"])))
+
 	gathered = asyncio.gather(*tasks)
 	loop.run_until_complete(gathered)
 except KeyboardInterrupt:

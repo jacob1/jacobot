@@ -4,6 +4,8 @@ import asyncio
 
 import config
 import inspect
+import json
+import jwt
 import random
 import re
 import traceback
@@ -17,6 +19,7 @@ from typing import TYPE_CHECKING, AnyStr
 
 if TYPE_CHECKING:
 	from connection.context import Context
+	from collections.abc import Callable
 
 
 def get_globals():
@@ -484,6 +487,101 @@ def add_command_permission_to_group(command_name : str, group_name : str) -> Non
 	"""Add command permission to group. All members of this group will automatically have this permission.
 	Meant to be run on startup only to initialize group permissions."""
 	permissions.add_command_permission_to_group(command_name, group_name)
+
+
+socket_handlers : dict[str, dict[str, Callable[[str], str]]] = {}
+def socket_handler_types() -> list[str]:
+	"""Return list of all registered socket handler types"""
+
+	all_types = []
+	for types in socket_handlers.values():
+		all_types.extend(types.keys())
+	return all_types
+
+def get_socket_handler(socket_event_name : str) -> Callable[[str], str] | None:
+	"""Get socket handler for a specific event type
+
+	:param socket_event_name: Name of the event
+	:return: The callback function"""
+
+	for types in socket_handlers.values():
+		if socket_event_name in types:
+			return types[socket_event_name]
+	return None
+
+def socket_handler(socket_event_name : str):
+	"""Decorator which registers a hook for a socket event.
+
+	@param socket_event_name: Name of the socket event (jwt audience) to listen for
+	"""
+
+	def real_command(func):
+		existing_handlers = socket_handler_types()
+		if socket_event_name in existing_handlers:
+			raise Exception(f"Socket handler for {socket_event_name} already exists")
+
+		plugin = ExtractPluginName()
+		if plugin not in socket_handlers:
+			socket_handlers[plugin] = {}
+		socket_handlers[plugin][socket_event_name] = func
+		return None
+
+	return real_command
+
+
+def parse_socket_message(message) -> tuple[bool, str|None, dict[str, str]|None]:
+	"""Parse message from socket and validate its jwt token
+
+	:param message: The incoming line from the socket
+	:return: 3 return values: True/False success bool, optional error message, optional decoded jwt event
+	"""
+	try:
+		decoded = json.loads(message.strip())
+		if not decoded:
+			return False, "Couldn't decode json", None
+		if not decoded["jwt"]:
+			return False, "json doesn't have required param 'jwt'", None
+
+		accepted_audiences = [f"jacobot:{key}" for key in socket_handler_types()]
+		token = jwt.decode(decoded["jwt"], config.socket["jwt_secret"], options={"require" : {"exp", "aud", "message"}}, audience=accepted_audiences, algorithms=["HS256"])
+		if not token:
+			return False, "Couldn't decode jwt", None
+
+		return True, None, token
+	except Exception as e:
+		print(e)
+		return False, str(e), None
+
+async def handle_socket_message(reader, writer):
+	"""Handles an incoming message from the socket"""
+
+	# Read whole line off socket
+	data = await reader.readline()
+	message = data.decode('utf8')
+
+	# Parse message and validate jwt token
+	success, err, token = parse_socket_message(message)
+	# Call socket handler for validated tokens
+	if success:
+		success = False
+		handler = get_socket_handler(token['aud'][8:])
+		if handler:
+			err = await handler(token["message"])
+			success = True
+		else:
+			err = f"No handler for {token['aud'][8:]}"
+
+	if not success:
+		print(f"[Socket error] {err}")
+
+	# Write reply or error message back to caller
+	resp = { "success": success, "message": err }
+	writer.write(json.dumps(resp).encode('utf8'))
+	await writer.drain()
+
+	writer.close()
+	await writer.wait_closed()
+
 
 def ScheduleInterval(func, interval : int, initial_delay : int, random_delay : int) -> None:
 	"""Schedule a function to run with a certain frequency. Will ensure there is 'interval' seconds between invocations,

@@ -40,6 +40,8 @@ async def reload_cmd(context : "Context", plugin_name : str):
 		return
 	if plugin_name in handlers.plugins["common"].commands:
 		del handlers.plugins["common"].commands[plugin_name]
+	if plugin_name in handlers.plugins["common"].socket_handlers:
+		del handlers.plugins["common"].socket_handlers[plugin_name]
 	handlers.plugins[plugin_name] = importlib.reload(handlers.plugins[plugin_name])
 
 	await context.reply("Reloaded {0}.py".format(plugin_name))
@@ -72,6 +74,8 @@ async def unload_cmd(context : "Context", plugin_name : str):
 
 	if plugin_name in handlers.plugins["common"].commands:
 		del handlers.plugins["common"].commands[plugin_name]
+	if plugin_name in handlers.plugins["common"].socket_handlers:
+		del handlers.plugins["common"].socket_handlers[plugin_name]
 	del handlers.plugins[plugin_name]
 	del sys.modules["plugins.{0}".format(plugin_name)]
 
