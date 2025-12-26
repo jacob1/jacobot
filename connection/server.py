@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Tuple
-
+import base64
 import discord
+import ssl
+from typing import Any, Tuple
 
 from event import *
 from connection.channel import *
@@ -151,7 +152,7 @@ irc_event_handlers = {}
 class IrcServer(Server):
 
 	def __init__(self, event_handler, *, name, host, port, ssl, nick, ident, owners, channels,
-				 account_name = None, account_password = None):
+				 account_name = None, account_password = None, sasl = False, certfp_certfile = None, certfp_keyfile = None):
 		self._name = name
 		self.host = host
 		self.port = port
@@ -163,24 +164,67 @@ class IrcServer(Server):
 		self.owners = owners
 		self.channels = channels
 
+		self.sasl = sasl
+		self.certfp_certfile = certfp_certfile
+		self.certfp_keyfile = certfp_keyfile
+		self.server_caps = {}
+		self.enabled_caps = {}
+		self.doing_sasl_registration = False
+		self.needs_regain_command = None
+		self.regain_attempts = 0
+
 		self.event_handler = event_handler
 		self.reconnect = False
 
 		self.reader = None
 		self.writer = None
 
+	def get_ssl_context(self):
+		"""Get appropriate ssl context, with TLS versions below 1.2 disabled, and using certfp if needed"""
+
+		context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+
+		# Enable certificate validation
+		context.verify_mode = ssl.CERT_REQUIRED
+		context.check_hostname = True
+		context.load_default_certs()
+
+		# Disable insecure protocols / options
+		context.options |= ssl.OP_NO_SSLv2
+		context.options |= ssl.OP_NO_SSLv3
+		context.options |= ssl.OP_NO_TLSv1
+		context.options |= ssl.OP_NO_TLSv1_1
+		context.options |= ssl.OP_NO_COMPRESSION
+		context.options |= ssl.OP_NO_TICKET
+
+		# For certfp option
+		if self.certfp_certfile:
+			context.load_cert_chain(self.certfp_certfile, self.certfp_keyfile, password="")
+
+		return context
+
 	async def connect(self):
-		self.reader, self.writer = await asyncio.open_connection(self.host, self.port, ssl = self.ssl)
-		self.writer.write(f"USER {self.ident} {self.nick} {self.nick} :jacobot rewrite\n".encode("utf-8"))
-		self.writer.write(f"NICK {self.nick}\n".encode("utf-8"))
-		if self.account_name:
-			self.writer.write(f"ns identify {self.account_name} {self.account_password}\n".encode("utf-8"))
-		for channel in self.channels:
-			self.writer.write(f"JOIN {channel}\n".encode("utf-8"))
+		self.reader, self.writer = await asyncio.open_connection(self.host, self.port, ssl = self.get_ssl_context())
+		self.raw_send(f"USER {self.ident} {self.nick} {self.nick} :jacobot rewrite")
+		self.raw_send(f"NICK {self.nick}")
+		if not self.sasl and self.account_name:
+			self.raw_send(f"ns identify {self.account_name} {self.account_password}", log=False)
+		if not self.account_password:
+			self.join_chans()
+		if self.sasl:
+			if not self.account_password:
+				print("Fatal: sasl requested but account password isn't set")
+				self.raw_send("QUIT :couldn't negotiate SASL")
+			self.raw_send("CAP LS 302")
 
 		# https://docs.python.org/3.5/library/asyncio-eventloop.html
 		# https://docs.python.org/3.5/library/asyncio-protocol.html#asyncio-transport
 		# https://docs.python.org/3.5/library/asyncio-stream.html#asyncio-register-socket-streams    <-----
+
+	def join_chans(self):
+		for channel in self.channels:
+			self.writer.write(f"JOIN {channel}\n".encode("utf-8"))
+		self.account_password = None
 
 	@property
 	def name(self):
@@ -198,8 +242,9 @@ class IrcServer(Server):
 			self.reader = client.reader
 			self.writer = client.writer
 
-	def raw_send(self, message):
-		print(f"--> {message.strip()}")
+	def raw_send(self, message, log = True):
+		if log:
+			print(f"--> {message.strip()}")
 		self.writer.write(f"{message}\n".encode("utf-8"))
 
 	def parse_raw_line(self, line):
@@ -273,6 +318,118 @@ class IrcServer(Server):
 
 		context = Context("irc", self.name, self, sender, receiver)
 		await self.event_handler(MessageEvent(context, args[1]))
+
+	@irchandler("396")
+	async def event_hosthidden(self, prefix: str, command: str, args: list[str]):
+		"""Joins IRC channels once we have identified and had a cloak set"""
+		self.join_chans()
+
+	@irchandler("433")
+	@irchandler("437")
+	async def event_nicknameinuse(self, prefix: str, command: str, args: list[str]):
+		"""Nickname is in use (433) or unavailable (437), use temporary nick to logon then later regain the nick"""
+
+		if not self.account_password:
+			return
+
+		# While doing registration, append a dash to the nick so we can try again, and queue a ns regain for later
+		if self.doing_sasl_registration:
+			attempted_nick = args[1]
+			self.raw_send(f"NICK {attempted_nick}-")
+			self.needs_regain_command = "ghost" if command == "433" else "regain"
+		# Once identified, try nicking to our rightful nick
+		# The first attempt seems to fail because the old connection isn't killed fast enough
+		else:
+			if self.regain_attempts < 3:
+				self.raw_send(f"NICK {self.nick}")
+			self.regain_attempts = self.regain_attempts + 1
+
+	@irchandler("CAP")
+	async def command_cap(self, prefix: str, command: str, args: list[str]):
+		cap_type = args[1]
+		if cap_type == "LS":
+			# Reset variables on reconnection
+			self.doing_sasl_registration = False
+			self.needs_regain_command = None
+			self.regain_attempts = 0
+
+			for cap in args[-1].split():
+				if cap.find("=") != -1:
+					(key, value) = cap.split("=", 1)
+					self.server_caps[key] = value
+				else:
+					self.server_caps[cap] = True
+
+			# Multiline cap, continue on
+			if args[2] == "*":
+				return
+
+			requested_caps = []
+			if self.sasl:
+				requested_sasl_type = "PLAIN" if not self.certfp_certfile else "EXTERNAL"
+				if self.server_caps["sasl"] and requested_sasl_type in self.server_caps["sasl"].upper().split(","):
+					requested_caps.append("sasl")
+					self.doing_sasl_registration = True
+				else:
+					print("SASL PLAIN not supported on this server, but sasl was requested in the bot config. Aborting.")
+					self.raw_send("QUIT :couldn't negotiate SASL")
+
+			if requested_caps:
+				self.raw_send("CAP REQ :" + " ".join(requested_caps))
+			else:
+				self.raw_send("CAP END")
+		elif cap_type == "ACK":
+			for cap in args[-1].split():
+				if cap[0] == "-":
+					self.enabled_caps[cap[1:]] = False
+				else:
+					self.enabled_caps[cap] = True
+					if cap == "sasl":
+						requested_sasl_type = "PLAIN" if not self.certfp_certfile else "EXTERNAL"
+						self.raw_send(f"AUTHENTICATE {requested_sasl_type}")
+
+		elif cap_type == "NAK" or cap_type == "DEL":
+			for cap in args[-1].split():
+				self.enabled_caps[cap] = False
+			if not self.enabled_caps["sasl"]:
+				self.doing_sasl_registration = False
+
+	@irchandler("AUTHENTICATE")
+	async def command_authenticate(self, prefix: str, command: str, args: list[str]):
+		if not self.sasl:
+			return
+
+		if args[0] == "+":
+			requested_sasl_type = "PLAIN" if not self.certfp_certfile else "EXTERNAL"
+			if requested_sasl_type == "PLAIN":
+				account = self.account_name.encode("utf-8")
+				password = self.account_password.encode("utf-8")
+				auth_token = base64.b64encode(b"\0".join((account, account, password))).decode("utf-8")
+				self.raw_send("AUTHENTICATE " + auth_token, log=False)
+			else:
+				self.raw_send("AUTHENTICATE +")
+
+	@irchandler("903")
+	async def event_saslsuccess(self, prefix: str, command: str, args: list[str]):
+		if not self.sasl:
+			return
+
+		self.raw_send("CAP END")
+		# Now that we are identified, ghost / regain our old connection if necessary
+		if self.needs_regain_command:
+			self.raw_send(f"ns {self.needs_regain_command} {self.nick}")
+			self.raw_send(f"NICK {self.nick}")
+		self.join_chans()
+		self.doing_sasl_registration = False
+
+	@irchandler("902")
+	@irchandler("904")
+	@irchandler("905")
+	@irchandler("906")
+	@irchandler("908")
+	async def event_saslfailed(self, prefix: str, command: str, args: list[str]):
+		print("SASL Failed, aborting")
+		self.raw_send("QUIT :couldn't negotiate SASL")
 
 	async def main_loop(self):
 		while self.reader:

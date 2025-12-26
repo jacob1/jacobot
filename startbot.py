@@ -196,7 +196,12 @@ for connection in config.connections:
 				nick=connection["nick"],
 				ident=connection["ident"],
 				owners=connection["owners"],
-				channels=connection["channels"])
+				channels=connection["channels"],
+				account_name=connection["account_name"] if "account_name" in connection else None,
+				account_password=connection["account_password"] if "account_password" in connection else None,
+				sasl=connection["sasl"],
+				certfp_certfile=connection["certfp_certfile"],
+				certfp_keyfile=connection["certfp_keyfile"])
 	elif connection["type"] == "discord":
 		clients[connection_name] = server.DiscordServer(connection_name, connection["token"], connection["owners"],
 				connection["guilds"], on_message)
