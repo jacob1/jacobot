@@ -566,7 +566,7 @@ async def handle_socket_message(reader, writer):
 		success = False
 		handler = get_socket_handler(token['aud'][8:])
 		if handler:
-			err = await handler(token["message"])
+			err = await handler(token["message"].rstrip())
 			success = True
 		else:
 			err = f"No handler for {token['aud'][8:]}"
