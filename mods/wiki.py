@@ -14,6 +14,10 @@ def SendToCrackbot(channel, message):
         crackbot.send("msg {0} {1}\n".format(channel, message).encode('utf-8'))
         crackbot.close()
 
+def GetTPTSessionInfo():
+    with open("passwords.txt") as f:
+        return f.readlines()[3].strip()
+
 def CheckWiki(message):
 	global frequency
 
@@ -22,7 +26,7 @@ def CheckWiki(message):
 		lastrc = 0
 
 	try:
-		info = GetPage("https://powdertoy.co.uk/Wiki/api.php?action=query&list=recentchanges&rcprop=timestamp|title|comment|ids|user|loginfo&rclimit=6&format=json")
+		info = GetPage("https://powdertoy.co.uk/Wiki/api.php?action=query&list=recentchanges&rcprop=timestamp|title|comment|ids|user|loginfo&rclimit=6&format=json", GetTPTSessionInfo())
 	except IOError:
 		return
 	if not info:
@@ -49,6 +53,8 @@ def CheckWiki(message):
 				elif change["logtype"] == "delete":
 					msg = "deleted page"
 					showlink = False
+				elif change["logtype"] == "protect":
+					msg = "protected page"
 				else:
 					msg = "did log action " + change["logtype"] + " on page"
 			else:
