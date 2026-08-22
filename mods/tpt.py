@@ -86,7 +86,7 @@ def CheckForumSpam(ip):
 		pass
 
 def Parse(raw, text):
-	powderBotMatch = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels|Shenanigan|jacob1)@turing.jacksonmj.co.uk PRIVMSG ([+@])?(#{1,}[\w-]+) :(.*)$", raw)
+	powderBotMatch = re.match("^:(?:StewieGriffinSub|PowderBot)!(?:Stewie|jacksonmj3|bagels|Shenanigan|jacob1|irc-stuff|PowderBot)@Powder/Bot PRIVMSG ([+@])?(#{1,}[\w-]+) :(.*)$", raw)
 	if powderBotMatch:
 		prefix = powderBotMatch.group(1)
 		channel = powderBotMatch.group(2)
@@ -99,6 +99,13 @@ def Parse(raw, text):
 		elif channel == GetSetting(__name__, "info-chan"):
 			CheckRegistration(message)
 			#CheckPost(message)
+	crackbotMatch = re.match("^:(?:Crackbot|Cokebot)!(?:~sellspowd|~drinkcoca)@user/jacob1/bot/crackbot PRIVMSG ([+@])?(#{1,}[\w-]+) :(.*)$", raw)
+	if crackbotMatch:
+		prefix = crackbotMatch.group(1)
+		channel = crackbotMatch.group(2)
+		message = crackbotMatch.group(3)
+		if channel == GetSetting(__name__, "info-chan"):
+			CheckRegistration(message)
 
 def CheckRegistrationForumSpam(username, IP):
 	data = CheckForumSpam(IP)
@@ -112,7 +119,7 @@ def CheckRegistrationForumSpam(username, IP):
 	confidence = data["ip"]["confidence"]
 	frequency = data["ip"].get("frequency", 0)
 	SendMessage(GetSetting(__name__, "info-chan"), "{0}% chance of being a spammer, seen {1} times".format(confidence, frequency))
-	if float(confidence) > 10 or float(frequency) > 10:
+	if float(confidence) > 50:# or float(frequency) > 10:
 		#BanUser(username, "1", "p", "Automatic ban: this IP address has been reported as spam")
 		return True
 	return False
@@ -129,14 +136,16 @@ def CheckRegistrationEmail(username, IP):
 def CheckDisposable(email, provider):
 	if provider in disposable_providers:
 		return disposable_providers[provider]
-	page = GetPage("https://disposable.debounce.io/?email=" + email, fakeuseragent=True)
+	testEmail = "user@" + provider
+	page = GetPage("https://disposable.debounce.io/?email=" + testEmail, fakeuseragent=True)
 	if not page:
 		SendMessage(GetSetting(__name__, "info-chan"), "Error: Could not access disposable.debounce.io")
 		return
 	disposable_check = json.loads(page)
 	if disposable_check["disposable"] == "true":
 		disposable_providers[provider] = True
-	disposable_providers[provider] = False
+	else:
+		disposable_providers[provider] = False
 	StoreData(__name__, "disposable-email-providers", disposable_providers)
 
 	return disposable_providers[provider]
@@ -148,9 +157,9 @@ def CheckRegistration(message):
 		IP = registrationMatch.group(3)
 		check = CheckIP(IP)
 		if not check[0]:
-			if CheckRegistrationForumSpam(username, IP):
-				BanUser(username, "1", "p", "Automatic ban: this IP address has been reported as spam")
-				return
+			CheckRegistrationForumSpam(username, IP)
+			#BanUser(username, "1", "p", "Automatic ban: this IP address has been reported as spam")
+			#return
 			if CheckRegistrationEmail(username, IP):
 				SendMessage(GetSetting(__name__, "info-chan"), "Disposable email detected")
 				BanUser(username, "1", "p", "Automatic ban: Due to abuse, registration with disposable email addresses is not allowed")
@@ -202,7 +211,7 @@ def CheckSave(message):
 		#SendMessage(logchan, "Data: {0}, {1}, {2}, {3}, {4}, {5}, {6}".format(status, title, username, numComments, score, bumps, saveId))
 		#SendMessage(logchan, "Registration Time: {0}".format(GetRegistrationDate(username)))
 		(numParts, numDeco) = savechecker.ValidateSave(saveId)
-		if numParts > 0 and numDeco / numParts > .8 and numParts > 10000:
+		if numParts > 0 and numDeco / numParts > .8 and numParts > 50000:
 			#SendMessage(logchan, "Num parts: {0}, percent deco: {1}".format(numParts, numDeco / numParts))
 			registrationTime = int(GetRegistrationDate(username))
 			if registrationTime > time.time() - 7200:
@@ -239,10 +248,11 @@ def CheckPost(message):
 			check = (0,0)
 			SendMessage(logchan, "Error getting post IP.")
 		if check[0] and check[1] == "tor":
-			if HidePost(postID, True, "This post has been automatically removed due to potential abuse."):
-				SendMessage(logchan, "Warning: This post was made using TOR. Removed post.")
-			else:
-				SendMessage(logchan, "Warning: This post was made using TOR. Error removing post, please remove manually.")
+			SendMessage(logchan, "Warning: This post was made using TOR.")
+			#if HidePost(postID, True, "This post has been automatically removed due to potential abuse."):
+			#	SendMessage(logchan, "Warning: This post was made using TOR. Removed post.")
+			#else:
+			#	SendMessage(logchan, "Warning: This post was made using TOR. Error removing post, please remove manually.")
 		elif check[0] and check[1] == "ipban":
 			if HidePost(postID, True, "This post has been automatically removed due to potential abuse."):
 				SendMessage(logchan, "Warning: This post was made from a suspicious IP address. Removed post.")
@@ -274,9 +284,10 @@ def CheckPost(message):
 			check = (0,0)
 			SendMessage(logchan, "Error getting thread IP.")
 		if check[0] and check[1] == "tor":
-			SendMessage(logchan, "Warning: This thread was made using TOR. Removing thread.")
-			MoveThread(threadID, 7)
-			LockThread(threadID, "Thread automatically moved and locked because it was posted with TOR")
+			SendMessage(logchan, "Warning: This thread was made using TOR.")
+			#SendMessage(logchan, "Warning: This thread was made using TOR. Removing thread.")
+			#MoveThread(threadID, 7)
+			#LockThread(threadID, "Thread automatically moved and locked because it was posted with TOR")
 		elif check[0] and check[1] == "neostrada":
 			SendMessage(logchan, "Warning: This thread was made using Neostrada Plus.")
 			#MoveThread(threadID, 7)
@@ -345,16 +356,12 @@ def CheckCommentBans():
 	#commentbans = GetData(__name__, "commentbans")
 	#if not commentbans:
 	#	return
-	#commentbansorig = ["Frads_man", "JanKaszanka", "DrBreen"]
-	#commentbans = [149086, 156645, 168723]
-	usermap = {143701:"DrBrick", 156645:"JanKaszanka", 164702:"troy7838", 167755:"NoNStopWarrior", 175563: "Aamths", 172360: "Earthbright",
-	           172964:"TheCARNUFEX", 118259:"VIP84", 63378:"PinkLeopard", 161794:"Coffee", 169436:"ludapecurka123", 147798:"Wasteland",
-	           189416:"Velociraptor", 184385:"The_Admiral", 163114:"REALkittyAndCats", 193090:"JellyfishGiant", 173754:"potatoman6778",
-	           194818:"Supercrafter", 190563:"BokkaB", 40317:"Vampireax", 149086:"Frads_man", 168401:"SuperJohn", 149196:"CatArmour",
-	           150099:"Umm",159252:"LiquidPlasma",202070:"heptium345"}
-	#commentbans = {"DrBrick":["JanKaszanka","troy7838"], "JanKaszanka":["DrBrick"], "troy7838":["DrBrick"]}
-	commentbans = {"Supercrafter":["BokkaB", "CatArmour"], "BokkaB":["SuperCrafter"], "Vampireax":["Frads_man","Umm"], "Frads_man":["Vampireax"],
-			"Umm":["Vampireax"], "heptium345":["LiquidPlasma"], "LiquidPlasma":["heptium345"]}
+
+	# usermap {  38642 : "jacob1" }
+	#commentbans = {"offending_user" : ["user1", "user2"]
+	usermap = { }
+	commentbans = { }
+
 	for user, commentban in commentbans.items():
 		userid = -1
 		for useri, username in usermap.items():
@@ -690,6 +697,13 @@ def DoComment(saveID, message, jacob1 = False):
 		return False
 	return True
 
+import sys
+def DoPost(threadID, message):
+	page = GetPage("https://powdertoy.co.uk/Discussions/Thread/Reply.json?Key=%s" % (GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"Post_Message":message, "Thread":threadID, "Post_Post":"posting"})
+	print(page)
+	sys.stdout.flush()
+	return True
+
 def DoUnpublish(saveID):
 	if not GetPage("https://powdertoy.co.uk/Browse/View.html?ID=%s&Key=%s" % (saveID, GetTPTSessionInfo(1)), GetTPTSessionInfo(0), {"ActionUnpublish":"&nbsp;"}):
 		return False
@@ -742,8 +756,11 @@ def GetUserComments(username, page=0):
 
 def GetSaveComments(saveID, page=0):
 	page = GetPage("https://powdertoy.co.uk/Browse/View.html?ID={0}&PageNum={1}".format(saveID, page), GetTPTSessionInfo(0))
-	comments = re.findall("\/User\.html\?Name=([\w_-]+)\">.*\n.*\n.*\n.*\/Browse\/View\.html\?ID=(\d+)&amp;DeleteComment=(\d+)\".*\n.*\n.*Message\">(.*?)<", page)
-	return comments
+	if page:
+		comments = re.findall("\/User\.html\?Name=([\w_-]+)\">.*\n.*\n.*\n.*\/Browse\/View\.html\?ID=(\d+)&amp;DeleteComment=(\d+)\".*\n.*\n.*Message\">(.*?)<", page)
+		return comments
+	else:
+		return []
 
 def DeleteComment(saveID, commentID, safe=True):
 	saveComments = GetSaveComments(saveID)
@@ -944,6 +961,14 @@ def Comment(message):
 		message.Reply("Done.")
 	else:
 		message.Reply("Error, could not comment.")
+
+@command("post", minArgs=2, owner = True)
+def Post(message):
+	"""(post <threadID> <post>). Comments on a forum post as jacob1. Owner only."""
+	if DoPost(message.GetArg(0), message.GetArg(1, endLine=True)):
+		message.Reply("Done.")
+	else:
+		message.Reply("Error, could not post.")
 
 @command("unpublish", minArgs=1, admin = True)
 def Unpublish(message):
