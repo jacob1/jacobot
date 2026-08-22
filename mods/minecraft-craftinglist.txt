@@ -22,15 +22,27 @@ Replacements here (for easier searaches)
 
  Wood Plank | 4 | Wood
  Stripped Wood | 3 | Stripped Log - Stipped Log / Stripped Log - Stripped Log
+ Bamboo Planks | 2 | Block of Bamboo
  Stick | 4 | Wood Plank / Wood Plank
  Crafting Table | 1 | Wood Plank - Wood Plank / Wood Plank - Wood Plank
  Furnace | 1 | Cobblestone - Cobblestone - Cobblestone / Cobblestone - - Cobblestone  / Cobblestone - Cobblestone - Cobblestone
  Chest | 1 | Wood Plank - Wood Plank - Wood Plank / Wood Plank - - Wood Plank / Wood Plank - Wood Plank - Wood Plank
  Trapped Chest | 1 | Tripwire Hook - Chest
+ Copper Chest | 1 | Copper - Copper - Copper / Copper - Chest - Copper / Copper - Copper - Copper
+ Waxed Copper Chest | 1 | Copper Chest - Honeycomb
+ Waxed Exposed Copper Chest | 1 | Exposed Copper Chest - Honeycomb
+ Waxed Weathered Copper Chest | 1 | Weathered Copper Chest - Honeycomb
+ Waxed Oxidized Copper Chest | 1 | Oxidized Copper Chest - Honeycomb
  Torch | 4 | Coal / Stick
  Lantern | 1 | Iron Nugget - Iron Nugget - Iron Nugget / Iron Nugget - Torch - Iron Nugget / Iron Nugget - Iron Nugget - Iron Nugget
  Soul Torch | 4 | Coal / Stick / Soul Sand
  Soul Lantern | 1 | Iron Nugget - Iron Nugget - Iron Nugget / Iron Nugget - Soul Torch - Iron Nugget / Iron Nugget - Iron Nugget - Iron Nugget
+ Copper Torch | 4 | Copper Nugget / Coal / Stick
+ Copper Lantern | 1 | Copper Nugget - Copper Nugget - Copper Nugget / Copper Nugget - Copper Torch - Copper Nugget / Copper Nugget - Copper Nugget - Copper Nugget
+ Waxed Copper Lantern | 1 | Copper Lantern - Honeycomb
+ Waxed Exposed Copper Lantern | 1 | Exposed Copper Lantern - Honeycomb
+ Waxed Weathered Copper Lantern | 1 | Weathered Copper Lantern - Honeycomb
+ Waxed Oxidized Copper Lantern | 1 | Oxidized Copper Lantern - Honeycomb
 
 /////////////////////////
 //Manufactured recepies//
@@ -40,12 +52,19 @@ Replacements here (for easier searaches)
  Wool | 1 | String - String / String - String
  TNT | 1 | Gunpowder - Sand - Gunpowder / Sand - Gunpowder - Sand / Gunpowder - Sand - Gunpowder
  Bookshelf | 1 | Wood Plank - Wood Plank - Wood Plank / Book - Book - Book / Wood Plank - Wood Plank - Wood Plank
+ Chiseled Bookshelf | 1 | Wood Plank - Wood Plank - Wood Plank / Wood Slab - Wood Slab - Wood Slab / Wood Plank - Wood Plank - Wood Plank
  Beehive | 1 | Wood Plank - Wood Plank - Wood Plank / Honeycomb - Honeycomb - Honeycomb / Wood Plank - Wood Plank - Wood Plank
  Honeycomb Block | 1 | Honeycomb - Honeycomb / Honeycomb - Honeycomb
  Honey Block | 1 | Honey Bottle - Honey Bottle / Honey Bottle - Honey Bottle
  Nether Wart Block | 1 | Nether Wart - Nether Wart - Nether wart / Nether Wart - Nether Wart - Nether wart / Nether Wart - Nether Wart - Nether wart
  Netherite Ingot | 1 | Gold - Gold - Gold / Gold - Netherite Scrap - Netherite Scrap / Netherite Scrap - Netherite Scrap -
- Chain | 1 | - Iron Nugget - / - Iron - / - Iron Nugget -
+ Iron Chain | 1 | - Iron Nugget - / - Iron - / - Iron Nugget -
+ Copper Chain | 1 | - Copper Nugget - / - Copper - / - Copper Nugget -
+ Waxed Copper Chain | 1 | Copper Chain - Honeycomb
+ Waxed Exposed Copper Chain | 1 | Exposed Copper Chain - Honeycomb
+ Waxed Weathered Copper Chain | 1 | Weathered Copper Chain - Honeycomb
+ Waxed Oxidized Copper Chain | 1 | Oxidized Copper Chain - Honeycomb
+ Block of Bamboo | 1 | Bamboo - Bamboo - Bamboo / Bamboo - Bamboo - Bamboo / Bamboo - Bamboo - Bamboo
 
  Wood Slab | 6 | Wood Plank - Wood Plank - Wood Plank
  Cobblestone Slab | 6 | Cobblestone - Cobblestone - Cobblestone
@@ -86,6 +105,16 @@ Replacements here (for easier searaches)
  Polished Deepslate Slab | 6 | Polished Deepslate - Polished Deepslate - Polished Deepslate
  Deepslate Brick Slab | 6 | Deepslate Bricks - Deepslate Bricks - Deepslate Bricks
  Deepslate Tile Slab | 6 | Deepslate Tiles - Deepslate Tiles - Deepslate Tiles
+ Bamboo Mosaic Slab | 6 | Bamboo Mosaic - Bamboo Mosaic - Bamboo Mosaic
+ Polished Tuff Slab | 6 | Polished Tuff - Polished Tuff - Polished Tuff
+ Tuff Slab | 6 | Tuff - Tuff - Tuff
+ Tuff Brick Slab | 6 | Tuff Bricks - Tuff Bricks - Tuff Bricks
+ Cinnabar Slab | 6 | Cinnabar - Cinnabar - Cinnabar
+ Polished Cinnabar Slab | 6 | Polished Cinnabar - Polished Cinnabar - Polished Cinnabar
+ Cinnabar Brick Slab | 6 | Cinnabar Bricks - Cinnabar Bricks - Cinnabar Bricks
+ Sulfur Slab | 6 | Sulfur - Sulfur - Sulfur
+ Polished Sulfur Slab | 6 | Polished Sulfur - Polished Sulfur - Polished Sulfur
+ Sulfur Brick Slab | 6 | Sulfur Bricks - Sulfur Bricks - Sulfur Bricks
 
  Wood Stairs | 4 | Wood Plank - - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank - Wood Plank
  Cobblestone Stairs | 4 | Cobblestone - - / Cobblestone - Cobblestone - / Cobblestone - Cobblestone - Cobblestone
@@ -121,6 +150,16 @@ Replacements here (for easier searaches)
  Polished Deepslate Stairs | 4 | Polished Deepslate - - / Polished Deepslate - Polished Deepslate - / Polished Deepslate - Polished Deepslate - Polished Deepslate
  Deepslate Brick Stairs | 4 | Deepslate Bricks - - / Deepslate Bricks - Deepslate Bricks - / Deepslate Bricks - Deepslate Bricks - Deepslate Bricks
  Deepslate Tile Stairs | 4 | Deepslate Tiles - - / Deepslate Tiles - Deepslate Tiles - / Deepslate Tiles - Deepslate Tiles - Deepslate Tiles
+ Bamboo Mosaic Stairs | 4 | Bamboo Mosaic - - / Bamboo Mosaic - Bamboo Mosaic - / Bamboo Mosaic - Bamboo Mosaic - Bamboo Mosaic
+ Polished Tuff Stairs | 4 | Polished Tuff - - / Polished Tuff - Polished Tuff - / Polished Tuff - Polished Tuff - Polished Tuff
+ Tuff Stairs | 4 | Tuff - - / Tuff - Tuff - / Tuff - Tuff - Tuff
+ Tuff Brick Stairs | 4 | Tuff Brick - - / Tuff Bricks - Tuff Bricks - / Tuff Bricks - Tuff Bricks - Tuff Bricks
+ Cinnabar Stairs | 4 | Cinnabar - - / Cinnabar - Cinnabar - / Cinnabar - Cinnabar - Cinnabar
+ Polished Cinnabar Stairs | 4 | Polished Cinnabar - - / Polished Cinnabar - Polished Cinnabar - / Polished Cinnabar - Polished Cinnabar - Polished Cinnabar
+ Cinnabar Brick Stairs | 4 | Cinnabar Bricks - - / Cinnabar Bricks - Cinnabar Bricks - / Cinnabar Bricks - Cinnabar Bricks - Cinnabar Bricks
+ Sulfur Stairs | 4 | Sulfur - - / Sulfur - Sulfur - / Sulfur - Sulfur - Sulfur
+ Polished Sulfur Stairs | 4 | Polished Sulfur - - / Polished Sulfur - Polished Sulfur - / Polished Sulfur - Polished Sulfur - Polished Sulfur
+ Sulfur Brick Stairs | 4 | Sulfur Bricks - - / Sulfur Bricks - Sulfur Bricks - / Sulfur Bricks - Sulfur Bricks - Sulfur Bricks
 
  Cobblestone Wall | 6 | - - / Cobblestone - Cobblestone - Cobblestone / Cobblestone - Cobblestone - Cobblestone
  Mossy Cobblestone Wall | 6 | - - / Mossy Cobblestone - Mossy Cobblestone - Mossy Cobblestone / Mossy Cobblestone - Mossy Cobblestone - Mossy Cobblestone
@@ -140,6 +179,15 @@ Replacements here (for easier searaches)
  Polished Deepslate Wall | 6 | Polished Deepslate - Polished Deepslate - Polished Deepslate / Polished Deepslate - Polished Deepslate - Polished Deepslate
  Deepslate Brick Wall | 6 | Deepslate Bricks - Deepslate Bricks - Deepslate Bricks / Deepslate Bricks - Deepslate Bricks - Deepslate Bricks
  Deepslate Tile Wall | 6 | Deepslate Tiles - Deepslate Tiles - Deepslate Tiles / Deepslate Tiles - Deepslate Tiles - Deepslate Tiles
+ Polished Tuff Wall | 6 | Polished Tuff - Polished Tuff - Polished Tuff / Polished Tuff - Polished Tuff - Polished Tuff
+ Tuff Wall | 6 | Tuff - Tuff - Tuff / Tuff - Tuff - Tuff
+ Tuff Brick Wall | 6 | Tuff Bricks - Tuff Bricks - Tuff Bricks / Tuff Bricks - Tuff Bricks - Tuff Bricks
+ Cinnabar Wall | 6 | Cinnabar - Cinnabar - Cinnabar / Cinnabar - Cinnabar - Cinnabar
+ Polished Cinnabar Wall | 6 | Polished Cinnabar - Polished Cinnabar - Polished Cinnabar / Polished Cinnabar - Polished Cinnabar - Polished Cinnabar
+ Cinnabar Brick Wall | 6 | Cinnabar Bricks - Cinnabar Bricks - Cinnabar Bricks / Cinnabar Bricks - Cinnabar Bricks - Cinnabar Bricks
+ Sulfur Wall | 6 | Sulfur - Sulfur - Sulfur / Sulfur - Sulfur - Sulfur
+ Polished Sulfur Wall | 6 | Polished Sulfur - Polished Sulfur - Polished Sulfur / Polished Sulfur - Polished Sulfur - Polished Sulfur
+ Sulfur Brick Wall | 6 | Sulfur Bricks - Sulfur Bricks - Sulfur Bricks / Sulfur Bricks - Sulfur Bricks - Sulfur Bricks
 
  Snow Block,Snow | 1 | Snowball - Snowball / Snowball - Snowball
  Snow Layer | 6 | Snow - Snow - Snow
@@ -157,6 +205,9 @@ Replacements here (for easier searaches)
  Bone Block | 1 | Bone Meal - Bone Meal - Bone Meal / Bone Meal - Bone Meal - Bone Meal / Bone Meal - Bone Meal - Bone Meal
  Nether Wart Block | 1 | Nether Wart - Nether Wart - Nether Wart / Nether Wart - Nether Wart - Nether Wart / Nether Wart - Nether Wart - Nether Wart
  Magma Block | 1 | Magma Cream - Magma Cream / Magma Cream - Magma Cream
+ Cinnabar Bricks | 4 | Polished Cinnabar - Polished Cinnabar / Polished Cinnabar - Polished Cinnabar
+ Sulfur Bricks | 4 | Polished Sulfur - Polished Sulfur / Polished Sulfur - Polished Sulfur
+ Sulfur | 1 | Sulfur Spike - Sulfur Spike / Sulfur Spike - Sulfur Spike
 
  Sandstone | 1 | Sand - Sand / Sand - Sand
  Smooth Sandstone | 4 | Sandstone - Sandstone / Sandstone - Sandstone
@@ -185,6 +236,15 @@ Replacements here (for easier searaches)
  Deepslate Bricks | 4 | Polished Deepslate - Polished Deepslate / Polished Deepslate - Polished Deepslate
  Deepslate Tiles | 4 | Deepslate Bricks - Deepslate Bricks / Deepslate Bricks - Deepslate Bricks
  Chiseled Deepslate Slab | 1 | Cobbled Deepslate Slab / Cobbled Deepslate Slab
+ Bamboo Mosaic | 1 | Bamboo Slab / Bamboo Slab
+ Chiseled Tuff | 1 | Tuff Slab / Tuff Slab
+ Polished Tuff | 4 | Tuff - Tuff / Tuff - Tuff
+ Tuff Bricks | 4 | Polished Tuff - Polished Tuff / Polished Tuff - Polished Tuff
+ Chiseled Tuff Bricks | 1 | Tuff Brick Slab / Tuff Brick Slab
+ Polished Cinnabar | 4 | Cinnabar - Cinnabar / Cinnabar - Cinnabar
+ Polished Sulfur | 4 | Sulfur - Sulfur / Sulfur - Sulfur
+ Potent Sulfur | 1 | Sulfur - Sulfur - Sulfur / Sulfur - Sulfur - Sulfur / Sulfur - Sulfur - Sulfur
+ Chiseled Sulfur | 1 | Sulfur Slab / Sulfur Slab
 
  Ender Chest | 1 | Obsidian - Obsidian - Obsidian / Obsidian - Eye of Ender - Obsidian / Obsidian - Obsidian - Obsidian
  Anvil | 1 | Block of Iron - Block of Iron - Block of Iron / - Iron - / Iron - Iron - Iron
@@ -197,7 +257,7 @@ Replacements here (for easier searaches)
  Campfire | 1 | - Stick - / Stick - Coal - Stick / Wood - Wood - Wood
  Soul Campfire | 1 | - Stick - / Stick - Soul Sand - Stick / Wood - Wood - Wood
  Cartography Table | 1 | Paper - Paper - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
- Composter | 1 | Wood Fence - - Wood Fence / Wood Fence - - Wood Fence / Wood Plank - Wood Plank - Wood Plank
+ Composter | 1 | Wood Slab - - Wood Slab / Wood Slab - - Wood Slab / Wood Slab - Wood Slab - Wood Slab
  Fletching Table | 1 | Flint - Flint - / Wood Plank - Wood Plank - / Wood Plank - Wood Plank -
  Grindstone | 1 | Stick - Stone Slab - Stick / Wood Plank - - Wood Plank
  Lectern | 1 | Wood Slab - Wood Slab - Wood Slab / - Bookshelf - / - Wood Slab -
@@ -209,6 +269,7 @@ Replacements here (for easier searaches)
  Lodestone | 1 | Chiseled Stone Bricks - Chiseled Stone Bricks - Chiseled Stone Bricks / Chiseled Stone Bricks - Netherite - Chiseled Stone Bricks / Chiseled Stone Bricks - Chiseled Stone Bricks - Chiseled Stone Bricks
  Respawn Anchor | 1 | Crying Obsidian - Crying Obsidian - Crying Obsidian / Glowstone Block - Glowstone Block - Glowstone Block / Crying Obsidian - Crying Obsidian - Crying Obsidian 
  Target | 1 | - Redstone - / Redstone - Hay Bale - Redstone / - Redstone -
+ Crafter | 1 | Iron - Iron - Iron / Iron - Crafting Table - Iron / Redstone - Dropper - Redstone
 
  Cut Copper | 4 | Block of Copper - Block of Copper / Block of Copper - Block of Copper
  Exposed Cut Copper | 4 | Exposed Copper - Exposed Copper / Exposed Copper - Exposed Copper
@@ -226,6 +287,39 @@ Replacements here (for easier searaches)
  Waxed Exposed Cut Copper | 4 | Waxed Exposed Copper - Waxed Exposed Copper / Waxed Exposed Copper - Waxed Exposed Copper
  Waxed Weathered Cut Copper | 4 | Waxed Weathered Copper - Waxed Weathered Copper / Waxed Weathered Copper - Waxed Weathered Copper
  Waxed Oxidized Cut Copper | 4 | Waxed Oxidized Copper - Waxed Oxidized Copper / Waxed Oxidized Copper - Waxed Oxidized Copper
+ Chiseled Copper | 1 | Cut Copper Slab / Cut Copper Slab
+ Waxed Chiseled Copper | 1 | Waxed Cut Copper Slab / Waxed Cut Copper Slab
+ Exposed Chiseled Copper | 1 | Exposed Cut Copper Slab / Exposed Cut Copper Slab
+ Waxed Exposed Chiseled Copper | 1 | Waxed Exposed Cut Copper Slab / Waxed Exposed Cut Copper Slab
+ Weathered Chiseled Copper | 1 | Weathered Cut Copper Slab / Weathered Cut Copper Slab
+ Waxed Weathered Chiseled Copper | 1 | Waxed Weathered Cut Copper Slab / Waxed Weathered Cut Copper Slab
+ Oxidized Chiseled Copper | 1 | Oxidized Cut Copper Slab / Oxidized Cut Copper Slab
+ Waxed Oxidized Chiseled Copper | 1 | Waxed Oxidized Cut Copper Slab / Waxed Oxidized Cut Copper Slab
+ Waxed Chiseled Copper (alt) | 1 | Chiseled Copper - Honeycomb
+ Waxed Exposed Chiseled Copper (alt) | 1 | Exposed Chiseled Copper - Honeycomb
+ Waxed Weathered Chiseled Copper (alt) | 1 | Weathered Chiseled Copper - Honeycomb
+ Waxed Oxidized Chiseled Copper (alt) | 1 | Oxidized Chiseled Copper - Honeycomb
+
+ Copper Grate | 4 | - Block of Copper - / Block of Copper - - Block of Copper / - Block of Copper -
+ Waxed Copper Grate | 4 | - Waxed Block of Copper - / Waxed Block of Copper - - Waxed Block of Copper / - Waxed Block of Copper -
+ Exposed Copper Grate | 4 | - Exposed Copper - / Exposed Copper - - Exposed Copper / - Exposed Copper -
+ Waxed Exposed Copper Grate | 4 | - Waxed Exposed Copper - / Waxed Exposed Copper - - Waxed Exposed Copper / - Waxed Exposed Copper -
+ Weathered Copper Grate | 4 | - Weathered Copper - / Weathered Copper - - Weathered Copper / - Weathered Copper -
+ Waxed Weathered Copper Grate | 4 | - Waxed Weathered Copper - / Waxed Weathered Copper - - Waxed Weathered Copper / - Waxed Weathered Copper -
+ Oxidized Copper Grate | 4 | - Oxidized Copper - / Oxidized Copper - - Oxidized Copper / - Oxidized Copper -
+ Waxed Oxidized Copper Grate | 4 | - Waxed Oxidized Copper - / Waxed Oxidized Copper - - Waxed Oxidized Copper / - Waxed Oxidized Copper -
+ Waxed Copper Grate (alt) | 1 | Copper Grate - Honeycomb
+ Waxed Exposed Copper Grate (alt) | 1 | Exposed Copper Grate - Honeycomb
+ Waxed Weathered Copper Grate (alt) | 1 | Weathered Copper Grate - Honeycomb
+ Waxed Oxidized Copper Grate (alt) | 1 | Oxidized Copper Grate - Honeycomb
+
+ Resin Clump | 9 | Block of Resin
+ Block of Resin | 1 | Resin Clump - Resin Clump - Resin Clump / Resin Clump - Resin Clump - Resin Clump / Resin Clump - Resin Clump - Resin Clump
+ Resin Bricks | 1 | Resin Brick - Resin Brick / Resin Brick - Resin Brick
+ Resin Brick Slab | 6 | Resin Bricks - Resin Bricks - Resin Bricks
+ Resin Brick Stairs | 4 | Resin Bricks / Resin Bricks - Resin Bricks / Resin Bricks - Resin Bricks - Resin Bricks
+ Resin Brick Wall | 6 | Resin Bricks - Resin Bricks - Resin Bricks / Resin Bricks - Resin Bricks - Resin Bricks
+ Chiseled Resin Bricks | 1 | Resin Brick Slab / Resin Brick Slab
 
 //////////////////////////
 //Transportation recipes//
@@ -243,6 +337,7 @@ Replacements here (for easier searaches)
  Carrot on a Stick | 1 | Fishing Rod / - Carrot
  Warped Fungus on a Stick | 1 | Fishing Rod - / - Warped Fungus
  Boat | 1 | - - / Wood Plank - - Wood Plank / Wood Plank - Wood Plank - Wood Plank
+ Dried Ghast | 1 | Ghast Tear - Ghast Tear - Ghast Tear / Ghast Tear - Soul Sand - Ghast Tear / Ghast Tear - Ghast Tear - Ghast Tear
 
 ////////////////
 //Tool recipes//
@@ -253,35 +348,51 @@ Replacements here (for easier searaches)
  Gold Axe | 1 | Gold - Gold - / Gold - Stick - / - Stick -
  Diamond Axe | 1 | Diamond - Diamond - / Diamond - Stick - / - Stick -
  Stone Axe | 1 | Cobblestone - Cobblestone - / Cobblestone - Stick - / - Stick -
+ Copper Axe | 1 | Copper - Copper - / Copper - Stick - / - Stick -
 
  Wood Pickaxe | 1 | Wood Plank - Wood Plank - Wood Plank / - Stick - / - Stick -
  Iron Pickaxe | 1 | Iron - Iron - Iron / - Stick - / - Stick -
  Gold Pickaxe | 1 | Gold - Gold - Gold / - Stick - / - Stick -
  Diamond Pickaxe | 1 | Diamond - Diamond - Diamond / - Stick - / - Stick -
  Stone Pickaxe | 1 | Cobblestone - Cobblestone - Cobblestone / - Stick - / - Stick -
+ Copper Pickaxe | 1 | Copper - Copper - Copper / - Stick - / - Stick -
 
  Wood Shovel | 1 | Wood Plank / Stick / Stick
  Iron Shovel | 1 | Iron / Stick / Stick
  Gold Shovel | 1 | Gold / Stick / Stick
  Diamond Shovel | 1 | Diamond / Stick / Stick
  Stone Shovel | 1 | Cobblestone / Stick / Stick
+ Copper Shovel | 1 | Copper / Stick / Stick
 
  Wood Sword | 1 | - Wood Plank - / - Wood Plank - / - Stick -
  Iron Sword | 1 | - Iron - / - Iron - / - Stick -
  Gold Sword | 1 | - Gold - / - Gold - / - Stick -
  Diamond Sword | 1 | - Diamond - / - Diamond - / - Stick -
  Stone Sword | 1 | - Cobblestone - / - Cobblestone - / - Stick -
+ Copper Sword | 1 | - Copper - / - Copper - / - Stick -
 
  Wood Hoe | 1 | Wood Plank - Wood Plank - / - Stick - / - Stick -
  Iron Hoe | 1 | Iron - Iron - / - Stick - / - Stick -
  Gold Hoe | 1 | Gold - Gold - / - Stick - / - Stick -
  Diamond Hoe | 1 | Diamond - Diamond - / - Stick - / - Stick -
  Stone Hoe | 1 | Cobblestone - Cobblestone - / - Stick - / - Stick -
+ Copper Hoe | 1 | Copper - Copper - / - Stick - / - Stick -
+
+ Wood Spear | 1 | - - Wood Plank / - Stick - / Stick - -
+ Iron Spear | 1 | - - Iron / - Stick - / Stick - -
+ Gold Spear | 1 | - - Gold / - Stick - / Stick - -
+ Diamond Spear | 1 | - - Diamond / - Stick - / Stick - -
+ Stone Spear | 1 | - - Cobblestone / - Stick - / Stick - -
+ Copper Spear | 1 | - - Copper / - Stick - / Stick - -
 
  Flint and Steel | 1 | Iron - / - Flint
  Bucket | 1 | Iron - - Iron / - Iron -
  Compass | 1 | - Iron - / Iron - Redstone - Iron / - Iron -
  Spyglass | 1 | - Amethyst Shard - / - Copper - / - Copper -
+ Brush | 1 | Feather / Copper Ingot / Stick
+ Mace | 1 | Heavy Core / Breeze Rod
+ Bundle | 1 | String / Leather
+ Dyed Bundle | 1 | Bundle - Dye
 
  Map | 1 | Paper - Paper - Paper / Paper - Compass - Paper / Paper - Paper - Paper
  Map (zoomed out) | 1 | Paper - Paper - Paper / Paper - Map - Paper / Paper - Paper - Paper
@@ -289,9 +400,10 @@ Replacements here (for easier searaches)
  Fishing Rod | 1 | - - Stick / - Stick - String / Stick - - String
  Shears | 1 | - Iron / Iron -
  Fire Charge | 3 | Blaze Powder - Coal / - Gunpowder
+ Wind Charge | 4 | Breeze Rod
 
  Bow | 1 | - Stick - String / Stick - - String / - Stick - String
- Crossbow | 1 | Stick - Iron - Stick / Sting - Tripwire Hook - String / - Stick -
+ Crossbow | 1 | Stick - Iron - Stick / String - Tripwire Hook - String / - Stick -
  Arrow | 4 | Flint / Stick / Feather
  Spectral Arrow | 2 | - Glowstone Dust - / Glowstone Dust - Arrow - Glowstone Dust / - Glowstone Dust - 
  Tipped Arrow | 8 | Arrow - Arrow - Arrow / Arrow - Lingering Potion - Arrow / Arrow - Arrow - Arrow
@@ -299,33 +411,61 @@ Replacements here (for easier searaches)
  Shield,Sheild | 1 | Wood Plank - Iron - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Wood Plank - 
 
  Leather Helmet | 1 | Leather - Leather - Leather / Leather - - Leather
+ Copper Helmet | 1 | Copper - Copper - Copper / Copper - - Copper
  Gold Helmet | 1 | Gold - Gold - Gold / Gold - - Gold
  Iron Helmet | 1 | Iron - Iron - Iron / Iron - - Iron
  Diamond Helmet | 1 | Diamond - Diamond - Diamond / Diamond - - Diamond
+ Turtle Shell | 1 | Turtle Scute - Turtle Scute - Turtle Scute / Turtle Scute - - Turtle Scute
 
  Leather Leggings | 1 | Leather - Leather - Leather / Leather - - Leather / Leather - - Leather
+ Copper Leggings | 1 | Copper - Copper - Copper / Copper - - Copper / Copper - - Copper
  Gold Leggings | 1 | Gold - Gold - Gold / Gold - - Gold / Gold - - Gold
  Iron Leggings | 1 | Iron - Iron - Iron / Iron - - Iron / Iron - - Iron
  Diamond Leggings | 1 | Diamond - Diamond - Diamond / Diamond - - Diamond / Diamond - - Diamond
 
  Leather Chestplate | 1 | Leather - - Leather / Leather - Leather - Leather / Leather - Leather - Leather
+ Copper Chestplate | 1 | Copper - - Copper / Copper - Copper - Copper / Copper - Copper - Copper
  Gold Chestplate | 1 | Gold - - Gold / Gold - Gold - Gold / Gold - Gold - Gold
  Iron Chestplate | 1 | Iron - - Iron / Iron - Iron - Iron / Iron - Iron - Iron
  Diamond Chestplate | 1 | Diamond - - Diamond / Diamond - Diamond - Diamond / Diamond - Diamond - Diamond
 
  Leather Boots | 1 | Leather - - Leather / Leather - - Leather
+ Copper Boots | 1 | Copper - - Copper / Copper - - Copper
  Gold Boots | 1 | Gold - - Gold / Gold - - Gold
  Iron Boots | 1 | Iron - - Iron / Iron - - Iron
  Diamond Boots | 1 | Diamond - - Diamond / Diamond - - Diamond
 
  Leather Horse Armor | 1 | Leather - - Leather / Leather - Leather - Leather / Leather - - Leather
+ Wolf Armor | 1 | Armadillo Scute - - / Armadillo Scute - Armadillo Scute - Armadillo Scute / Armadillo Scute - - Armadillo Scute
+ Harness | 1 | Leather - Leather - Leather / Glass - Wool - Glass
+ Dyed Harness | 1 | Harness - Dye
+ Saddle | 1 | - Leather - / Leather - Iron - Leather
+
+ Smithing Template | 2 | Diamond - Smithing Template - Diamond / Diamond - Various - Diamond / Diamond - Diamond - Diamond
+ Netherite Upgrade | 2 | Diamond - Netherite Upgrade - Diamond / Diamond - Netherrack - Diamond / Diamond - Diamond - Diamond
+ Sentry Armor Trim | 2 | Diamond - Sentry Armor Trim - Diamond / Diamond - Cobblestone - Diamond / Diamond - Diamond - Diamond
+ Vex Armor Trim | 2 | Diamond - Vex Armor Trim - Diamond / Diamond - Cobblestone - Diamond / Diamond - Diamond - Diamond
+ Wild Armor Trim | 2 | Diamond - Wild Armor Trim - Diamond / Diamond - Mossy Cobblestone - Diamond / Diamond - Diamond - Diamond
+ Coast Armor Trim | 2 | Diamond - Coast Armor Trim - Diamond / Diamond - Cobblestone - Diamond / Diamond - Diamond - Diamond
+ Dune Armor Trim | 2 | Diamond - Dune Armor Trim - Diamond / Diamond - Sandstone - Diamond / Diamond - Diamond - Diamond
+ Wayfinder Armor Trim | 2 | Diamond - Wayfinder Armor Trim - Diamond / Diamond - Terracotta - Diamond / Diamond - Diamond - Diamond
+ Raiser Armor Trim | 2 | Diamond - Raiser Armor Trim - Diamond / Diamond - Terracotta - Diamond / Diamond - Diamond - Diamond
+ Shaper Armor Trim | 2 | Diamond - Shaper Armor Trim - Diamond / Diamond - Terracotta - Diamond / Diamond - Diamond - Diamond
+ Host Armor Trim | 2 | Diamond - Host Armor Trim - Diamond / Diamond - Terracotta - Diamond / Diamond - Diamond - Diamond
+ Ward Armor Trim | 2 | Diamond - Ward Armor Trim - Diamond / Diamond - Cobbled Deepslate - Diamond / Diamond - Diamond - Diamond
+ Silence Armor Trim | 2 | Diamond - Silence Armor Trim - Diamond / Diamond - Cobbled Deepslate - Diamond / Diamond - Diamond - Diamond
+ Tide Armor Trim | 2 | Diamond - Tide Armor Trim - Diamond / Diamond - Prismarine - Diamond / Diamond - Diamond - Diamond
+ Snout Armor Trim | 2 | Diamond - Snout Armor Trim - Diamond / Diamond - Blackstone - Diamond / Diamond - Diamond - Diamond
+ Rib Armor Trim | 2 | Diamond - Rib Armor Trim - Diamond / Diamond - Netherrack - Diamond / Diamond - Diamond - Diamond
+ Eye Armor Trim | 2 | Diamond - Eye Armor Trim - Diamond / Diamond - End Stone - Diamond / Diamond - Diamond - Diamond
+ Spire Armor Trim | 2 | Diamond - Spire Armor Trim - Diamond / Diamond - Purpur Block - Diamond / Diamond - Diamond - Diamond
+ Flow Armor Trim | 2 | Diamond - Flow Armor Trim - Diamond / Diamond - Breeze Rod - Diamond / Diamond - Diamond - Diamond
+ Bolt Armor Trim | 2 | Diamond - Bolt Armor Trim - Diamond / Diamond - Block of Copper - Diamond / Diamond - Diamond - Diamond
 
 /////////////////////
 //Mechanism recipes//
 /////////////////////
 
- Wooden Trapdoor,Trapdoor | 2 | - - / Wood Plank - Wood Plank - Wood Plank / Wood Plank - Wood Plank - Wood PLank
- Iron Trapdoor | 1 | Iron - Iron / Iron - Iron
  Wooden Pressure Plate,Pressure Plate | 1 | Wood Plank - Wood Plank
  Stone Pressure Plate | 1 | Stone - Stone
  Weighted Pressure Plate | 1 | Iron - Iron
@@ -348,10 +488,38 @@ Replacements here (for easier searaches)
 
  Wood Door,Door | 3 | Wood Plank - Wood Plank / Wood Plank - Wood Plank / Wood Plank - Wood Plank
  Iron Door | 3 | Iron - Iron / Iron - Iron / Iron - Iron
+ Copper Door | 3 | Copper - Copper / Copper - Copper / Copper - Copper
+ Waxed Copper Door | 1 | Copper Door - Honeycomb
+ Waxed Exposed Copper Door | 1 | Exposed Copper Door - Honeycomb
+ Waxed Weathered Copper Door | 1 | Weathered Copper Door - Honeycomb
+ Waxed Oxidized Copper Door | 1 | Oxidized Copper Door - Honeycomb
+
+ Wooden Trapdoor,Trapdoor | 2 | - - / Wood Plank - Wood Plank - Wood Plank / Wood Plank - Wood Plank - Wood PLank
+ Iron Trapdoor | 1 | Iron - Iron / Iron - Iron
+ Copper Trapdoor | 1 | Copper - Copper / Copper - Copper
+ Waxed Copper Trapdoor | 1 | Copper Trapdoor - Honeycomb
+ Waxed Exposed Copper Trapdoor | 1 | Exposed Copper Trapdoor - Honeycomb
+ Waxed Weathered Copper Trapdoor | 1 | Weathered Copper Trapdoor - Honeycomb
+ Waxed Oxidized Copper Trapdoor | 1 | Oxidized Copper Trapdoor - Honeycomb
 
  Redstone Repeater,Repeater | 1 | - - / Redstone Torch - Redstone - Redstone Torch / Stone - Stone - Stone
  Redstone Comparator,Comparator | 1 | - Redstone Torch - / Redstone Torch - Nether Quartz - Redstone Torch / Stone - Stone - Stone
  Observer | 1 | Cobblestone - Cobblestone - Cobblestone / Redstone - Redstone - Nether Quartz / Cobblestone - Cobblestone - Cobblestone 
+
+ Calibrated Sculk Sensor | 1 | - Amethyst Shard - / Amethyst Shard - Sculk Sensor - Amethyst Shard
+
+ Copper Bulb | 4 | - Block of Copper - / Block of Copper - Blaze Rod - Block of Copper / - Redstone -
+ Waxed Copper Bulb | 4 | - Waxed Block of Copper - / Waxed Block of Copper - Blaze Rod - Waxed Block of Copper / - Redstone -
+ Exposed Copper Bulb | 4 | - Exposed Copper - / Exposed Copper - Blaze Rod - Exposed Copper / - Redstone -
+ Waxed Exposed Copper Bulb | 4 | - Waxed Exposed Copper - / Waxed Exposed Copper - Blaze Rod - Waxed Exposed Copper / - Redstone -
+ Weathered Copper Bulb | 4 | - Weathered Copper - / Weathered Copper - Blaze Rod - Weathered Copper / - Redstone -
+ Waxed Weathered Copper Bulb | 4 | - Waxed Weathered Copper - / Waxed Weathered Copper - Blaze Rod - Waxed Weathered Copper / - Redstone -
+ Oxidized Copper Bulb | 4 | - Oxidized Copper - / Oxidized Copper - Blaze Rod - Oxidized Copper / - Redstone -
+ Waxed Oxidized Copper Bulb | 4 | - Waxed Oxidized Copper - / Waxed Oxidized Copper - Blaze Rod - Waxed Oxidized Copper / - Redstone -
+ Waxed Copper Bulb (alt) | 1 | Copper Bulb - Honeycomb
+ Waxed Exposed Copper Bulb (alt) | 1 | - Exposed Copper Bulb - Honeycomb
+ Waxed Weathered Copper Bulb (alt) | 1 | - Weathered Copper Bulb - Honeycomb
+ Waxed Oxidized Copper Bulb (alt) | 1 | - Oxidized Copper Bulb - Honeycomb
 
 ////////////////
 //Food recipes//
@@ -393,11 +561,16 @@ Replacements here (for easier searaches)
  Slime Block | 1 | Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball / Slimeball - Slimeball - Slimeball
  Melon Block,Melon | 1 | Melon - Melon - Melon /  Melon - Melon - Melon /  Melon - Melon - Melon
 
- Lead | 2 | String - String - / String - Slimeball - / - - String
+ Lead | 2 | String - String - / String - String - / - - String
  Ladder | 3 | Stick - - Stick / Stick - Stick - Stick / Stick - - Stick
  Glass Pane | 16 | Glass - Glass - Glass / Glass - Glass - Glass
  Tinted Glass | 2 | - Amethyst Shard - / Amethyst Shard - Glass - Amethyst Shard / - Amethyst Shard -
- Iron Bars | 16 | - - / Iron - Iron - Iron / Iron - Iron - Iron 
+ Iron Bars | 16 | - - / Iron - Iron - Iron / Iron - Iron - Iron
+ Copper Bars | 16 | - - / Copper - Copper - Copper / Copper - Copper - Copper
+ Waxed Copper Bars | 1 | Copper Bars - Honeycomb
+ Waxed Exposed Copper Bars | 1 | Exposed Copper Bars - Honeycomb
+ Waxed Weathered Copper Bars | 1 | Weathered Copper Bars - Honeycomb
+ Waxed Oxidized Copper Bars | 1 | Oxidized Copper Bars - Honeycomb
  Wood Fence,Fence | 3 | - - / Wood Plank - Stick - Wood Plank / Wood Plank - Stick - Wood Plank
  Nether Brick Fence | 6 | - - / Nether Brick - Nether Brick (item) - Nether Brick / Nether Brick - Nether Brick (item) - Nether Brick
  Fence Gate,Gate | 1 | - - / Stick - Wood Plank - Stick / Stick - Wood Plank - Stick
@@ -405,9 +578,13 @@ Replacements here (for easier searaches)
  Mossy Cobblestone (alt) | 1 | Cobblestone - Moss Block
  Mossy Stone Bricks | 1 | Stone Bricks - Moss Block
  Moss Carpet | 3 | Moss Block - Moss Block
- Candle | 1 | String / Candle
+ Pale Moss Carpet | 3 | Pale Moss Block - Pale Moss Block
+ Candle | 1 | String / Honeycomb
  Dyed Candle | 1 | Candle - Dye
-#Bundle | 1 | String - Rabbit Hide - String / Rabbit Hide - - Rabbit Hide / Rabbit Hide - Rabbit Hide - Rabbit Hide
+ 5 | 1 | Disc Fragment - Disc Fragment - Disc Fragment / Disc Fragment - Disc Fragment - Disc Fragment / Disc Fragment - Disc Fragment - Disc Fragment
+ Packed Ice | 1 | Ice - Ice - Ice / Ice - Ice - Ice / Ice - Ice - Ice
+ Blue Ice | 1 | Packed Ice - Packed Ice - Packed Ice / Packed Ice - Packed Ice - Packed Ice / Packed Ice - Packed Ice - Packed Ice
+ Name Tag | 1 | - Nugget / Paper -
 
  Iron | 9 | Iron Block
  Gold | 9 | Gold Block
@@ -432,7 +609,9 @@ Replacements here (for easier searaches)
  Item Frame | 1 | Stick - Stick - Stick / Stick - Leather - Stick / Stick - Stick - Stick
  Glow Item Frame | 1 | Glow Ink Sac - Item Frame
  Sign | 3 | Wood Plank - Wood Plank - Wood Plank / Wood Plank - Wood Plank - Wood Plank / - Stick -
+ Hanging Sign | 6 | Iron Chain - - Iron Chain / Stripped Log - Stripped Log - Stripped Log / Stripped Log - Stripped Log - Stripped Log
  Armor Stand | 1 | Stick - Stick - Stick / - Stick - / Stick - Smooth Stone Slab - Stick
+ Shelf | 6 | Stripped Log - Stripped Log - Stripped Log / - - / Stripped Log - Stripped Log - Stripped Log
 
  Paper | 3 | Sugar Cane - Sugar Cane - Sugar Cane
  Book | 1 | Paper - Paper / Paper - Leather
@@ -444,13 +623,25 @@ Replacements here (for easier searaches)
  Eye of Ender | 1 | Ender Pearl / Blaze Powder
  End Crystal | 1 | Glass - Glass - Glass / Glass - Eye of ender - Glass / Glass - Ghast Tear - Glass
  Flower Pot | 1 | - - / Brick - - Brick / - Brick -
+ Decorated Pot | 1 | - Pottery Sherd - / Pottery Sherd - - Pottery Sherd / - Pottery Sherd -
+ Golden Dandelion | 1 | Gold Nugget - Gold Nugget - Gold Nugget / Gold Nugget - Dandelion - Gold Nugget / Gold Nugget - Gold Nugget - Gold Nugget
  Banner | 1 | Wool - Wool - Wool / Wool - Wool - Wool / - Stick -
  Lightning Rod | 1 | - Copper Ingot - / - Copper Ingot - / - Copper Ingot -
+ Waxed Lightning Rod | 1 | Lightning Rod - Honeycomb
+ Waxed Exposed Lightning Rod | 1 | Exposed Lightning Rod - Honeycomb
+ Waxed Weathered Lightning Rod | 1 | Weathered Lightning Rod - Honeycomb
+ Waxed Oxidized Lightning Rod | 1 | Oxidized Lightning Rod - Honeycomb
 
  Sea Lantern | 1 | Prismarine Shard - Prismarine Crystals - Prismarine Shard / Prismarine Crystals - Prismarine Crystals - Prismarine Crystals / Prismarine Shard - Prismarine Crystals - Prismarine Shard
  Prismarine | 1 | Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard
  Prismarine Brick | 1 | Prismarine Shard - Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard - Prismarine Shard / Prismarine Shard - Prismarine Shard - Prismarine Shard
  Dark Prismarine | 1 | Prismarine Shard - Prismarine Shard - Prismarine Shard / Prismarine Shard - Ink Sac - Prismarine Shard / Prismarine Shard - Prismarine Shard - Prismarine Shard
+
+ Creaking Heart | 1 | Pale Oak Log / Block of Resin / Pale Oak Log
+ Waxed Copper Golem Statue | 1 | Copper Golem Statue - Honeycomb
+ Waxed Exposed Copper Golem Statue | 1 | Exposed Copper Golem Statue - Honeycomb
+ Waxed Weathered Copper Golem Statue | 1 | Weathered Copper Golem Statue - Honeycomb
+ Waxed Oxidized Copper Golem Statue | 1 | Oxidized Copper Golem Statue - Honeycomb
 
 ///////////////
 //Dye recipes//
@@ -458,36 +649,36 @@ Replacements here (for easier searaches)
 
  Bone Meal | 3 | Bone
  White Dye | 1 | Bone Meal
- White Dye (var.) | 1 | Lily of the Valley
+ White Dye 2 | 1 | Lily of the Valley
  Light Gray Dye | 3 | White Dye / Black Dye - White Dye
  Light Gray Dye 2 | 2 | Gray Dye - White Dye
  Gray Dye | 2 | Black Dye - White Dye
  Red Dye | 1 | Red Tulip
- Red Dye (var.) | 1 | Poppy
- Red Dye (var. 2) | 1 | Rose Bush
- Red Dye (var. 3) | 1 | Beetroot
+ Red Dye 2 | 1 | Poppy
+ Red Dye 3 | 1 | Rose Bush
+ Red Dye 4 | 1 | Beetroot
  Orange Dye | 2 | Red Dye - Yellow Dye
- Orange Dye (var.) | 1 | Orange Tulip
+ Orange Dye 2 | 1 | Orange Tulip
  Yellow Dye | 1 | Dandelion
- Yellow Dye (var.) | 2 | Sunflower
+ Yellow Dye 2 | 2 | Sunflower
  Lime Dye | 2 | Green Dye - White Dye
  Light Blue Dye | 2 | Blue Dye - White Dye
  Light Blue Dye | 1 | Blue Orchid
  Cyan Dye | 2 | Blue Dye - Green Dye
- Purple Dye | 1 | Blye Dye - Red Dye
+ Purple Dye | 1 | Blue Dye - Red Dye
  Magenta Dye | 2 | Pink Dye / Purple Dye
- Magenta Dye (var.) | 2 | Lilac
- Magenta Dye (var. 2) | 1 | Allium
- Magenta Dye (var. 3) | 4 | Blue Dye - White Dye / Red Dye - Red Dye
- Magenta Dye (var. 4) | 3 | Blue Dye - / Pink Dye - Red Dye
+ Magenta Dye 2 | 2 | Lilac
+ Magenta Dye 3 | 1 | Allium
+ Magenta Dye 4 | 4 | Blue Dye - White Dye / Red Dye - Red Dye
+ Magenta Dye 5 | 3 | Blue Dye - / Pink Dye - Red Dye
  Pink Dye | 1 | Pink Tulip
- Pink Dye (var.) | 2 | Peony
- Pink Dye (var. 2) | 2 | Red Dye - White Dye
+ Pink Dye 2 | 2 | Peony
+ Pink Dye 3 | 2 | Red Dye - White Dye
  Green Dye | 1 | Cactus - / Furnace - Coal
  Blue Dye | 1 | Lapis Lazuli
- Blue Dye (var.) | 1 | Cornflower
+ Blue Dye 2 | 1 | Cornflower
  Black Dye | 1 | Ink Sac
- Black Dye (var.) | 1 | Wither Rose
+ Black Dye 2 | 1 | Wither Rose
  Brown Dye | 1 | Cocoa Beans
 
 ////////////////
@@ -510,7 +701,6 @@ Replacements here (for easier searaches)
  Red Wool | 1 | White Wool - Red Dye
  Black Wool | 1 | White Wool - Black Dye
  Carpet | 3 | Wool - Wool
- Carpet (dyed) | 8 | Carpet - Carpet - Carpet / Carpet - Dye - Carpet / Carpet - Carpet - Carpet
 
 //////////////////////
 //Dyed Block Recipes//
