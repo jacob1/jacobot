@@ -11,6 +11,11 @@ def AlwaysRun(channel):
 	if now.minute%6 == 1 and now.second == 4:
 		Send("PING checkalive\n")
 
+@command("error", owner=True)
+def ErrorCmd(message):
+	"""(no args). Produces an error"""
+	return 0 / 0
+
 @command("help", minArgs = 1)
 def HelpCmd(message):
 	"""<command> Shows help for a command."""
