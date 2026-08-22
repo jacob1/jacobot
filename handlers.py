@@ -201,19 +201,16 @@ def HandleLine(line : str, text : str):
 		for hook in hooks[command]:
 			hook(prefix, command, args)
 
+	#allow modules to do their own text parsing if needed, outside of raw commands
+	for mod in mods:
+		if hasattr(mods[mod], "Parse"):
+			mods[mod].Parse(line, text)
+
 	# Leaving legacy junk in place for now, jacobot is getting rewritten later anyway
 	if len(text) >= 4:
 		if len(text) and text[1] == "PRIVMSG":
 			SetRateLimiting(True)
 			HandlePrivmsg(line, text)
-	if len(text) >= 5:
-		if text[1] == "MODE" and text[2] == "#powder-bots" and text[3] == "+o" and text[4] == botNick:
-			Send("MODE #powder-bots -o %s\n" % (botNick))
-
-	#allow modules to do their own text parsing if needed, outside of raw commands
-	for mod in mods:
-		if hasattr(mods[mod], "Parse"):
-			mods[mod].Parse(line, text)
 
 def HandlePrivmsg(line, text):
 	message = Message(line)

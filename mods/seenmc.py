@@ -7,7 +7,7 @@ RegisterMod(__name__)
 
 botMessage = r"^:(?:(potato|mc|creative)relay!~mcrelay@user/jacob1/bot/potatorelay) PRIVMSG #powder-mc :"
 def Parse(raw, text):
-	match = re.match(botMessage + r"<([^>]+)\x0F> (.+)$", raw)
+	match = re.match(botMessage + r"(?:\x02\x02)?<([^>]+)\x0F?> (.+)$", raw)
 	connection = False
 	if not match:
 		match = re.match(botMessage + r"\x0314\[([^ ]+) ((?:dis)?connected)\]", raw)

@@ -5,15 +5,20 @@ import config
 import subprocess
 import sys
 import itertools
+import re
+from datetime import datetime
 
 try:
 	if 'SourceRcon' in sys.modules:
 		del sys.modules['SourceRcon']
 	import SourceRcon
 	has_rcon = True
+	has_rcon2 = True
 except ImportError:
 	has_rcon = False
 	rcon_error = False
+	has_rcon2 = False
+	rcon2_error = False
 
 from common import *
 RegisterMod(__name__)
@@ -23,6 +28,9 @@ AddSetting(__name__, "dynmap-url", "https://dynmap.starcatcher.us")
 AddSetting(__name__, "rcon-address", "localhost")
 AddSetting(__name__, "rcon-port", "25575")
 AddSetting(__name__, "rcon-password", "")
+AddSetting(__name__, "rcon2-address", "localhost")
+AddSetting(__name__, "rcon2-port", "25585")
+AddSetting(__name__, "rcon2-password", "")
 LoadSettings(__name__)
 
 if has_rcon:
@@ -33,8 +41,22 @@ if has_rcon:
 		has_rcon = False
 		rcon_error = True
 
+	try:
+		rcon2 = SourceRcon.SourceRcon(GetSetting(__name__, "rcon2-address"), int(GetSetting(__name__, "rcon2-port")), GetSetting(__name__, "rcon2-password"))
+		rcon2_error = False
+	except SourceRcon.SourceRconError:
+		has_rcon2 = False
+		rcon2_error = False
+
+def StripColors(text):
+	text = re.sub("[\x02\x0F\x1D\x1E\u200b]", "", text)
+	text = re.sub("\x03(\d\d(,\d\d)?)?", "", text)
+	return text
+
 def Parse(raw, text):
 	minecraftRelayMatch = re.match("^:(?:potato|mc)relay!~?mcrelay@user/jacob1/bot/potatorelay PRIVMSG #powder-mc :(.*)$", raw)
+	if not minecraftRelayMatch:
+		minecraftRelayMatch = re.match("^:Cokebot!~?drinkcocac?@user/jacob1/bot/crackbot PRIVMSG #powder-mc :(.*)$", raw)
 	if minecraftRelayMatch:
 		message = minecraftRelayMatch.group(1)
 		messageMatch = re.match("\u000314\[(\S+) connected\]", message)
@@ -53,12 +75,107 @@ def Parse(raw, text):
 			#motd = "[MOTD] This server will be upgraded to 1.16 and reset the weekend of June 26th/27st. Details: https://tpt.io/.312730"
 			#motd = "[MOTD] The map has been reset. Have fun on the new world :)"
 			#motd = "[MOTD] Due to the hostile takeover of the Freenode IRC network, the IRC relay has moved to irc.libera.chat #powder-mc"
-			motd = "[MOTD] This server will update to 1.17 once dynmap releases, or this weekend, whichever is sooner"
+			#motd = "[MOTD] This server will update to 1.17 once dynmap releases, or this weekend, whichever is sooner"
+			#motd = "[MOTD] Server was down Aug 19th-21th while I was vacation, I'm sorry for the extended downtime --jacob614"
+			#motd = "[MOTD] With the upcoming release of 1.18, this server will be resetting. More details on the date will come later."
+			#motd = "[MOTD] This server will be resetting for Minecraft 1.18 on Friday"
+			#motd = "[MOTD] Due to technical difficulties, dynmap has been reset. It may take several days to fully render the entire map"
+			#motd = "[MOTD] The server will be down the weekend of May 28th-30th as it moves from Florida back to North Carolina"
+			#motd = "[MOTD] The server has been reset for 1.20. Additionally, we now have a Discord, type /discord to get a link"
+			#motd = "[MOTD] The server is updated to 1.20.6, which features armadillos and wolf armor"
+			#motd = "[MOTD] Minecraft 1.21 is releasing on June 13th. This server will likely upgrade during the week after"
+			#motd = "[MOTD] This is a TEST SERVER with a replica of survival from yesterday. Please report feedback on the new fabric server and plugins (such as Flan, the replacement for GriefPrevention)"
+			#motd = "[MOTD] The server has been reset for 1.21.11 and switched to Fabric"
+			#motd = "[MOTD] TPT Minecraft is a public Minecraft server, please stop asking for it to be whitelisted. See https://tpt.io/:20069 for more info"
 			if motd:
 				try:
 					RunRconCommand(None, 'tellraw {0} {{"text":"{1}", "color":"green"}}'.format(username, motd))
 				except:
 					pass
+
+	match = re.match("^:(.[^!]+)!([^@]+@[^ ]+) PRIVMSG (#[^ ]+) :(.+)", raw)
+	if match:
+		username = match.group(1)
+		identhost = match.group(2)
+		channel = match.group(3)
+		message = match.group(4)
+
+		is_cokebot = username == "Cokebot" and identhost == "~drinkcoca@user/jacob1/bot/crackbot"
+		is_discord_relay = username == "SpinDown" and (identhost == "mark2222@hellomouse/bin/spindown" or identhost == "~SpinDown@hellomouse/bin/spindown")
+		is_minecraft_relay = username == "mcrelay" and identhost == "~mcrelay@user/jacob1/bot/potatorelay"
+		is_alt_minecraft_relay = username in ("aprilrelay", "potatorelay") and identhost == "~mcrelay@user/jacob1/bot/potatorelay"
+
+		if channel == "#powder-mc" and not is_cokebot:
+		#if channel == "#powder-mc" and (username != "Cokebot" or identhost != "~drinkcoca@user/jacob1/bot/crackbot") and (username != "SpinDown" or identhost != "mark2222@hellomouse/bin/spindown") and (username not in ("potatorelay", "mcrelay", "aprilrelay") or identhost != "~mcrelay@user/jacob1/bot/potatorelay"):
+			try:
+				if is_discord_relay:
+					username = "<Discord>"
+				message = StripColors(message)
+				rcon_command = MakeMinecraftClickable(username, StripColors(message))
+				print(f"RCON (user): {len(rcon_command)} {rcon_command}")
+				if not is_discord_relay and not is_minecraft_relay:
+					RunRconCommand(None, rcon_command)
+				#if not is_alt_minecraft_relay:
+				#	RunRconCommand(None, rcon_command, True) # Test / April server on starcatcher.us
+				#RunRconCommand(None, 'tellraw @a [ {{ "text":"[IRC] ", "color":"gray"}}, {{"text":"<{0}> {1}", "color":"white"}} ]'.format(username, StripColors(message)))
+			except Exception as e:
+				print(e)
+				pass
+			#try:
+			#	RunRconCommand(None, 'tellraw @a [ {{ "text":"[IRC] ", "color":"gray"}}, {{"text":"<{0}> {1}", "color":"white"}} ]'.format(username, StripColors(message)), True)
+			#except:
+			#	pass
+
+		if channel == "#powder-mc" and is_discord_relay:
+			match = re.match(r"^\[.*\] !?!online", message)
+			if match:
+				ret = RunRconCommand(None, "list")
+				SendMessage("#powder-mc", ret)
+
+def MakeMinecraftClickable(username, message):
+	split = re.split(r"(https?://[^\s]+)[,:]?", message)
+	odd = True
+	capped = False
+	max_rcon_len = 497
+	output_message_parts = [ '{ "text":"[IRC]", "color":"gray"}', f'{{ "text":" <{username}> ", "color":"white"}}' ]
+	length = 15 - 2
+	for part in output_message_parts:
+		length = length + len(part)
+	for part in split:
+		if odd:
+			if length + 28 + len(part) > max_rcon_len:
+				part = part[:max_rcon_len - length - 24] + " ..."
+				capped = True
+			output_message_part = f'{{"text":"{part}", "color":"white"}}'
+		else:
+			if length + 106 + len(part) * 2 > max_rcon_len:
+				part = part[:(max_rcon_len - length) / 2 - 110] + " ..."
+			output_message_part = f'{{"text":"{part}", "underlined":true, "color":"aqua", "click_event":{{"action":"open_url","url":"{part}"}} }}'
+
+		length = length + len(output_message_part) + 2
+		output_message_parts.append(output_message_part)
+		odd = not odd
+		if capped:
+			break
+	return f"tellraw @a [ {', '.join(output_message_parts)} ]"
+
+def SendHook(typ, target, msg):
+	if typ == "PRIVMSG" and target == "#powder-mc":
+		try:
+			rcon_command = MakeMinecraftClickable("jacobot", StripColors(msg))
+			print(f"RCON (self): {len(rcon_command)} {rcon_command}")
+			RunRconCommand(None, rcon_command)
+			#RunRconCommand(None, rcon_command, True) # Test / April server on starcatcher.us
+			#RunRconCommand(None, 'tellraw @a [ {{ "text":"[IRC] ", "color":"gray"}}, {{"text":"<jacobot> {0}", "color":"white"}} ]'.format(StripColors(msg)))
+		except Exception as e:
+			print(e)
+			pass
+
+		#try:
+		#	RunRconCommand(None, 'tellraw @a [ {{ "text":"[IRC] ", "color":"gray"}}, {{"text":"<jacobot> {0}", "color":"white"}} ]'.format(StripColors(msg)), True)
+		#except:
+		#	pass
+SetSendHook(SendHook)
 
 class CraftingList(object):
 	recipes = {}
@@ -317,6 +434,10 @@ strength     | strength         | blaze powder
 leap         | leaping          | rabbit's foot
 slowness     | slowness         | sugar, fermented spider eye
 swift, speed | swiftness        | sugar
+infest       | infestation      | stone block
+ooz          | oozing           | slime block
+weav         | weaving          | cobweb
+wind         | wind charging    | breeze rod
 """
 
 	# In order:
@@ -517,9 +638,9 @@ def GetPlayer(message):
 		pos = tuple(map(int, (player['x'], player['y'], player['z'])))
 		health = player['health']
 		dimension = player['world']
-		if dimension == "world_the_end":
+		if dimension == "world_the_end" or dimension == "DIM1":
 			dimension = "The End"
-		elif dimension == "world_nether":
+		elif dimension == "world_nether" or dimension == "DIM-1":
 			dimension = "The Nether"
 		elif dimension == "world":
 			dimension = "The Overworld"
@@ -577,8 +698,9 @@ def GetMap(message):
 			maptype = "s" #surface
 		elif message.GetArg(1).lower() == "cave" and dimension == "world":
 			maptype = "c" #cave
+	dim_letter = "N" if dimension == "DIM-1" else "E" if dimension == "DIM1" else dimension.split("_")[-1][0]
 	#message.Reply("https://dynmap.starcatcher.us/?worldname={0}&mapname={1}&zoom=5&x={2}&y={3}&z={4}".format(dimension, maptype, pos[0], pos[1], pos[2]))
-	message.Reply("https://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dimension.split("_")[-1][0], maptype, 5, pos[0], pos[2]))
+	message.Reply("https://starcatcher.us/s?mc={0}{1}{2}{3},{4}".format(dim_letter, maptype, 5, pos[0], pos[2]))
 
 @command("getclaim")
 def GetClaim(message):
@@ -646,7 +768,7 @@ def GetTime(message):
 
 @command("brewingchart")
 def BrewingChart(message):
-	message.Reply("https://hydra-media.cursecdn.com/minecraft.gamepedia.com/7/7b/Minecraft_brewing_en.png")
+	message.Reply("https://minecraft.wiki/images/Minecraft_brewing_en.png")
 
 @command("tradingchart")
 def TradingChart(message):
@@ -669,20 +791,32 @@ def GetUsername(message):
 	else:
 		message.Reply("Could not find player with that username")
 
-def RunRconCommand(message, command):
-	if not has_rcon:
-		if rcon_error:
-			message.Reply("error while connecting to rcon server")
+def RunRconCommand(message, command, use_rcon2=False):
+	print(command)
+	if (not use_rcon2 and not has_rcon) or (use_rcon2 and not has_rcon2):
+		if (not use_rcon2 and rcon_error) or (use_rcon2 and rcon2_error):
+			err = "error while connecting to rcon server"
 		else:
-			message.Reply("https://raw.githubusercontent.com/frostschutz/SourceLib/master/SourceRcon.py needs to be installed to use rcon")
+			err = "https://raw.githubusercontent.com/frostschutz/SourceLib/master/SourceRcon.py needs to be installed to use rcon"
+
+		if message:
+			message.Reply(err)
+		else:
+			print(err)
 		return False
 	try:
-		ret = rcon.rcon(command)
+		ret = rcon.rcon(command) if not use_rcon2 else rcon2.rcon(command)
 	except SourceRcon.SourceRconError:
-		message.Reply("Error while running Rcon command")
+		if message:
+			message.Reply("Error while running Rcon command")
+		else:
+			print("Error while running Rcon command")
 		return False
 	except OSError:
-		message.Reply("Socket error while running Rcon command")
+		if message:
+			message.Reply("Socket error while running Rcon command")
+		else:
+			print("Socket error while running Rcon command")
 		return False
 	return ret
 
@@ -698,6 +832,32 @@ def GetCurrentTeam(mcusername):
 @command("rcon", admin=True)
 def Rcon(message):
 	ret = RunRconCommand(message, message.commandLine)
+	if ret == "":
+		message.Reply("No output.")
+	elif ret:
+		message.Reply(ret)
+
+@command("rcon2", admin=True)
+def Rcon(message):
+	ret = RunRconCommand(message, message.commandLine, True)
+	if ret == "":
+		message.Reply("No output.")
+	elif ret:
+		message.Reply(ret)
+
+@command("imprison", admin=True, minArgs=1)
+def Imprison(message):
+	username = message.GetArg(0)
+	ret = RunRconCommand(message, f"execute in minecraft:the_nether run tp {username} 6767 67 6767")
+	if not ret:
+		message.Reply("Failed to imprison " + username)
+		return
+	RunRconCommand(message, f'tellraw {username} {{"text":"[SERVER] You have been imprisoned by the TPTMC community. A moderator will be around to resolve your case shortly.", "color":"red"}}')
+	message.Reply(f"{username} has been sent to prison")
+
+@command("online")
+def Online(message):
+	ret = RunRconCommand(message, "list")
 	if ret == "":
 		message.Reply("No output.")
 	elif ret:
@@ -832,9 +992,9 @@ def InviteMember(message):
 		message.Reply("You aren't the owner of any teams")
 		return
 
-	# Max of 8 members
+	# Max of 10 members
 	teammembers = GetData(__name__, "teammembers.{0}".format(teamname))
-	if len(teammembers) > 7:
+	if len(teammembers) >= 10:
 		message.Reply("You have too many members on your team and cannot invite any more")
 		return
 
@@ -873,8 +1033,8 @@ def JoinTeam(message):
 		DelData(__name__, "teaminvites.{0}.{1}".format(teamname, username))
 		return
 
-	# Max of 8 members
-	if len(teammembers) > 7:
+	# Max of 16 members
+	if len(teammembers) > 15:
 		message.Reply("This team has too many members and cannot hold any more")
 		return
 

@@ -24,23 +24,50 @@ def CheckAdmin(hostmask):
 	return host in adminHostmasks or CheckOwner(hostmask)
 
 messageQueue = []
+sendHooks = {}
+def RunSendHooks(typ, target, msg):
+	try:
+		for plugin in sendHooks:
+			newmsg = sendHooks[plugin](typ, target, msg)
+			if msg == False:
+				return False
+			if newmsg:
+				msg = newmsg
+	except e:
+		print("Failed to run send hook: " + e)
+
+	return msg
+
 def Send(msg):
+	msg = RunSendHooks("RAW", None, msg)
+	if not msg:
+		return
+
 	messageQueue.append(msg)
 
 def SendMessage(target, msg):
 	msg = msg[:450]
 	if re.match(".*moo+$", msg):
 		msg = msg + "."
+	msg = RunSendHooks("PRIVMSG", target, msg)
+	if not msg:
+		return
+
 	Send("PRIVMSG %s :%s\n" % (target, msg))
 
 def SendNotice(target, msg):
 	msg = msg[:450]
+	msg = RunSendHooks("NOTICE", target, msg)
+	if not msg:
+		return
+
 	Send("NOTICE %s :%s\n" % (target, msg))
 
 class Message(object):
 	privmsgRegex = r"^:(([^!]+)!([^@]+)@([^ ]+)) PRIVMSG ([^ ]+) :(.+)$"
 	commandRegex = r"^{0}([^ ]+)(?: (.+))?$".format(commandChar)
-	minecraftRegex = r"^:(?:(?:potato|mc|creative)relay!~mcrelay@user/jacob1/bot/potatorelay) PRIVMSG #powder-mc :<([^>]+)\x0F> (.+)$"
+	minecraftRegex = r"^:(?:(?:potato|potesto|mc|creative|april)relay!~mcrelay@user/jacob1/bot/potatorelay) PRIVMSG #powder-mc :\u0002?\u0002?<([^>]+)\x0F?> (.+)$"
+	minecraftRegex2 = r"^:Cokebot!~?drinkcocac?@user/jacob1/bot/crackbot PRIVMSG #powder-mc :\002\002<([^>]+)> (.+)$"
 
 	def __init__(self, rawline):
 		parsed = re.search(self.privmsgRegex, rawline)
@@ -54,6 +81,8 @@ class Message(object):
 		self.message = parsed.group(6)
 
 		mcCheck = re.search(self.minecraftRegex, rawline)
+		if not mcCheck:
+			mcCheck = re.search(self.minecraftRegex2, rawline)
 		self.isMinecraft = False
 		if mcCheck:
 			self.isMinecraft = True
@@ -112,6 +141,9 @@ def RegisterMod(name):
 	name = name.split(".")[-1]
 	commands[name] = []
 	plugin = name
+
+def SetSendHook(func):
+	sendHooks[plugin] = func
 
 commands = {}
 def command(name, minArgs = 0, owner = False, admin = False, rateLimit = False):
