@@ -187,9 +187,15 @@ CONSTANTS = {
     "sqrt2": 2 ** 0.5
 }
 
+def power(a, b):
+	if b < 1000:
+		return a ** b
+	else:
+		raise RuntimeError("Invalid pow")
+
 BIN_OPS = {
-    "**": lambda a, b: a ** b,
-    "^": lambda a, b: a ** b,
+    "**": power,
+    "^": power,
     "//": lambda a, b: a // b,
     "/": lambda a, b: a / b,
     "*": lambda a, b: a * b,
