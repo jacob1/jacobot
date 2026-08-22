@@ -64,10 +64,10 @@ def Print(message):
 	if encoding != "utf-8":
 		message = message.encode(encoding, errors="replace").decode(encoding)
 	try:
-		print(message)
+		print(message, flush=True)
 	except UnicodeEncodeError as e:
-		print("Error printing message")
-		print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()))
+		print("Error printing message", flush=True)
+		print("=======ERROR=======\n%s========END========\n" % (traceback.format_exc()), flush=True)
 		#raise e
 
 def Connect():
@@ -186,7 +186,8 @@ def main():
 							for modname, mod in handler.mods.items():
 								if mod.__name__ in sys.modules:
 									del sys.modules[mod.__name__]
-							del sys.modules["handlers"]
+							if "handlers" in sys.modules:
+								del sys.modules["handlers"]
 							handler = importlib.import_module("handlers")
 							common = importlib.import_module("common")
 							handler.LoadMods()
